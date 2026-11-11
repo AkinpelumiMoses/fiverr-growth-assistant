@@ -97,8 +97,7 @@ export default function CommunityNotifications() {
   }
 
   async function markAllRead() {
-    const unreadIds = items.filter((item) => !item.read_at).map((item) => item.id);
-    if (!unreadIds.length) return;
+    if (!items.some((item) => !item.read_at)) return;
     const now = new Date().toISOString();
     const { error: updateError } = await supabase.from("community_notifications").update({ read_at: now }).eq("recipient_id", userId).is("read_at", null);
     if (updateError) setError(updateError.message);
