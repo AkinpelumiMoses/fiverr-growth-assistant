@@ -20,7 +20,6 @@ export default function Home(){
  const slide=slides[active];
  const move=(direction:number)=>setActive(v=>(v+direction+slides.length)%slides.length);
  return <main className="min-h-screen overflow-hidden bg-white text-[#222325]">
-  <a href="#main-content" className="skip-link">Skip to content</a>
   <header className="site-nav sticky top-0 z-50 border-b border-[#e9ece9] bg-white/90 backdrop-blur-xl">
    <div className="mx-auto flex h-[78px] max-w-[1320px] items-center justify-between px-5 md:px-8">
     <Link href="/" aria-label="Fiverr Growth Assistant home" className="group flex items-center gap-3">
@@ -34,32 +33,26 @@ export default function Home(){
    {menu&&<div className="mobile-nav border-t border-[#edf0f2] bg-white px-5 py-6 md:hidden"><nav aria-label="Mobile navigation" className="flex flex-col gap-1">{nav.map(([label,href])=><a key={href} onClick={()=>setMenu(false)} href={href} className="rounded-lg px-3 py-3 text-sm font-semibold text-[#4f5651] hover:bg-[#f1f8f3]">{label}</a>)}<div className="my-3 border-t border-[#edf0f2]"/><Link onClick={()=>setMenu(false)} href="/login" className="px-3 py-3 text-sm font-semibold text-[#404145]">Log in</Link><Link onClick={()=>setMenu(false)} href="/signup" className="mx-3 mt-1 inline-flex items-center justify-center gap-2 rounded-full bg-[#222325] px-5 py-3.5 text-sm font-bold text-white">Get started <ArrowRight size={15}/></Link></nav></div>}
   </header>
 
-  <section id="main-content" className="hero-shell relative bg-[#f5f7f5]">
-   <div className="hero-orb hero-orb-one"/><div className="hero-orb hero-orb-two"/>
-   <div className="relative mx-auto grid min-h-[650px] max-w-[1320px] items-center gap-12 px-5 py-14 md:px-8 md:py-20 lg:grid-cols-[.92fr_1.08fr]">
-    <div className="hero-copy relative z-10 max-w-[590px]" key={active}>
-     <p className="mb-6 flex items-center gap-3 text-[10px] font-extrabold uppercase tracking-[.2em] text-[#15965A]"><span className="h-[2px] w-7 bg-[#1DBF73]"/>{slide.eyebrow}</p>
-     <h1 className="text-[44px] font-semibold leading-[1.06] tracking-[-.065em] text-[#222325] sm:text-[58px] lg:text-[68px]">{slide.title}<br/><span className="text-[#1DBF73]">{slide.accent}</span></h1>
-     <p className="mt-7 max-w-[465px] text-[14px] leading-[1.9] text-[#626a64] md:text-[15px]">{slide.body}</p>
-     <div className="mt-9 flex flex-col gap-3 sm:flex-row"><Link href="/signup" className="hero-primary inline-flex items-center justify-center gap-3 rounded-full bg-[#1DBF73] px-7 py-4 text-[12px] font-extrabold text-white">Create your free account <ArrowRight size={15}/></Link><a href="#how-it-works" className="inline-flex items-center justify-center rounded-full border border-[#dce3dd] bg-white/80 px-7 py-4 text-[12px] font-bold text-[#404145] transition hover:border-[#1DBF73]">See how it works</a></div>
-     <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-[10px] font-semibold text-[#727b74]"><span className="flex items-center gap-2"><Check size={13} className="text-[#15965A]"/> Practical seller guidance</span><span className="flex items-center gap-2"><Check size={13} className="text-[#15965A]"/> Built around your data</span></div>
+  <section id="main-content" className="hero-shell relative isolate min-h-[690px] overflow-hidden bg-[#202522] text-white md:min-h-[760px]">
+   <div className="hero-backgrounds" aria-hidden="true">
+    {slides.map((item,i)=><div key={item.image} className={`hero-background ${active===i?"is-active":""}`} style={{backgroundImage:`url("${item.image}")`}}/>)}
+   </div>
+   <div className="hero-shade" aria-hidden="true"/>
+   <div className="hero-grain" aria-hidden="true"/>
+   <div className="relative z-10 mx-auto flex min-h-[690px] max-w-[1320px] flex-col justify-center px-5 pb-28 pt-20 md:min-h-[760px] md:px-8 md:pb-32">
+    <div className="hero-copy max-w-[680px]" key={active}>
+     <p className="mb-7 flex items-center gap-3 text-[10px] font-extrabold uppercase tracking-[.22em] text-[#75e0aa]"><span className="h-px w-8 bg-[#1DBF73]"/>{slide.eyebrow}</p>
+     <h1 className="max-w-[720px] text-[48px] font-semibold leading-[1.04] tracking-[-.06em] text-white sm:text-[66px] lg:text-[78px]">{slide.title}<br/><span className="text-[#6ed99f]">{slide.accent}</span></h1>
+     <p className="mt-7 max-w-[510px] text-[14px] leading-[1.9] text-white/85 md:text-[16px]">{slide.body}</p>
+     <div className="mt-9 flex flex-col gap-3 sm:flex-row"><Link href="/signup" className="hero-primary inline-flex items-center justify-center gap-3 self-start rounded-full bg-[#1DBF73] px-7 py-4 text-[12px] font-extrabold text-white">Create your free account <ArrowRight size={15}/></Link><a href="#how-it-works" className="inline-flex items-center justify-center self-start rounded-full border border-white/45 bg-white/10 px-7 py-4 text-[12px] font-bold text-white backdrop-blur-sm transition hover:border-white hover:bg-white/20">See how it works</a></div>
+     <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-[10px] font-semibold text-white/75"><span className="flex items-center gap-2"><Check size={13} className="text-[#75e0aa]"/> Practical seller guidance</span><span className="flex items-center gap-2"><Check size={13} className="text-[#75e0aa]"/> Built around your data</span></div>
     </div>
-    <div className="hero-visual relative mx-auto w-full max-w-[660px]">
-     <div className="hero-image-frame relative overflow-hidden rounded-[26px] bg-[#dce4de] shadow-[0_30px_90px_rgba(29,49,37,.17)]">
-      <img key={slide.image} src={slide.image} alt={slide.alt} className="hero-slide-image h-[390px] w-full object-cover sm:h-[510px] lg:h-[540px]"/>
-      <div className="absolute inset-0 bg-gradient-to-t from-[#101b14]/65 via-transparent to-transparent"/>
-      <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between gap-4 p-6 text-white sm:p-8"><div><p className="text-[9px] font-extrabold uppercase tracking-[.2em] text-white/70">Fiverr Growth Assistant</p><p className="mt-2 text-[19px] font-semibold tracking-[-.035em] sm:text-[23px]">{slide.tag}</p></div><span className="rounded-full border border-white/35 bg-white/10 px-3 py-2 text-[10px] font-semibold backdrop-blur-md">0{active+1} / 0{slides.length}</span></div>
-     </div>
-     <div className="hero-floating-card absolute -bottom-6 -left-3 rounded-2xl border border-[#edf0ed] bg-white px-5 py-4 shadow-[0_15px_45px_rgba(27,40,31,.12)] sm:-left-8"><p className="text-[9px] font-extrabold uppercase tracking-[.15em] text-[#929a94]">Your next step</p><p className="mt-1.5 text-[12px] font-extrabold text-[#222325]">Find what to improve</p><div className="mt-2 h-1.5 w-28 overflow-hidden rounded-full bg-[#e9f4ec]"><div className="h-full w-2/3 rounded-full bg-[#1DBF73]"/></div></div>
-     <div className="hero-controls absolute -bottom-[76px] right-0 flex items-center gap-2 sm:bottom-5 sm:right-5">
-      <button aria-label="Previous slide" onClick={()=>move(-1)} className="carousel-arrow"><ChevronLeft size={17}/></button>
-      <div className="flex items-center gap-1.5 rounded-full border border-white/50 bg-white/90 px-3 py-2 shadow-sm backdrop-blur">{slides.map((s,i)=><button key={s.eyebrow} aria-label={`Show slide ${i+1}`} aria-current={active===i?"true":undefined} onClick={()=>setActive(i)} className={`carousel-dot ${active===i?"active":""}`}/>)}</div>
-      <button aria-label="Next slide" onClick={()=>move(1)} className="carousel-arrow"><ChevronRight size={17}/></button>
-      <button aria-label={paused?"Play slideshow":"Pause slideshow"} onClick={()=>setPaused(v=>!v)} className="carousel-arrow hidden sm:flex">{paused?<Play size={14}/>:<Pause size={14}/>}</button>
-     </div>
+    <div className="hero-slideshow-controls absolute bottom-9 left-5 right-5 z-20 flex items-center justify-between md:bottom-12 md:left-8 md:right-8">
+     <div className="flex items-center gap-2.5"><span className="text-[10px] font-bold tracking-[.16em] text-white/75">0{active+1}</span><div className="flex items-center gap-2">{slides.map((item,i)=><button key={item.eyebrow} aria-label={`Show slide ${i+1}`} aria-current={active===i?"true":undefined} onClick={()=>setActive(i)} className={`hero-progress ${active===i?"active":""}`}/>)}</div><span className="text-[10px] font-bold tracking-[.16em] text-white/55">0{slides.length}</span></div>
+     <div className="flex items-center gap-2"><button aria-label="Previous slide" onClick={()=>move(-1)} className="hero-control"><ChevronLeft size={17}/></button><button aria-label="Next slide" onClick={()=>move(1)} className="hero-control"><ChevronRight size={17}/></button><button aria-label={paused?"Play slideshow":"Pause slideshow"} onClick={()=>setPaused(v=>!v)} className="hero-control">{paused?<Play size={14}/>:<Pause size={14}/>}</button></div>
     </div>
    </div>
-   <div className="hero-bottom-line"/>
+   <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/25 to-transparent"/>
   </section>
 
   <section className="mx-auto max-w-[1320px] px-5 py-20 md:px-8 md:py-28">
