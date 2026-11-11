@@ -82,18 +82,21 @@ Latest seller question:
 ${message}`;
     }
 
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "x-goog-api-key": apiKey,
+        "Api-Revision": "2026-05-20",
       },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM_BASE }] },
-        contents: [{ role: "user", parts: [{ text: taskPrompt }] }],
-        generationConfig: {
-          maxOutputTokens: body.mode === "gig-analysis" ? 1800 : 1000,
-          temperature: 0.4,
+        model: "gemini-3.8-flash",
+        input: taskPrompt,
+        system_instruction: SYSTEM_BASE,
+        store: false,
+        generation_config: {
+          max_output_tokens: body.mode === "gig-analysis" ? 1800 : 1000,
+          thinking_level: "low",
         },
       }),
       signal: AbortSignal.timeout(55000),
@@ -105,8 +108,10 @@ ${message}`;
       return NextResponse.json({ error: "The AI service could not complete that request. Please try again shortly." }, { status: 502 });
     }
 
-    const answer = (result.candidates ?? [])
-      .flatMap((candidate: { content?: { parts?: { text?: string }[] } }) => candidate.content?.parts ?? [])
+    const answer = typeof result.output_text === "string" ? result.output_text : (result.steps ?? [])
+      .filter((step: { type?: string }) => step.type === "model_output")
+      .flatMap((step: { content?: { type?: string; text?: string }[] }) => step.content ?? [])
+      .filter((part: { type?: string }) => part.type === "text")
       .map((part: { text?: string }) => part.text ?? "")
       .join("\n\n");
 
