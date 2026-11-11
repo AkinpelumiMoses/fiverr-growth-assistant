@@ -2,22 +2,23 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import CommunityDirectory from "@/app/community/community-directory";
 import { signOut } from "@/app/auth/actions";
 import {
-  Activity, ArrowUpRight, Bot, BriefcaseBusiness, ChartNoAxesCombined,
+  Activity, ArrowUpRight, Bot, BriefcaseBusiness, ChartNoAxesCombined, Users,
   CheckCircle2, FileSearch, LayoutDashboard, Lightbulb, LogOut, Menu,
   Plus, Search, Settings, ShieldCheck, Sparkles, Target, TrendingUp, X,
   UserRound, Trash2, ExternalLink
 } from "lucide-react";
 
-type Section = "Overview" | "My Gigs" | "Gig Analyzer" | "Performance" | "Growth Plan" | "Profile" | "AI Growth Coach" | "Keyword Research" | "Competitor Research";
+type Section = "Overview" | "Community" | "My Gigs" | "Gig Analyzer" | "Performance" | "Growth Plan" | "Profile" | "AI Growth Coach" | "Keyword Research" | "Competitor Research";
 type Profile = { id: string; display_name: string | null; fiverr_username: string | null; seller_level: string | null; primary_niche: string | null; website_url: string | null; avatar_url: string | null; bio: string | null; fiverr_profile_url: string | null; skills: string | null; experience_years: number | null; ideal_client: string | null; community_discoverable: boolean | null; onboarding_completed: boolean };
 type Gig = { id: string; title: string; description: string; tags: string[]; category: string | null; subcategory: string | null; starting_price: number | null; currency: string; status: "draft" | "active" | "paused"; gig_url: string | null };
 type Performance = { id: string; period_start: string; period_end: string; impressions: number; clicks: number; orders: number; revenue: number; currency: string; gig_id: string | null };
 type Task = { id: string; title: string; description: string; category: string; priority: "low" | "medium" | "high"; status: "pending" | "in_progress" | "completed" };
 
 const navigation: { label: Section; icon: typeof LayoutDashboard }[] = [
-  { label: "Overview", icon: LayoutDashboard }, { label: "My Gigs", icon: BriefcaseBusiness },
+  { label: "Overview", icon: LayoutDashboard }, { label: "Community", icon: Users }, { label: "My Gigs", icon: BriefcaseBusiness },
   { label: "Gig Analyzer", icon: FileSearch }, { label: "Performance", icon: ChartNoAxesCombined },
   { label: "Growth Plan", icon: Target }, { label: "AI Growth Coach", icon: Bot },
   { label: "Keyword Research", icon: Search }, { label: "Competitor Research", icon: Activity },
@@ -368,6 +369,7 @@ export default function DashboardWorkspace() {
       <div className="workspace-content mx-auto max-w-[1680px] px-6 py-9 md:px-10 md:py-12 2xl:px-14">
         {notice && <div role="status" className="mb-5 rounded-lg border border-[#d8eadf] bg-[#f0faf3] px-4 py-3 text-xs text-[#246642]">{notice}</div>}
         {loading ? <div className="py-24 text-center text-sm text-[#777d77]">Loading your workspace…</div> : <>
+          {section === "Community" && <CommunityDirectory />}
           {section === "Overview" && <><div className="workspace-overview-hero mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="mb-2 text-xs font-bold text-[#168B56]">YOUR SELLER WORKSPACE</p><h2 className="workspace-page-title text-4xl font-extrabold tracking-[-.055em] md:text-5xl">Good to have you back{profileForm.display_name ? `, ${profileForm.display_name.split(" ")[0]}` : ""}.</h2><p className="mt-2 max-w-xl text-sm leading-6 text-[#777d77]">A clear view of your gigs, performance and next steps.</p></div><button onClick={() => go("My Gigs")} className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#222325] px-4 py-3 text-xs font-bold text-white hover:bg-[#404145]"><Plus size={15}/> Add a gig</button></div>
             <div className="workspace-stat-grid mb-9 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">{[{label:"Impressions",value:totals.impressions.toLocaleString(),icon:Activity},{label:"Clicks",value:totals.clicks.toLocaleString(),icon:ArrowUpRight},{label:"Orders",value:totals.orders.toLocaleString(),icon:BriefcaseBusiness},{label:"Revenue",value:"$"+totals.revenue.toLocaleString(),icon:TrendingUp}].map((item) => { const Icon=item.icon; return <div key={item.label} className="workspace-stat-card rounded-xl border border-[#e9ece9] bg-white p-6"><div className="flex items-center justify-between"><p className="text-xs font-semibold text-[#777d77]">{item.label}</p><Icon size={17} className="text-[#168B56]"/></div><p className="mt-4 text-[28px] font-extrabold tracking-tight">{item.value}</p><p className="mt-2 text-[10px] text-[#9aa19a]">From your saved snapshots</p></div>; })}</div>
             <div className="workspace-overview-grid grid gap-6 2xl:grid-cols-[1.2fr_.8fr]"><div className="workspace-panel rounded-xl border border-[#e9ece9] bg-white p-6 md:p-8"><h3 className="text-base font-extrabold">Your gigs</h3><p className="mt-1 text-xs text-[#929992]">Services saved to your workspace.</p>{gigs.length ? <div className="mt-5 divide-y divide-[#eef0ee]">{gigs.slice(0,4).map((gig)=><div key={gig.id} className="flex items-center justify-between gap-3 py-3"><div className="min-w-0"><p className="truncate text-xs font-semibold">{gig.title}</p><p className="mt-1 text-[10px] capitalize text-[#929992]">{gig.status} · {gig.tags.length} tags</p></div><button onClick={()=>{setAnalysisGig(gig.id);setAnalysisText({title:gig.title,description:gig.description,tags:gig.tags.join(", ")});go("Gig Analyzer")}} className="shrink-0 text-[11px] font-bold text-[#168B56]">Review</button></div>)}</div> : <div className="mt-5 rounded-lg border border-dashed border-[#dce3dd] p-7 text-center"><BriefcaseBusiness className="mx-auto mb-2 text-[#168B56]" size={22}/><p className="text-xs font-semibold">No gigs saved yet</p><p className="mt-1 text-[11px] text-[#929992]">Add your first gig to start organising your services.</p><button onClick={()=>go("My Gigs")} className="mt-3 text-xs font-bold text-[#168B56]">Add a gig <ArrowUpRight className="inline" size={13}/></button></div>}</div>
