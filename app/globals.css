@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root{color-scheme:light}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#f7f7fb;color:#191827;font-family:Arial,Helvetica,sans-serif}
+button,input,textarea,select{font:inherit}
+button{-webkit-tap-highlight-color:transparent}
+::selection{background:#e8e2ff;color:#39269d}
+.panel{background:#fff;border:1px solid #ecebf2;border-radius:18px;box-shadow:0 8px 30px rgba(26,22,54,.035)}
+.nav-item{display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;border-radius:11px;color:#777588;font-size:13px;font-weight:600;text-align:left;transition:.18s}
+.nav-item:hover,.nav-item.active{background:#f0edff;color:#6249e8}
+.field{width:100%;border:1px solid #e8e7ef;border-radius:11px;background:white;padding:11px 13px;font-size:13px;outline:none}
+.field:focus{border-color:#8b79f7;box-shadow:0 0 0 3px #7057f51a}
+.primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:11px;background:#7057f5;padding:11px 15px;color:white;font-size:12px;font-weight:700;transition:.18s}
+.primary:hover{background:#5c43df}
+.secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #e9e7f0;border-radius:11px;background:white;padding:10px 14px;color:#555267;font-size:12px;font-weight:700}
+.metric{letter-spacing:-.055em}
