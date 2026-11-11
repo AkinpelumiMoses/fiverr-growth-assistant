@@ -7,6 +7,7 @@ export const maxDuration = 60;
 type RequestBody = {
   mode?: "gig-analysis" | "coach";
   gigId?: string;
+  gig?: { title?: string; description?: string; tags?: string };
   message?: string;
   history?: { role: "user" | "assistant"; content: string }[];
 };
@@ -54,10 +55,14 @@ export async function POST(request: Request) {
       if (!gig) {
         return NextResponse.json({ error: "Select one of your saved gigs before requesting an AI review." }, { status: 400 });
       }
-      taskPrompt = `Review this seller's saved Fiverr gig. Analyse buyer clarity, offer positioning, specificity, description structure, trust signals, deliverables, tags relevance and likely buyer objections. Do not infer ranking or search-volume data. Give: (1) concise overall diagnosis, (2) strengths, (3) priority issues with reasons, (4) a suggested improved title, (5) a rewritten description only if the existing description gives enough information—do not invent credentials or deliverables, (6) tag ideas labelled as hypotheses to validate, (7) three practical next actions. If information is missing, say exactly what is missing.
-
-Gig data:
-${JSON.stringify(gig)}`;
+      const submitted = body.gig && typeof body.gig === "object" ? body.gig : {};
+      const reviewGig = {
+        title: typeof submitted.title === "string" ? submitted.title.slice(0, 180) : gig.title,
+        description: typeof submitted.description === "string" ? submitted.description.slice(0, 6000) : gig.description,
+        tags: typeof submitted.tags === "string" ? submitted.tags.slice(0, 600) : (gig.tags ?? []).join(", "),
+        category: gig.category, starting_price: gig.starting_price, currency: gig.currency, status: gig.status,
+      };
+      taskPrompt = `Review this seller's Fiverr gig. Analyse buyer clarity, offer positioning, specificity, description structure, trust signals, deliverables, tags relevance and likely buyer objections. Do not infer ranking or search-volume data. Give: (1) concise overall diagnosis, (2) strengths, (3) priority issues with reasons, (4) a suggested improved title, (5) a rewritten description only if the existing description gives enough information—do not invent credentials or deliverables, (6) tag ideas labelled as hypotheses to validate, (7) three practical next actions. If information is missing, say exactly what is missing.\n\nGig data:\n${JSON.stringify(reviewGig)}`;
     } else {
       const message = typeof body.message === "string" ? body.message.trim().slice(0, 2000) : "";
       if (!message) return NextResponse.json({ error: "Type a question for your growth coach." }, { status: 400 });
