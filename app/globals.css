@@ -62,3 +62,10 @@ button{-webkit-tap-highlight-color:transparent}
 @keyframes editorialFade{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.hero-background,.hero-copy,.hero-control,.hero-progress{transition:none!important;animation:none!important}.hero-background{transform:none!important}}
 @media(max-width:640px){.hero-background{background-position:58% center}.hero-shade{background:linear-gradient(90deg,rgba(15,21,17,.84),rgba(18,26,21,.52)),linear-gradient(0deg,rgba(10,15,12,.46),transparent 58%)}.hero-slideshow-controls{bottom:26px}.hero-shell>div.relative{min-height:680px;padding-bottom:110px;padding-top:76px}}
+
+/* Founder story and problem statements */
+.problem-card{border-top:2px solid #cfe9d8;padding:18px 4px 8px;transition:border-color .2s ease,transform .2s ease}
+.problem-card:hover{border-color:#1DBF73;transform:translateY(-3px)}
+.problem-card>span{font-size:10px;font-weight:800;letter-spacing:.12em;color:#1DBF73}
+.problem-card h3{margin-top:22px;font-size:16px;font-weight:700;letter-spacing:-.025em;color:#222325}
+.problem-card p{margin-top:10px;font-size:12px;line-height:1.85;color:#727b74}
