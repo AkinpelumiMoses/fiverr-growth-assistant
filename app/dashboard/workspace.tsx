@@ -149,6 +149,8 @@ export default function DashboardWorkspace() {
     if (!window.confirm("Remove this gig from your workspace? Its performance snapshots will be kept without a gig link.")) return;
     const { error: unlinkError } = await supabase.from("performance_entries").update({ gig_id: null }).eq("gig_id", id);
     if (unlinkError) return setNotice(unlinkError.message);
+    const { error: reportError } = await supabase.from("analysis_reports").update({ gig_id: null }).eq("gig_id", id);
+    if (reportError) return setNotice(reportError.message);
     const { error } = await supabase.from("gigs").delete().eq("id", id);
     if (error) setNotice(error.message);
     else { setGigs((old) => old.filter((gig) => gig.id !== id)); setPerformance((old) => old.map((row) => row.gig_id === id ? { ...row, gig_id: null } : row)); setNotice("Gig removed. Performance history was preserved."); }
