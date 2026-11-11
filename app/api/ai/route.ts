@@ -10,6 +10,7 @@ type RequestBody = {
   gig?: { title?: string; description?: string; tags?: string };
   message?: string;
   history?: { role: "user" | "assistant"; content: string }[];
+  attachments?: { path: string; name: string; mimeType: string; size: number }[];
 };
 
 const SYSTEM_BASE = `You are Fiverr Growth Assistant, a practical and honest coach for Fiverr freelancers.
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
     };
 
     let taskPrompt = "";
+    let multimodalInput: { type: string; text?: string; uri?: string; mime_type?: string }[] | null = null;
     if (body.mode === "gig-analysis") {
       const gigId = typeof body.gigId === "string" ? body.gigId : "";
       const gig = (gigs ?? []).find((item) => item.id === gigId);
@@ -70,7 +72,11 @@ export async function POST(request: Request) {
         role: item.role === "assistant" ? "assistant" : "user",
         content: typeof item.content === "string" ? item.content.slice(0, 1500) : "",
       })).filter((item) => item.content) : [];
-      taskPrompt = `Use the seller context below to answer the seller's latest question. If there is not enough data, ask one focused follow-up question. Diagnose performance carefully: low impressions may relate to relevance, demand, competition or indexing; impressions without clicks may suggest title/thumbnail/positioning issues; clicks without orders may suggest offer, price, trust or conversion friction. Treat these as hypotheses, not facts about Fiverr's algorithm.
+      const attachmentItems = Array.isArray(body.attachments) ? body.attachments.slice(0, 5) : [];
+      const allowedMime = new Set(["application/pdf","text/plain","text/markdown","text/csv","application/json","image/jpeg","image/png","image/webp","image/gif","application/vnd.openxmlformats-officedocument.wordprocessingml.document","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]);
+      const inputParts: { type: string; text?: string; uri?: string; mime_type?: string }[] = [{
+        type: "text",
+        text: `Use the seller context below to answer the seller's latest question. If there is not enough data, ask one focused follow-up question. Diagnose performance carefully: low impressions may relate to relevance, demand, competition or indexing; impressions without clicks may suggest title/thumbnail/positioning issues; clicks without orders may suggest offer, price, trust or conversion friction. Treat these as hypotheses, not facts about Fiverr's algorithm.
 
 Seller context:
 ${JSON.stringify(sellerContext)}
@@ -79,7 +85,22 @@ Recent conversation:
 ${JSON.stringify(history)}
 
 Latest seller question:
-${message}`;
+${message}`
+      }];
+      for (const attachment of attachmentItems) {
+        if (!attachment || typeof attachment.path !== "string" || !attachment.path.startsWith(`${user.id}/`) || !allowedMime.has(attachment.mimeType) || !Number.isFinite(attachment.size) || attachment.size <= 0 || attachment.size > 10 * 1024 * 1024) {
+          return NextResponse.json({ error: "One of the attachments is invalid or too large." }, { status: 400 });
+        }
+        const { data: signed, error: signedError } = await supabase.storage.from("ai-attachments").createSignedUrl(attachment.path, 90);
+        if (signedError || !signed?.signedUrl) return NextResponse.json({ error: "An attachment could not be accessed. Please upload it again." }, { status: 400 });
+        inputParts.push({
+          type: attachment.mimeType.startsWith("image/") ? "image" : "document",
+          uri: signed.signedUrl,
+          mime_type: attachment.mimeType,
+        });
+      }
+      multimodalInput = inputParts;
+      taskPrompt = inputParts[0].text ?? "";
     }
 
     // Try the current Flash model first, then a lighter stable model if Google is busy.
@@ -99,7 +120,7 @@ ${message}`;
           },
           body: JSON.stringify({
             model,
-            input: taskPrompt,
+            input: multimodalInput ?? taskPrompt,
             system_instruction: SYSTEM_BASE,
             store: false,
             generation_config: {
