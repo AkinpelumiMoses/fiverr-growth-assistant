@@ -2,14 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-:root{color-scheme:light;--page:#f7f8fa;--surface:#fff;--surface-soft:#f5f6f8;--border:#e8eaee;--ink:#20242c;--muted:#777f8c;--subtle:#969daa;--accent:#526b86;--accent-soft:#edf2f6;--shadow:0 5px 24px rgba(25,35,45,.035)}
-:root[data-theme="dark"]{color-scheme:dark;--page:#15191e;--surface:#1d232a;--surface-soft:#252c34;--border:#303943;--ink:#edf1f5;--muted:#b0bac5;--subtle:#8d99a6;--accent:#a9bfd4;--accent-soft:#2b3947;--shadow:0 6px 24px rgba(0,0,0,.14)}
+:root{color-scheme:light;--page:#f7f9f7;--surface:#fff;--surface-soft:#f1f5f2;--border:#e6ebe7;--ink:#222;--muted:#69716c;--subtle:#929a94;--accent:#1DBF73;--accent-strong:#15965A;--accent-soft:#e7f7ee;--shadow:0 5px 24px rgba(22,45,31,.045)}
+:root[data-theme="dark"]{color-scheme:dark;--page:#151816;--surface:#1d231f;--surface-soft:#252d28;--border:#343e37;--ink:#f0f3f0;--muted:#b3beb6;--subtle:#89968d;--accent:#35ce86;--accent-strong:#35ce86;--accent-soft:#203b2c;--shadow:0 6px 24px rgba(0,0,0,.18)}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--page);color:var(--ink);font-family:var(--font-montserrat),Montserrat,Arial,sans-serif;transition:background-color .18s ease,color .18s ease}
 button,input,textarea,select{font:inherit}
 button{-webkit-tap-highlight-color:transparent}
-::selection{background:#dce5ed;color:#26394b}
+::selection{background:#c8f1da;color:#173c29}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow)}
 .nav-item{display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;border-radius:10px;color:var(--muted);font-size:13px;font-weight:600;text-align:left;transition:background-color .18s,color .18s}
 .nav-item:hover,.nav-item.active{background:var(--accent-soft);color:var(--ink)}
@@ -36,3 +36,8 @@ button{-webkit-tap-highlight-color:transparent}
 :root[data-theme="dark"] aside{background:var(--surface);border-color:var(--border)}
 :root[data-theme="dark"] footer{border-color:var(--border)}
 :root[data-theme="dark"] .text-emerald-500{color:#6fc99b}
+
+/* Fiverr-inspired palette: vivid green, charcoal, white and restrained neutrals. */
+:root[data-theme="dark"] .bg-\\[\\#E7F7EE\\]{background-color:var(--accent-soft)!important}
+:root[data-theme="dark"] [class*="text-[#1DBF73"],:root[data-theme="dark"] [class*="text-[#168B56"]{color:var(--accent)!important}
+:root[data-theme="dark"] [class*="bg-[#1DBF73"]{background-color:var(--accent)!important}
