@@ -11,6 +11,7 @@ type RequestBody = {
   message?: string;
   history?: { role: "user" | "assistant"; content: string }[];
   attachments?: { path: string; name: string; mimeType: string; size: number }[];
+  conversationId?: string;
 };
 
 const SYSTEM_BASE = `You are Fiverr Growth Assistant, a practical and honest coach for Fiverr freelancers.
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
     }
 
     const body = (await request.json()) as RequestBody;
+    if (body.mode === "coach" && (typeof body.conversationId !== "string" || !body.conversationId)) return NextResponse.json({ error: "Start a conversation before sending a message." }, { status: 400 });
     if (body.mode !== "gig-analysis" && body.mode !== "coach") {
       return NextResponse.json({ error: "Choose a valid AI action." }, { status: 400 });
     }
@@ -104,6 +106,17 @@ ${message}`
       }
       multimodalInput = inputParts;
       taskPrompt = inputParts[0].text ?? "";
+      const { data: conversation, error: conversationError } = await supabase.from("ai_conversations").select("id,title").eq("id", body.conversationId!).eq("user_id", user.id).maybeSingle();
+      if (conversationError || !conversation) return NextResponse.json({ error: "This conversation could not be found." }, { status: 404 });
+      const userMessage = message || "Please review the attached files.";
+      const { error: messageSaveError } = await supabase.from("ai_messages").insert({
+        conversation_id: conversation.id,
+        user_id: user.id,
+        role: "user",
+        content: userMessage,
+        attachments: attachmentItems.map((item) => ({ name: item.name, mimeType: item.mimeType, size: item.size, path: item.path })),
+      });
+      if (messageSaveError) return NextResponse.json({ error: "Your message could not be saved. Please try again." }, { status: 500 });
     }
 
     // Try the current Flash model first, then a lighter stable model if Google is busy.
@@ -179,6 +192,18 @@ ${message}`
       if (saveError) console.error("Could not save AI gig report:", saveError.message);
     }
 
+    if (body.mode === "coach") {
+      const conversationId = body.conversationId as string;
+      const { error: assistantSaveError } = await supabase.from("ai_messages").insert({
+        conversation_id: conversationId,
+        user_id: user.id,
+        role: "assistant",
+        content: answer,
+        attachments: [],
+      });
+      if (assistantSaveError) console.error("Could not save AI response:", assistantSaveError.message);
+      await supabase.from("ai_conversations").update({ updated_at: new Date().toISOString() }).eq("id", conversationId).eq("user_id", user.id);
+    }
     return NextResponse.json({ answer });
   } catch (error) {
     console.error("AI route error:", error);
