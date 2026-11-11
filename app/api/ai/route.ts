@@ -95,7 +95,7 @@ ${message}`
           return NextResponse.json({ error: "One of the attachments is invalid or too large." }, { status: 400 });
         }
         totalAttachmentBytes += attachment.size;
-        if (totalAttachmentBytes > 18 * 1024 * 1024) return NextResponse.json({ error: "The combined attachments are too large. Please send fewer or smaller files." }, { status: 413 });
+        if (totalAttachmentBytes > 12 * 1024 * 1024) return NextResponse.json({ error: "The combined attachments are too large. Please send fewer or smaller files." }, { status: 413 });
         const { data: file, error: downloadError } = await supabase.storage.from("ai-attachments").download(attachment.path);
         if (downloadError || !file) return NextResponse.json({ error: "An attachment could not be accessed. Please upload it again." }, { status: 400 });
         const bytes = Buffer.from(await file.arrayBuffer());
