@@ -95,3 +95,31 @@ button{-webkit-tap-highlight-color:transparent}
 @media(max-width:900px){.founder-editorial{grid-template-columns:minmax(250px,.8fr) minmax(0,1.2fr);gap:36px}.founder-portrait-wrap{min-height:540px}}
 @media(max-width:700px){.founder-editorial{grid-template-columns:1fr;gap:35px}.founder-portrait-wrap{min-height:470px;max-width:520px;width:100%;margin:0 auto}.founder-copy{padding:0}.founder-heading{font-size:clamp(36px,10vw,49px)}}
 @media(max-width:420px){.founder-portrait-wrap{min-height:410px}}
+
+
+/* Premium signed-in workspace design system */
+.workspace-shell{--ws-bg:#f5f7f5;--ws-surface:#fff;--ws-border:#e7ece8;--ws-ink:#202722;--ws-muted:#707b73;--ws-accent:#1dbf73;background:var(--ws-bg);color:var(--ws-ink)}
+.workspace-sidebar{background:rgba(255,255,255,.97);border-color:var(--ws-border);box-shadow:8px 0 34px rgba(27,42,32,.035)}
+.workspace-sidebar nav button{min-height:46px;border-radius:12px;padding:12px 13px;font-size:12px;letter-spacing:-.01em}
+.workspace-sidebar nav button:hover{background:#f2f7f3;color:#202722}
+.workspace-sidebar nav button[class*="bg-[#eaf8ef]"]{background:#e7f7ee;color:#137b4b;box-shadow:inset 3px 0 #1dbf73}
+.workspace-topbar{background:rgba(255,255,255,.88);border-color:var(--ws-border);backdrop-filter:blur(18px);box-shadow:0 5px 24px rgba(25,42,30,.025)}
+.workspace-topbar h1{font-size:13px;font-weight:800;letter-spacing:-.025em}
+.workspace-content{padding-top:42px;padding-bottom:64px}
+.workspace-page-title{max-width:900px;font-size:clamp(36px,4.1vw,58px);line-height:1.04;letter-spacing:-.065em;color:#202722}
+.workspace-content [class*="rounded-xl"][class*="border-[#e9ece9]"],.workspace-content [class*="rounded-2xl"][class*="border-[#e9ece9]"]{border-color:#e6ece7;border-radius:18px;box-shadow:0 8px 30px rgba(27,42,32,.035);transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease}
+.workspace-content [class*="rounded-xl"][class*="border-[#e9ece9]"]:hover,.workspace-content [class*="rounded-2xl"][class*="border-[#e9ece9]"]:hover{border-color:#d6e5da;box-shadow:0 12px 34px rgba(27,42,32,.055)}
+.workspace-content input:not([type="checkbox"]),.workspace-content textarea,.workspace-content select{border-radius:12px!important;border-color:#dfe7e1!important;background:#fff;color:#202722;min-height:46px}
+.workspace-content textarea{min-height:120px}
+.workspace-content input:focus,.workspace-content textarea:focus,.workspace-content select:focus{border-color:#1dbf73!important;box-shadow:0 0 0 4px rgba(29,191,115,.10);outline:none}
+.workspace-content button[class*="bg-[#222325]"]{border-radius:12px;min-height:44px;box-shadow:0 5px 14px rgba(34,35,37,.10);transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+.workspace-content button[class*="bg-[#222325]"]:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(34,35,37,.15)}
+.workspace-content h3{letter-spacing:-.025em}
+.workspace-content footer{color:#89938c}
+@media(max-width:1023px){.workspace-content{padding-top:30px}.workspace-page-title{font-size:clamp(34px,7vw,48px)}}
+@media(max-width:640px){.workspace-content{padding:24px 16px 42px}.workspace-topbar{height:68px}.workspace-page-title{font-size:36px;line-height:1.08}}
+:root[data-theme="dark"] .workspace-shell{--ws-bg:#141916;--ws-surface:#1d2520;--ws-border:#344139;--ws-ink:#f1f5f1;--ws-muted:#b1bcb4;background:var(--ws-bg);color:var(--ws-ink)}
+:root[data-theme="dark"] .workspace-sidebar,:root[data-theme="dark"] .workspace-topbar{background:rgba(29,37,32,.96);border-color:var(--ws-border)}
+:root[data-theme="dark"] .workspace-page-title{color:#f1f5f1}
+:root[data-theme="dark"] .workspace-content [class*="rounded-xl"][class*="border-[#e9ece9]"],:root[data-theme="dark"] .workspace-content [class*="rounded-2xl"][class*="border-[#e9ece9]"]{background:#1d2520;border-color:#344139;box-shadow:0 8px 28px rgba(0,0,0,.15)}
+:root[data-theme="dark"] .workspace-content input:not([type="checkbox"]),:root[data-theme="dark"] .workspace-content textarea,:root[data-theme="dark"] .workspace-content select{background:#18201b!important;border-color:#3a493e!important;color:#f1f5f1!important}
