@@ -127,7 +127,7 @@ button{-webkit-tap-highlight-color:transparent}
 
 /* Desktop workspace art direction — spacious, structured, editorial */
 .workspace-shell{background:#f3f6f3!important}
-.workspace-sidebar{width:292px!important;padding:30px 20px 24px!important;background:#fbfcfb!important;border-right:1px solid #e3eae4!important;box-shadow:10px 0 40px rgba(25,45,31,.035)!important}
+.workspace-sidebar{padding:30px 20px 24px!important;background:#fbfcfb!important;border-right:1px solid #e3eae4!important;box-shadow:10px 0 40px rgba(25,45,31,.035)!important}
 .workspace-sidebar>div:first-child{margin-bottom:42px!important;padding:0 8px}
 .workspace-sidebar>p{margin:0 10px 14px!important;font-size:9px!important;letter-spacing:.19em!important;color:#98a39a!important}
 .workspace-sidebar nav{display:flex;flex-direction:column;gap:5px!important}
@@ -167,8 +167,8 @@ button{-webkit-tap-highlight-color:transparent}
 .workspace-content h3{font-weight:800}
 .workspace-content button, .workspace-sidebar button{cursor:pointer}
 @media(min-width:1600px){.workspace-content{padding-inline:64px!important}.workspace-stat-card{min-height:180px}.workspace-page-title{font-size:72px!important}}
-@media(max-width:1279px){.workspace-sidebar{width:270px!important}.workspace-content{padding:36px 30px 56px!important}.workspace-page-title{font-size:48px!important}}
-@media(max-width:1023px){.workspace-sidebar{width:292px!important;padding:25px 18px!important}.workspace-topbar{height:72px!important;padding-inline:18px!important}.workspace-content{padding:30px 22px 48px!important}.workspace-page-title{font-size:clamp(38px,6vw,52px)!important}}
+@media(max-width:1279px){.workspace-content{padding:36px 30px 56px!important}.workspace-page-title{font-size:48px!important}}
+@media(max-width:1023px){.workspace-sidebar{padding:25px 18px!important}.workspace-topbar{height:72px!important;padding-inline:18px!important}.workspace-content{padding:30px 22px 48px!important}.workspace-page-title{font-size:clamp(38px,6vw,52px)!important}}
 @media(max-width:640px){.workspace-content{padding:24px 16px 40px!important}.workspace-page-title{font-size:37px!important}.workspace-stat-card{min-height:135px;padding:18px!important}.workspace-stat-card>p:nth-child(2){font-size:30px!important}.workspace-panel{padding:20px!important}}
 :root[data-theme="dark"] .workspace-shell{background:#141a16!important}
 :root[data-theme="dark"] .workspace-sidebar{background:#18211b!important;border-color:#2d3a31!important}
