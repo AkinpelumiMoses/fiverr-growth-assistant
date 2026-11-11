@@ -75,10 +75,6 @@ export default function DashboardWorkspace() {
   }, [supabase]);
 
   useEffect(() => {
-    try { window.localStorage.setItem("fga-coach-history", JSON.stringify(coachHistory)); } catch {}
-  }, [coachHistory]);
-
-  useEffect(() => {
     let active = true;
     async function loadWorkspace() {
       setLoading(true);
