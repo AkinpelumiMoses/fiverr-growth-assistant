@@ -57,16 +57,21 @@ export default function Home(){
 
   <section id="why-it-exists" className="bg-[#f5f8f5]">
    <div className="mx-auto max-w-[1320px] px-5 py-20 md:px-8 md:py-28">
-    <div className="grid items-center gap-12 lg:grid-cols-[.92fr_1.08fr]">
-     <div className="reveal overflow-hidden rounded-[22px] bg-[#e1e9e2]">
-      <img src="https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&w=1400&q=88" alt="A freelancer planning and organising work at a desk" className="h-[320px] w-full object-cover sm:h-[430px]"/>
+    <div className="founder-editorial reveal">
+     <div className="founder-portrait-wrap">
+      <img src="/founder-portrait.webp" alt="Fiverr Growth Assistant founder, Akinpelumi Moses Temitope" className="founder-portrait"/>
+      <div className="founder-photo-caption"><span className="founder-caption-line"/><span>THE PERSON BEHIND THE PLATFORM</span></div>
+      <div className="founder-photo-index">01 <span>/ FOUNDER</span></div>
      </div>
-     <div className="reveal">
-      <p className="section-kicker">Why this was created</p>
-      <h2 className="section-heading mt-4">Starting on Fiverr is hard enough. Figuring everything out shouldn't be.</h2>
-      <p className="mt-6 text-[14px] leading-8 text-[#59645c]">I created Fiverr Growth Assistant because getting started as a seller can feel like trying to solve a puzzle without seeing the full picture. You hear that you need better SEO, the right tags, a stronger gig and more visibility — but it is not always clear what any of that means for your own service.</p>
-      <p className="mt-4 text-[14px] leading-8 text-[#59645c]">You may wonder why your gig is not getting seen, whether your description is convincing, which keywords actually fit what buyers are looking for, or what your performance numbers are trying to tell you. Too often, beginners are left jumping between advice, videos and guesswork.</p>
-      <p className="mt-4 text-[14px] leading-8 text-[#59645c]">This platform is being built to bring that work into one practical place — so sellers can understand their starting point, improve what they can control and make their next decision with more confidence.</p>
+     <div className="founder-copy">
+      <p className="founder-kicker"><span/> A NOTE FROM THE FOUNDER</p>
+      <h2 className="founder-heading">I built this because <em>getting started</em> shouldn't mean figuring everything out alone.</h2>
+      <div className="founder-rule"/>
+      <p className="founder-lead">Starting on Fiverr can be exciting. But after publishing your first gig, the questions often begin.</p>
+      <p className="founder-body">Are these the right keywords? Is my gig clear enough? Why am I not getting impressions? If people are clicking, what might be stopping them from ordering? And with so much conflicting advice online, how do I know what is actually worth changing?</p>
+      <p className="founder-body">I wanted to create a more practical way to approach those questions. A place where sellers can bring their performance information together, review how their services are presented, and turn uncertainty into clear, manageable next steps.</p>
+      <p className="founder-body">That is the thinking behind Fiverr Growth Assistant: not another promise of overnight success, but a useful workspace built around understanding, honest guidance and better decisions.</p>
+      <div className="founder-signoff"><span className="founder-signoff-name">Akinpelumi Moses Temitope</span><span className="founder-signoff-role">Founder, Fiverr Growth Assistant</span></div>
      </div>
     </div>
     <div className="mt-16 border-t border-[#dfe8e0] pt-9">
