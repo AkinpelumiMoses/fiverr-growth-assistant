@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 type Section = "Overview" | "My Gigs" | "Gig Analyzer" | "Performance" | "Growth Plan" | "Profile" | "AI Growth Coach" | "Keyword Research" | "Competitor Research";
-type Profile = { id: string; display_name: string | null; fiverr_username: string | null; seller_level: string | null; primary_niche: string | null; website_url: string | null; avatar_url: string | null; bio: string | null; fiverr_profile_url: string | null; skills: string | null; experience_years: number | null; ideal_client: string | null; onboarding_completed: boolean };
+type Profile = { id: string; display_name: string | null; fiverr_username: string | null; seller_level: string | null; primary_niche: string | null; website_url: string | null; avatar_url: string | null; bio: string | null; fiverr_profile_url: string | null; skills: string | null; experience_years: number | null; ideal_client: string | null; community_discoverable: boolean | null; onboarding_completed: boolean };
 type Gig = { id: string; title: string; description: string; tags: string[]; category: string | null; subcategory: string | null; starting_price: number | null; currency: string; status: "draft" | "active" | "paused"; gig_url: string | null };
 type Performance = { id: string; period_start: string; period_end: string; impressions: number; clicks: number; orders: number; revenue: number; currency: string; gig_id: string | null };
 type Task = { id: string; title: string; description: string; category: string; priority: "low" | "medium" | "high"; status: "pending" | "in_progress" | "completed" };
