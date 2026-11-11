@@ -230,7 +230,25 @@ export default function DashboardWorkspace() {
   const completedTasks = tasks.filter((task) => task.status === "completed").length;
   const initials = (profileForm.display_name || userEmail || "FG").split(/[\s@._-]+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "FG";
 
-  function go(next: Section) { setSection(next); setMobileOpen(false); setNotice(""); }\n\n  function startNewCoachChat() {\n    if (coachMessages.length) {\n      const title = coachMessages.find((item) => item.role === "user")?.content.slice(0, 54) || "New conversation";\n      setCoachHistory((old) => [{ id: crypto.randomUUID(), title, messages: coachMessages, updatedAt: new Date().toISOString() }, ...old].slice(0, 30));\n    }\n    setCoachMessages([]); setCoachInput(""); setNotice("");\n  }\n\n  function openCoachChat(id: string) {\n    const chat = coachHistory.find((item) => item.id === id);\n    if (!chat) return;\n    if (coachMessages.length) {\n      const title = coachMessages.find((item) => item.role === "user")?.content.slice(0, 54) || "Conversation";\n      setCoachHistory((old) => [{ id: crypto.randomUUID(), title, messages: coachMessages, updatedAt: new Date().toISOString() }, ...old].slice(0, 30));\n    }\n    setCoachMessages(chat.messages); setSection("AI Growth Coach"); setMobileOpen(false);\n  }
+  function go(next: Section) { setSection(next); setMobileOpen(false); setNotice(""); }
+
+  function startNewCoachChat() {
+    if (coachMessages.length) {
+      const title = coachMessages.find((item) => item.role === "user")?.content.slice(0, 54) || "New conversation";
+      setCoachHistory((old) => [{ id: crypto.randomUUID(), title, messages: coachMessages, updatedAt: new Date().toISOString() }, ...old].slice(0, 30));
+    }
+    setCoachMessages([]); setCoachInput(""); setNotice("");
+  }
+
+  function openCoachChat(id: string) {
+    const chat = coachHistory.find((item) => item.id === id);
+    if (!chat) return;
+    if (coachMessages.length) {
+      const title = coachMessages.find((item) => item.role === "user")?.content.slice(0, 54) || "Conversation";
+      setCoachHistory((old) => [{ id: crypto.randomUUID(), title, messages: coachMessages, updatedAt: new Date().toISOString() }, ...old].slice(0, 30));
+    }
+    setCoachMessages(chat.messages); setSection("AI Growth Coach"); setMobileOpen(false);
+  }
 
   return <main className="workspace-shell min-h-screen bg-[#f7f8f7] text-[#222325]">
     <aside style={{ width: sidebarCollapsed ? 82 : 270 }} className={`workspace-sidebar fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[#e9ece9] bg-white px-4 py-6 transition-[width,transform] duration-200 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
