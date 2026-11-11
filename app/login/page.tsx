@@ -1,11 +1,20 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowLeft, LockKeyhole } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Eye, EyeOff, LockKeyhole } from "lucide-react";
 import { signIn } from "@/app/auth/actions";
 
 type Props = { searchParams: Promise<{ error?: string; message?: string; next?: string }> };
 
 export default async function LoginPage({ searchParams }: Props) {
   const params = await searchParams;
+  return <LoginForm params={params} />;
+}
+
+function LoginForm({ params }: { params: { error?: string; message?: string; next?: string } }) {
+  const [showPassword, setShowPassword] = useState(false);
+
   return <main className="flex min-h-screen bg-[#f5f7f8]">
     <div className="hidden w-1/2 flex-col justify-between bg-[#222325] p-12 text-white lg:flex">
       <Link href="/" className="text-sm font-bold">Fiverr Growth Assistant</Link>
@@ -21,7 +30,7 @@ export default async function LoginPage({ searchParams }: Props) {
       <form action={signIn} className="mt-9 space-y-5">
         <input type="hidden" name="next" value={params.next || "/dashboard"}/>
         <div><label htmlFor="email" className="mb-2 block text-xs font-semibold text-[#343A40]">Email address</label><input id="email" name="email" type="email" required autoComplete="email" placeholder="you@example.com" className="w-full rounded-lg border border-[#dfe5e9] bg-white px-4 py-3.5 text-sm text-[#222222] outline-none focus:border-[#168B56]"/></div>
-        <div><label htmlFor="password" className="mb-2 block text-xs font-semibold text-[#343A40]">Password</label><input id="password" name="password" type="password" required autoComplete="current-password" placeholder="Enter your password" className="w-full rounded-lg border border-[#dfe5e9] bg-white px-4 py-3.5 text-sm text-[#222222] outline-none focus:border-[#168B56]"/></div>
+        <div><label htmlFor="password" className="mb-2 block text-xs font-semibold text-[#343A40]">Password</label><div className="relative"><input id="password" name="password" type={showPassword ? "text" : "password"} required autoComplete="current-password" placeholder="Enter your password" className="w-full rounded-lg border border-[#dfe5e9] bg-white px-4 py-3.5 pr-12 text-sm text-[#222222] outline-none focus:border-[#168B56]"/><button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-[#667583] transition hover:bg-[#f0f3f4] hover:text-[#222325]">{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button></div></div>
         <button type="submit" className="w-full rounded-lg bg-[#222325] px-5 py-4 text-xs font-bold text-white transition hover:bg-[#404145]">Sign in</button>
       </form>
       <p className="mt-7 text-center text-xs text-[#7b8791]">New here? <Link href="/signup" className="font-bold text-[#168B56]">Create an account</Link></p>
