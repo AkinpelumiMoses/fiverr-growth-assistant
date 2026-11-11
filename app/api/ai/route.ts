@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     };
 
     let taskPrompt = "";
-    let multimodalInput: { type: string; text?: string; uri?: string; mime_type?: string }[] | null = null;
+    let multimodalInput: { type: string; text?: string; data?: string; mime_type?: string }[] | null = null;
     if (body.mode === "gig-analysis") {
       const gigId = typeof body.gigId === "string" ? body.gigId : "";
       const gig = (gigs ?? []).find((item) => item.id === gigId);
@@ -73,8 +73,8 @@ export async function POST(request: Request) {
         content: typeof item.content === "string" ? item.content.slice(0, 1500) : "",
       })).filter((item) => item.content) : [];
       const attachmentItems = Array.isArray(body.attachments) ? body.attachments.slice(0, 5) : [];
-      const allowedMime = new Set(["application/pdf","text/plain","text/markdown","text/csv","application/json","image/jpeg","image/png","image/webp","image/gif","application/vnd.openxmlformats-officedocument.wordprocessingml.document","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]);
-      const inputParts: { type: string; text?: string; uri?: string; mime_type?: string }[] = [{
+      const allowedMime = new Set(["application/pdf","text/plain","text/markdown","text/csv","application/json","image/jpeg","image/png","image/webp","image/gif"]);
+      const inputParts: { type: string; text?: string; data?: string; mime_type?: string }[] = [{
         type: "text",
         text: `Use the seller context below to answer the seller's latest question. If there is not enough data, ask one focused follow-up question. Diagnose performance carefully: low impressions may relate to relevance, demand, competition or indexing; impressions without clicks may suggest title/thumbnail/positioning issues; clicks without orders may suggest offer, price, trust or conversion friction. Treat these as hypotheses, not facts about Fiverr's algorithm.
 
@@ -87,16 +87,19 @@ ${JSON.stringify(history)}
 Latest seller question:
 ${message}`
       }];
+      let totalAttachmentBytes = 0;
       for (const attachment of attachmentItems) {
         if (!attachment || typeof attachment.path !== "string" || !attachment.path.startsWith(`${user.id}/`) || !allowedMime.has(attachment.mimeType) || !Number.isFinite(attachment.size) || attachment.size <= 0 || attachment.size > 10 * 1024 * 1024) {
           return NextResponse.json({ error: "One of the attachments is invalid or too large." }, { status: 400 });
         }
-        const { data: signed, error: signedError } = await supabase.storage.from("ai-attachments").createSignedUrl(attachment.path, 90);
-        if (signedError || !signed?.signedUrl) return NextResponse.json({ error: "An attachment could not be accessed. Please upload it again." }, { status: 400 });
+        totalAttachmentBytes += attachment.size;
+        if (totalAttachmentBytes > 18 * 1024 * 1024) return NextResponse.json({ error: "The combined attachments are too large. Please send fewer or smaller files." }, { status: 413 });
+        const { data: file, error: downloadError } = await supabase.storage.from("ai-attachments").download(attachment.path);
+        if (downloadError || !file) return NextResponse.json({ error: "An attachment could not be accessed. Please upload it again." }, { status: 400 });
+        const bytes = Buffer.from(await file.arrayBuffer());
         inputParts.push({
-          type: attachment.mimeType.startsWith("image/") ? "image" : "document",
-          uri: signed.signedUrl,
-          mime_type: attachment.mimeType,
+          type: attachment.mimeType.startsWith("image/") ? "image" : attachment.mimeType === "application/pdf" ? "document" : "text",
+          ...(attachment.mimeType === "application/pdf" || attachment.mimeType.startsWith("image/") ? { data: bytes.toString("base64"), mime_type: attachment.mimeType } : { text: `Attached file: ${attachment.name}\\n\\n${bytes.toString("utf8").slice(0, 30000)}` }),
         });
       }
       multimodalInput = inputParts;
