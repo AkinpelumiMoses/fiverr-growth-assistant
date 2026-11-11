@@ -6,7 +6,7 @@
 :root[data-theme="dark"]{color-scheme:dark;--page:#15191e;--surface:#1d232a;--surface-soft:#252c34;--border:#303943;--ink:#edf1f5;--muted:#b0bac5;--subtle:#8d99a6;--accent:#a9bfd4;--accent-soft:#2b3947;--shadow:0 6px 24px rgba(0,0,0,.14)}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--page);color:var(--ink);font-family:Arial,Helvetica,sans-serif;transition:background-color .18s ease,color .18s ease}
+body{margin:0;background:var(--page);color:var(--ink);font-family:var(--font-montserrat),Montserrat,Arial,sans-serif;transition:background-color .18s ease,color .18s ease}
 button,input,textarea,select{font:inherit}
 button{-webkit-tap-highlight-color:transparent}
 ::selection{background:#dce5ed;color:#26394b}
