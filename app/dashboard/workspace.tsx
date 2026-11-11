@@ -57,6 +57,14 @@ export default function DashboardWorkspace() {
   const [coachHistory, setCoachHistory] = useState<{ id: string; title: string; messages: { role: "user" | "assistant"; content: string }[]; updatedAt: string }[]>([]);
 
   useEffect(() => {
+    try { const saved = window.localStorage.getItem("fga-coach-history"); if (saved) setCoachHistory(JSON.parse(saved)); } catch {}
+  }, []);
+
+  useEffect(() => {
+    try { window.localStorage.setItem("fga-coach-history", JSON.stringify(coachHistory)); } catch {}
+  }, [coachHistory]);
+
+  useEffect(() => {
     let active = true;
     async function loadWorkspace() {
       setLoading(true);
@@ -230,7 +238,7 @@ export default function DashboardWorkspace() {
       <div className="mt-auto space-y-3"><div className={`rounded-xl bg-[#eaf8ef] ${sidebarCollapsed ? "flex justify-center p-3" : "p-4"}`} title={sidebarCollapsed ? "Grow with clarity" : undefined}><Lightbulb size={18} className="shrink-0 text-[#1DBF73]"/>{!sidebarCollapsed && <><p className="mt-2 text-xs font-bold">Grow with clarity.</p><p className="mt-1 text-[11px] leading-5 text-[#4C6658]">Understand your numbers. Improve your offer. Make deliberate moves.</p></>}</div><button onClick={() => go("Profile")} title={sidebarCollapsed ? "Profile" : undefined} className={`flex w-full items-center ${sidebarCollapsed ? "justify-center" : "gap-3"} rounded-xl px-3 py-3 text-xs font-semibold text-[#62646A] hover:bg-[#f5f6f5]`}><UserRound size={17}/>{!sidebarCollapsed && "Profile & settings"}</button><form action={signOut}><button type="submit" title={sidebarCollapsed ? "Log out" : undefined} className={`flex w-full items-center ${sidebarCollapsed ? "justify-center" : "gap-3"} rounded-xl px-3 py-3 text-xs font-semibold text-[#62646A] hover:bg-[#f5f6f5]`}><LogOut size={17}/>{!sidebarCollapsed && "Log out"}</button></form></div>
     </aside>
     {mobileOpen && <button aria-label="Close navigation" onClick={() => setMobileOpen(false)} className="fixed inset-0 z-30 bg-black/25 lg:hidden"/>}
-    <section className="min-h-screen transition-[padding] duration-200" style={{ paddingLeft: typeof window !== "undefined" && window.innerWidth >= 1024 ? (sidebarCollapsed ? 82 : 270) : 0 }}>
+    <section className={`min-h-screen transition-[padding] duration-200 ${sidebarCollapsed ? "lg:pl-[82px]" : "lg:pl-[270px]"}`}>
       <header className="sticky top-0 z-20 flex h-[76px] items-center justify-between border-b border-[#e9ece9] bg-white/95 px-5 backdrop-blur md:px-9"><div className="flex items-center gap-3"><button onClick={() => setMobileOpen(true)} className="rounded-xl p-2 hover:bg-[#f3f5f3] lg:hidden" aria-label="Open navigation"><Menu size={20}/></button><div><p className="text-[10px] text-[#929992]">WORKSPACE / {section.toUpperCase()}</p><h1 className="text-base font-extrabold tracking-tight">{section}</h1></div></div><div className="flex items-center gap-2"><button onClick={() => go("Profile")} className="hidden items-center gap-2 rounded-xl px-3 py-2 text-left hover:bg-[#f4f6f4] sm:flex"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#222325] text-[11px] font-bold text-white">{initials}</span><span className="hidden max-w-[150px] text-left lg:block"><span className="block truncate text-xs font-bold">{profileForm.display_name || "Your profile"}</span><span className="block max-w-[150px] truncate text-[10px] text-[#929992]">{userEmail}</span></span></button><form action={signOut} className="hidden sm:block"><button type="submit" className="inline-flex items-center gap-2 rounded-xl border border-[#e7ebe7] px-3 py-2.5 text-xs font-bold text-[#555d56] hover:bg-[#f5f7f5]"><LogOut size={15}/> Log out</button></form></div></header>
       <div className="mx-auto max-w-[1500px] px-5 py-8 md:px-9 md:py-10">
         {notice && <div role="status" className="mb-5 rounded-lg border border-[#d8eadf] bg-[#f0faf3] px-4 py-3 text-xs text-[#246642]">{notice}</div>}
