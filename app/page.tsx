@@ -59,7 +59,7 @@ export default function Home(){
    <div className="mx-auto max-w-[1320px] px-5 py-20 md:px-8 md:py-28">
     <div className="founder-editorial reveal">
      <div className="founder-portrait-wrap">
-      <img src="/founder-portrait.webp" alt="Fiverr Growth Assistant founder, Akinpelumi Moses Temitope" className="founder-portrait"/>
+      <img src="https://myportfolio.creatiftechnologies.com.ng/images/A2S_5186c.jpg%20(1).jpeg" alt="Fiverr Growth Assistant founder, Akinpelumi Moses Temitope" className="founder-portrait"/>
       <div className="founder-photo-caption"><span className="founder-caption-line"/><span>THE PERSON BEHIND THE PLATFORM</span></div>
       <div className="founder-photo-index">01 <span>/ FOUNDER</span></div>
      </div>
