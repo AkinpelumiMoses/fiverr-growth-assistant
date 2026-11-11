@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 type Section = "Overview" | "Community" | "My Gigs" | "Gig Analyzer" | "Performance" | "Growth Plan" | "Profile" | "AI Growth Coach" | "Keyword Research" | "Competitor Research";
-type Profile = { id: string; display_name: string | null; fiverr_username: string | null; seller_level: string | null; primary_niche: string | null; website_url: string | null; avatar_url: string | null; bio: string | null; fiverr_profile_url: string | null; skills: string | null; experience_years: number | null; ideal_client: string | null; community_discoverable: boolean | null; onboarding_completed: boolean };
+type Profile = { id: string; display_name: string | null; fiverr_username: string | null; seller_level: string | null; primary_niche: string | null; website_url: string | null; avatar_url: string | null; bio: string | null; fiverr_profile_url: string | null; skills: string | null; experience_years: number | null; community_discoverable: boolean | null; onboarding_completed: boolean };
 type Gig = { id: string; title: string; description: string; tags: string[]; category: string | null; subcategory: string | null; starting_price: number | null; currency: string; status: "draft" | "active" | "paused"; gig_url: string | null };
 type Performance = { id: string; period_start: string; period_end: string; impressions: number; clicks: number; orders: number; revenue: number; currency: string; gig_id: string | null };
 type Task = { id: string; title: string; description: string; category: string; priority: "low" | "medium" | "high"; status: "pending" | "in_progress" | "completed" };
@@ -88,14 +88,15 @@ export default function DashboardWorkspace() {
         return;
       }
       setUserEmail(user.email ?? "");
-      const [profileResult, gigsResult, performanceResult, tasksResult] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
+      const [profileResult, privateProfileResult, gigsResult, performanceResult, tasksResult] = await Promise.all([
+        supabase.from("profiles").select("id,display_name,fiverr_username,seller_level,primary_niche,website_url,avatar_url,bio,fiverr_profile_url,skills,experience_years,community_discoverable,onboarding_completed").eq("id", user.id).maybeSingle(),
+        supabase.from("profile_private").select("ideal_client").eq("user_id", user.id).maybeSingle(),
         supabase.from("gigs").select("id,title,description,tags,category,subcategory,starting_price,currency,status,gig_url").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("performance_entries").select("id,period_start,period_end,impressions,clicks,orders,revenue,currency,gig_id").eq("user_id", user.id).order("period_start", { ascending: false }),
         supabase.from("growth_tasks").select("id,title,description,category,priority,status").eq("user_id", user.id).order("created_at", { ascending: true }),
       ]);
       if (!active) return;
-      const failed = [profileResult.error, gigsResult.error, performanceResult.error, tasksResult.error].find(Boolean);
+      const failed = [profileResult.error, privateProfileResult.error, gigsResult.error, performanceResult.error, tasksResult.error].find(Boolean);
       if (failed) setNotice(failed.message);
       const p = profileResult.data as Profile | null;
       setProfile(p);
@@ -109,7 +110,7 @@ export default function DashboardWorkspace() {
         fiverr_profile_url: p?.fiverr_profile_url ?? "",
         skills: p?.skills ?? "",
         experience_years: p?.experience_years == null ? "" : String(p.experience_years),
-        ideal_client: p?.ideal_client ?? "",
+        ideal_client: privateProfileResult.data?.ideal_client ?? "",
         community_discoverable: p?.community_discoverable ?? false,
       });
       setGigs((gigsResult.data ?? []) as Gig[]);
@@ -287,13 +288,21 @@ export default function DashboardWorkspace() {
       fiverr_profile_url: profileForm.fiverr_profile_url.trim() || null,
       skills: profileForm.skills.trim() || null,
       experience_years: profileForm.experience_years.trim() ? Number(profileForm.experience_years) : null,
-      ideal_client: profileForm.ideal_client.trim() || null,
       community_discoverable: profileForm.community_discoverable,
       onboarding_completed: true,
       updated_at: new Date().toISOString(),
     }).select("*").single();
-    if (error) setNotice(error.message);
-    else { setProfile(data as Profile); setNotice("Your profile has been saved."); }
+    if (error) {
+      setNotice(error.message);
+    } else {
+      const { error: privateError } = await supabase.from("profile_private").upsert({
+        user_id: user.id,
+        ideal_client: profileForm.ideal_client.trim() || null,
+        updated_at: new Date().toISOString(),
+      });
+      setProfile(data as Profile);
+      setNotice(privateError ? `Public profile saved, but private details could not be saved: ${privateError.message}` : "Your profile has been saved.");
+    }
     setSaving(false);
   }
 
