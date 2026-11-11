@@ -82,30 +82,58 @@ Latest seller question:
 ${message}`;
     }
 
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
-        "Api-Revision": "2026-05-20",
-      },
-      body: JSON.stringify({
-        model: "gemini-3.8-flash",
-        input: taskPrompt,
-        system_instruction: SYSTEM_BASE,
-        store: false,
-        generation_config: {
-          max_output_tokens: body.mode === "gig-analysis" ? 1800 : 1000,
-          thinking_level: "low",
-        },
-      }),
-      signal: AbortSignal.timeout(55000),
-    });
+    // Try the current Flash model first, then a lighter stable model if Google is busy.
+    // Keep each attempt bounded so the dashboard receives a useful response before the function times out.
+    const models = ["gemini-3.7-flash", "gemini-3.5-flash-lite"];
+    let result: any = null;
+    let lastError = "The AI service is temporarily unavailable.";
 
-    const result = await response.json();
-    if (!response.ok) {
-      console.error("Gemini API error:", result);
-      return NextResponse.json({ error: "The AI service could not complete that request. Please try again shortly." }, { status: 502 });
+    for (const model of models) {
+      try {
+        const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey,
+            "Api-Revision": "2026-05-20",
+          },
+          body: JSON.stringify({
+            model,
+            input: taskPrompt,
+            system_instruction: SYSTEM_BASE,
+            store: false,
+            generation_config: {
+              max_output_tokens: body.mode === "gig-analysis" ? 1800 : 1000,
+            },
+          }),
+          signal: AbortSignal.timeout(22000),
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (response.ok) {
+          result = payload;
+          break;
+        }
+
+        const providerMessage = payload?.error?.message || `Gemini returned HTTP ${response.status}.`;
+        lastError = providerMessage;
+        console.error(`Gemini model ${model} failed:`, payload);
+
+        // Only retry on temporary capacity/rate/server failures. Other errors need configuration fixes.
+        if (![408, 429, 500, 502, 503, 504].includes(response.status)) break;
+      } catch (error) {
+        lastError = error instanceof Error && error.name === "TimeoutError"
+          ? `The ${model} request timed out.`
+          : "The AI provider could not be reached.";
+        console.error(`Gemini model ${model} request failed:`, error);
+      }
+    }
+
+    if (!result) {
+      return NextResponse.json({
+        error: "The AI service is busy right now. Your message has not been lost—please try again in a moment.",
+        detail: lastError,
+      }, { status: 503 });
     }
 
     const answer = typeof result.output_text === "string" ? result.output_text : (result.steps ?? [])
