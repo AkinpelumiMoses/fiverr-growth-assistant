@@ -18,7 +18,8 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const { data: { claims } } = await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+  const claims = data?.claims;
   const isDashboard = request.nextUrl.pathname.startsWith("/dashboard");
   if (isDashboard && !claims) {
     const loginUrl = request.nextUrl.clone();
