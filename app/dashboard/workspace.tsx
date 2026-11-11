@@ -53,7 +53,7 @@ export default function DashboardWorkspace() {
   const [aiResult, setAiResult] = useState("");
   const [coachInput, setCoachInput] = useState("");
   const [coachLoading, setCoachLoading] = useState(false);
-  const [coachMessages, setCoachMessages] = useState<{ role: "user" | "assistant"; content: string; attachments?: { path: string; name: string; mimeType: string; size: number; url?: string }[] }[]>([]);
+  const [coachMessages, setCoachMessages] = useState<{ role: "user" | "assistant"; content: string; attachments?: { path?: string; name: string; mimeType: string; size: number; url?: string }[] }[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [coachAttachments, setCoachAttachments] = useState<File[]>([]);
   const [chatHistoryLoading, setChatHistoryLoading] = useState(false);
@@ -156,11 +156,13 @@ export default function DashboardWorkspace() {
     setCoachLoading(true); setNotice(""); setUploadingAttachments(coachAttachments.length > 0);
     let conversationId = activeConversationId;
     const queuedFiles = [...coachAttachments];
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (!currentUser) { setNotice("Please sign in again before sending a message."); setCoachLoading(false); return; }
     const nextMessages = [...coachMessages, { role: "user" as const, content: message || "Please review the attached files.", attachments: queuedFiles.map((file) => ({ name: file.name, mimeType: file.type, size: file.size })) }];
     setCoachMessages(nextMessages); setCoachInput(""); setCoachAttachments([]);
     try {
       if (!conversationId) {
-        const { data: created, error } = await supabase.from("ai_conversations").insert({ title: message.slice(0, 64) || queuedFiles[0]?.name || "New conversation" }).select("id,title,updated_at").single();
+        const { data: created, error } = await supabase.from("ai_conversations").insert({ user_id: currentUser.id, title: message.slice(0, 64) || queuedFiles[0]?.name || "New conversation" }).select("id,title,updated_at").single();
         if (error || !created) throw new Error(error?.message || "Could not create a conversation.");
         conversationId = created.id; setActiveConversationId(created.id);
         setCoachHistory((old) => [{ id: created.id, title: created.title, updatedAt: created.updated_at, messages: [] }, ...old]);
@@ -168,7 +170,7 @@ export default function DashboardWorkspace() {
       const attachmentMeta: { path: string; name: string; mimeType: string; size: number }[] = [];
       for (const file of queuedFiles) {
         const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100);
-        const path = `${(await supabase.auth.getUser()).data.user?.id}/${conversationId}/${crypto.randomUUID()}-${safeName}`;
+        const path = `${currentUser.id}/${conversationId}/${crypto.randomUUID()}-${safeName}`;
         const { error } = await supabase.storage.from("ai-attachments").upload(path, file, { contentType: file.type, upsert: false });
         if (error) throw new Error(`Could not upload ${file.name}: ${error.message}`);
         attachmentMeta.push({ path, name: file.name, mimeType: file.type, size: file.size });
@@ -206,6 +208,9 @@ export default function DashboardWorkspace() {
   }
 
   async function deleteCoachChat(id: string) {
+    const { data: rows } = await supabase.from("ai_messages").select("attachments").eq("conversation_id", id);
+    const paths = (rows ?? []).flatMap((row) => Array.isArray(row.attachments) ? row.attachments.map((file: {path?:string}) => file.path).filter((path): path is string => Boolean(path)) : []);
+    if (paths.length) { const { error: fileError } = await supabase.storage.from("ai-attachments").remove(paths); if (fileError) return setNotice(fileError.message); }
     const { error } = await supabase.from("ai_conversations").delete().eq("id", id);
     if (error) return setNotice(error.message);
     setCoachHistory((old) => old.filter((item) => item.id !== id));
