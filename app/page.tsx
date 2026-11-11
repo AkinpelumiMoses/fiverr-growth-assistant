@@ -13,7 +13,7 @@ const benefits=[
  {n:"02",title:"Make every gig clearer",body:"Review your titles, descriptions, tags and offers with practical guidance you can actually use."},
  {n:"03",title:"Know what to work on next",body:"Turn your numbers and goals into focused actions instead of guessing what might help."}
 ];
-const nav=[["How it works","#how-it-works"],["What you can do","#features"],["Our approach","#why"]];
+const nav=[["Why it exists","#why-it-exists"],["How it works","#how-it-works"],["What you can do","#features"],["Our approach","#why"]];
 export default function Home(){
  const [menu,setMenu]=useState(false),[active,setActive]=useState(0),[paused,setPaused]=useState(false);
  useEffect(()=>{if(paused)return;const timer=window.setInterval(()=>setActive(v=>(v+1)%slides.length),6500);return()=>window.clearInterval(timer)},[paused]);
@@ -53,6 +53,33 @@ export default function Home(){
     </div>
    </div>
    <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/25 to-transparent"/>
+  </section>
+
+  <section id="why-it-exists" className="bg-[#f5f8f5]">
+   <div className="mx-auto max-w-[1320px] px-5 py-20 md:px-8 md:py-28">
+    <div className="grid items-center gap-12 lg:grid-cols-[.92fr_1.08fr]">
+     <div className="reveal overflow-hidden rounded-[22px] bg-[#e1e9e2]">
+      <img src="https://images.unsplash.com/photo-1522542550221-31fd19575a2d?auto=format&fit=crop&w=1400&q=88" alt="A freelancer planning and organising work at a desk" className="h-[320px] w-full object-cover sm:h-[430px]"/>
+     </div>
+     <div className="reveal">
+      <p className="section-kicker">Why this was created</p>
+      <h2 className="section-heading mt-4">Starting on Fiverr is hard enough. Figuring everything out shouldn't be.</h2>
+      <p className="mt-6 text-[14px] leading-8 text-[#59645c]">I created Fiverr Growth Assistant because getting started as a seller can feel like trying to solve a puzzle without seeing the full picture. You hear that you need better SEO, the right tags, a stronger gig and more visibility — but it is not always clear what any of that means for your own service.</p>
+      <p className="mt-4 text-[14px] leading-8 text-[#59645c]">You may wonder why your gig is not getting seen, whether your description is convincing, which keywords actually fit what buyers are looking for, or what your performance numbers are trying to tell you. Too often, beginners are left jumping between advice, videos and guesswork.</p>
+      <p className="mt-4 text-[14px] leading-8 text-[#59645c]">This platform is being built to bring that work into one practical place — so sellers can understand their starting point, improve what they can control and make their next decision with more confidence.</p>
+     </div>
+    </div>
+    <div className="mt-16 border-t border-[#dfe8e0] pt-9">
+     <p className="section-kicker">The problems we want to make easier</p>
+     <div className="mt-7 grid gap-7 sm:grid-cols-2 lg:grid-cols-4">
+      <article className="problem-card"><span>01</span><h3>Getting found</h3><p>Understanding search relevance and visibility without believing that anyone can promise a first-page position.</p></article>
+      <article className="problem-card"><span>02</span><h3>Knowing if your gig is ready</h3><p>Seeing whether your title, description, offer and presentation make sense to the buyer you want to reach.</p></article>
+      <article className="problem-card"><span>03</span><h3>Choosing useful keywords</h3><p>Finding relevant tags and buyer-focused phrases instead of stuffing your gig with words that do not fit.</p></article>
+      <article className="problem-card"><span>04</span><h3>Knowing what to improve</h3><p>Making sense of impressions, clicks and orders so your next step is based on evidence, not panic.</p></article>
+     </div>
+    </div>
+    <p className="mt-10 max-w-3xl text-[12px] leading-7 text-[#7b857d]">A clear note: Fiverr Growth Assistant does not control Fiverr search or promise rankings, orders or sales. It is designed to help you understand your own information, strengthen your gig and make better-informed decisions.</p>
+   </div>
   </section>
 
   <section className="mx-auto max-w-[1320px] px-5 py-20 md:px-8 md:py-28">
