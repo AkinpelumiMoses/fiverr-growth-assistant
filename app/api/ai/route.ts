@@ -82,18 +82,19 @@ Latest seller question:
 ${message}`;
     }
 
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "x-goog-api-key": apiKey,
       },
       body: JSON.stringify({
-        model: "gemini-3.8-flash",
-        input: taskPrompt,
-        system_instruction: SYSTEM_BASE,
-        store: false,
-        generation_config: { max_output_tokens: body.mode === "gig-analysis" ? 1800 : 1000, thinking_level: "low" },
+        systemInstruction: { parts: [{ text: SYSTEM_BASE }] },
+        contents: [{ role: "user", parts: [{ text: taskPrompt }] }],
+        generationConfig: {
+          maxOutputTokens: body.mode === "gig-analysis" ? 1800 : 1000,
+          temperature: 0.4,
+        },
       }),
       signal: AbortSignal.timeout(55000),
     });
@@ -104,16 +105,10 @@ ${message}`;
       return NextResponse.json({ error: "The AI service could not complete that request. Please try again shortly." }, { status: 502 });
     }
 
-    const answer = typeof result.output_text === "string" ? result.output_text : (result.steps ?? [])
-      .filter((step: { type?: string }) => step.type === "model_output")
-      .flatMap((step: { content?: { type?: string; text?: string }[] }) => step.content ?? [])
-      .filter((part: { type?: string }) => part.type === "text")
+    const answer = (result.candidates ?? [])
+      .flatMap((candidate: { content?: { parts?: { text?: string }[] } }) => candidate.content?.parts ?? [])
       .map((part: { text?: string }) => part.text ?? "")
       .join("\n\n");
-
-    if (!answer.trim()) {
-      return NextResponse.json({ error: "The AI returned an empty response. Please try again." }, { status: 502 });
-    }
 
     if (body.mode === "gig-analysis") {
       const gigId = body.gigId as string;
