@@ -21,7 +21,8 @@ export async function middleware(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;
   const isDashboard = request.nextUrl.pathname.startsWith("/dashboard");
-  if (isDashboard && !claims) {
+  const isCommunity = request.nextUrl.pathname.startsWith("/community");
+  if ((isDashboard || isCommunity) && !claims) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", request.nextUrl.pathname);
@@ -34,5 +35,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/signup"],
+  matcher: ["/dashboard/:path*", "/community/:path*", "/login", "/signup"],
 };
