@@ -13,7 +13,10 @@ export async function signUp(formData: FormData) {
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    options: {
+      data: { full_name: fullName },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://fiverr-growth-assitant.vercel.app"}/auth/callback`,
+    },
   });
   if (error) redirect("/signup?error=signup");
   redirect("/login?message=confirm");
