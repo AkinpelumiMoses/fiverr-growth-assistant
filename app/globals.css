@@ -16,8 +16,8 @@ button{-webkit-tap-highlight-color:transparent}
 .field{width:100%;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--ink);padding:11px 13px;font-size:13px;outline:none}
 .field::placeholder{color:var(--subtle)}
 .field:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent)}
-.primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;background:#405d78;padding:11px 15px;color:white;font-size:12px;font-weight:700;transition:background-color .18s}
-.primary:hover{background:#304a63}
+.primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;background:#222325;padding:11px 15px;color:white;font-size:12px;font-weight:700;transition:background-color .18s}
+.primary:hover{background:#404145}
 .primary:disabled{cursor:not-allowed;opacity:.45}
 .secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:10px 14px;color:var(--ink);font-size:12px;font-weight:700}
 .metric{letter-spacing:-.055em}
