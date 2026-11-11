@@ -53,12 +53,12 @@ export default function DashboardWorkspace() {
   const [aiResult, setAiResult] = useState("");
   const [coachInput, setCoachInput] = useState("");
   const [coachLoading, setCoachLoading] = useState(false);
-  const [coachMessages, setCoachMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [coachMessages, setCoachMessages] = useState<{ role: "user" | "assistant"; content: string; attachments?: { path: string; name: string; mimeType: string; size: number; url?: string }[] }[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [coachAttachments, setCoachAttachments] = useState<File[]>([]);
   const [chatHistoryLoading, setChatHistoryLoading] = useState(false);
   const [uploadingAttachments, setUploadingAttachments] = useState(false);
-  const [coachHistory, setCoachHistory] = useState<{ id: string; title: string; messages: { role: "user" | "assistant"; content: string }[]; updatedAt: string }[]>([]);
+  const [coachHistory, setCoachHistory] = useState<{ id: string; title: string; messages: { role: "user" | "assistant"; content: string; attachments?: { path: string; name: string; mimeType: string; size: number; url?: string }[] }[]; updatedAt: string }[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -156,7 +156,7 @@ export default function DashboardWorkspace() {
     setCoachLoading(true); setNotice(""); setUploadingAttachments(coachAttachments.length > 0);
     let conversationId = activeConversationId;
     const queuedFiles = [...coachAttachments];
-    const nextMessages = [...coachMessages, { role: "user" as const, content: message || "Please review the attached files." }];
+    const nextMessages = [...coachMessages, { role: "user" as const, content: message || "Please review the attached files.", attachments: queuedFiles.map((file) => ({ name: file.name, mimeType: file.type, size: file.size })) }];
     setCoachMessages(nextMessages); setCoachInput(""); setCoachAttachments([]);
     try {
       if (!conversationId) {
@@ -182,15 +182,20 @@ export default function DashboardWorkspace() {
       setCoachHistory((old) => [{ id: conversationId!, title: old.find((item) => item.id === conversationId)?.title || message.slice(0, 64) || queuedFiles[0]?.name || "Conversation", messages: completed, updatedAt: new Date().toISOString() }, ...old.filter((item) => item.id !== conversationId)].slice(0, 40));
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Unable to contact the AI coach.");
-      setCoachMessages(coachMessages); setCoachInput(message); setCoachAttachments(queuedFiles);
+      setCoachMessages(nextMessages); setCoachInput(message); setCoachAttachments(queuedFiles);
     } finally { setUploadingAttachments(false); setCoachLoading(false); }
   }
 
   async function openCoachChat(id: string) {
     setActiveConversationId(id); setSection("AI Growth Coach"); setMobileOpen(false); setNotice("");
-    const { data, error } = await supabase.from("ai_messages").select("role,content").eq("conversation_id", id).order("created_at", { ascending: true });
+    const { data, error } = await supabase.from("ai_messages").select("role,content,attachments").eq("conversation_id", id).order("created_at", { ascending: true });
     if (error) return setNotice(error.message);
-    setCoachMessages((data ?? []).map((item) => ({ role: item.role as "user" | "assistant", content: item.content })));
+    const restored = await Promise.all((data ?? []).map(async (item) => {
+      const files = Array.isArray(item.attachments) ? item.attachments as {path:string;name:string;mimeType:string;size:number}[] : [];
+      const attachments = await Promise.all(files.map(async (file) => { const { data: signed } = await supabase.storage.from("ai-attachments").createSignedUrl(file.path, 300); return { ...file, url: signed?.signedUrl }; }));
+      return { role: item.role as "user" | "assistant", content: item.content, attachments };
+    }));
+    setCoachMessages(restored);
   }
 
   async function startNewCoachChat() {
@@ -343,7 +348,7 @@ export default function DashboardWorkspace() {
                 <div className="flex items-center justify-between border-b border-[#edf0ed] px-5 py-4 md:px-7"><div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eaf8ef] text-[#168B56]"><Bot size={20}/></div><div><p className="text-sm font-extrabold">Growth Coach</p><p className="mt-1 text-[10px] text-[#8b948d]">AI-powered seller support</p></div></div><span className="rounded-full bg-[#f1f8f3] px-3 py-1.5 text-[10px] font-bold text-[#168B56]">Private workspace</span></div>
                 <div className="min-h-[390px] flex-1 space-y-5 overflow-y-auto p-5 md:p-8">
                   {!coachMessages.length && <div className="flex min-h-[330px] flex-col items-center justify-center text-center"><div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#eaf8ef] text-[#168B56]"><Sparkles size={28}/></div><h3 className="text-xl font-extrabold tracking-tight">What are we working on today?</h3><p className="mt-2 max-w-md text-xs leading-6 text-[#929992]">Ask about your gig, pricing, positioning or performance. You can also attach documents and images for the coach to review.</p><div className="mt-6 flex flex-wrap justify-center gap-2"><button onClick={()=>setCoachInput("Review my gig positioning and tell me what to improve.")} className="rounded-full border border-[#e5eae6] px-4 py-2 text-[11px] font-semibold hover:bg-[#f5f7f5]">Review my gig</button><button onClick={()=>setCoachInput("Help me understand my Fiverr performance.")} className="rounded-full border border-[#e5eae6] px-4 py-2 text-[11px] font-semibold hover:bg-[#f5f7f5]">Understand my metrics</button></div></div>}
-                  {coachMessages.map((item,index)=><div key={index} className={item.role==="user"?"ml-auto max-w-[88%] rounded-2xl rounded-br-md bg-[#eaf8ef] p-4 md:p-5":"mr-auto max-w-[94%] rounded-2xl rounded-bl-md bg-[#f6f8f6] p-4 md:p-5"}><p className="mb-2 text-[10px] font-extrabold uppercase tracking-[.12em] text-[#168B56]">{item.role==="user"?"You":"Growth Coach"}</p><div className="whitespace-pre-wrap text-sm leading-7 text-[#414942]">{item.content}</div></div>)}
+                  {coachMessages.map((item,index)=><div key={index} className={item.role==="user"?"ml-auto max-w-[88%] rounded-2xl rounded-br-md bg-[#eaf8ef] p-4 md:p-5":"mr-auto max-w-[94%] rounded-2xl rounded-bl-md bg-[#f6f8f6] p-4 md:p-5"}><p className="mb-2 text-[10px] font-extrabold uppercase tracking-[.12em] text-[#168B56]">{item.role==="user"?"You":"Growth Coach"}</p><div className="whitespace-pre-wrap text-sm leading-7 text-[#414942]">{item.content}</div>{item.attachments?.length ? <div className="mt-3 flex flex-wrap gap-2">{item.attachments.map((file,i)=><a key={i} href={file.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg border border-[#dfe7e1] bg-white/80 px-3 py-2 text-[11px] font-semibold text-[#4f5a51]"><FileSearch size={13}/>{file.name}</a>)}</div> : null}</div>)}
                   {coachLoading && <div className="flex items-center gap-3 text-xs text-[#929992]"><span className="h-2 w-2 animate-pulse rounded-full bg-[#1DBF73]"/>{uploadingAttachments?"Uploading your files…":"Your coach is thinking…"}</div>}
                 </div>
                 <form onSubmit={sendCoachMessage} className="border-t border-[#edf0ed] p-4 md:p-6">
