@@ -117,7 +117,7 @@ export default function DashboardWorkspace() {
     if (!analysisGig) { setNotice("Save this gig first, then select it for an AI review."); return; }
     setAiLoading(true); setAiResult(""); setNotice("");
     try {
-      const response = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "gig-analysis", gigId: analysisGig }) });
+      const response = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "gig-analysis", gigId: analysisGig, gig: analysisText }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "The AI review could not be completed.");
       setAiResult(result.answer); setAnalysisDone(true);
