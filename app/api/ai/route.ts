@@ -84,7 +84,7 @@ ${message}`;
 
     // Try the current Flash model first, then a lighter stable model if Google is busy.
     // Keep each attempt bounded so the dashboard receives a useful response before the function times out.
-    const models = ["gemini-3.7-flash", "gemini-3.5-flash-lite"];
+    const models = ["gemini-3.5-flash-lite", "gemini-3.7-flash"];
     let result: any = null;
     let lastError = "The AI service is temporarily unavailable.";
 
