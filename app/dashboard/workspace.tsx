@@ -54,11 +54,25 @@ export default function DashboardWorkspace() {
   const [coachInput, setCoachInput] = useState("");
   const [coachLoading, setCoachLoading] = useState(false);
   const [coachMessages, setCoachMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [coachAttachments, setCoachAttachments] = useState<File[]>([]);
+  const [chatHistoryLoading, setChatHistoryLoading] = useState(false);
+  const [uploadingAttachments, setUploadingAttachments] = useState(false);
   const [coachHistory, setCoachHistory] = useState<{ id: string; title: string; messages: { role: "user" | "assistant"; content: string }[]; updatedAt: string }[]>([]);
 
   useEffect(() => {
-    try { const saved = window.localStorage.getItem("fga-coach-history"); if (saved) setCoachHistory(JSON.parse(saved)); } catch {}
-  }, []);
+    let active = true;
+    async function loadChatHistory() {
+      setChatHistoryLoading(true);
+      const { data: conversations, error } = await supabase.from("ai_conversations").select("id,title,updated_at").order("updated_at", { ascending: false }).limit(40);
+      if (!active) return;
+      if (error) setNotice(error.message);
+      setCoachHistory((conversations ?? []).map((item) => ({ id: item.id, title: item.title, updatedAt: item.updated_at, messages: [] })));
+      setChatHistoryLoading(false);
+    }
+    loadChatHistory();
+    return () => { active = false; };
+  }, [supabase]);
 
   useEffect(() => {
     try { window.localStorage.setItem("fga-coach-history", JSON.stringify(coachHistory)); } catch {}
@@ -138,20 +152,59 @@ export default function DashboardWorkspace() {
   async function sendCoachMessage(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const message = coachInput.trim();
-    if (!message || coachLoading) return;
-    const nextMessages = [...coachMessages, { role: "user" as const, content: message }];
-    setCoachMessages(nextMessages); setCoachInput(""); setCoachLoading(true); setNotice("");
+    if ((!message && coachAttachments.length === 0) || coachLoading) return;
+    setCoachLoading(true); setNotice(""); setUploadingAttachments(coachAttachments.length > 0);
+    let conversationId = activeConversationId;
+    const queuedFiles = [...coachAttachments];
+    const nextMessages = [...coachMessages, { role: "user" as const, content: message || "Please review the attached files." }];
+    setCoachMessages(nextMessages); setCoachInput(""); setCoachAttachments([]);
     try {
-      const response = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "coach", message, history: coachMessages.slice(-8) }) });
+      if (!conversationId) {
+        const { data: created, error } = await supabase.from("ai_conversations").insert({ title: message.slice(0, 64) || queuedFiles[0]?.name || "New conversation" }).select("id,title,updated_at").single();
+        if (error || !created) throw new Error(error?.message || "Could not create a conversation.");
+        conversationId = created.id; setActiveConversationId(created.id);
+        setCoachHistory((old) => [{ id: created.id, title: created.title, updatedAt: created.updated_at, messages: [] }, ...old]);
+      }
+      const attachmentMeta: { path: string; name: string; mimeType: string; size: number }[] = [];
+      for (const file of queuedFiles) {
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100);
+        const path = `${(await supabase.auth.getUser()).data.user?.id}/${conversationId}/${crypto.randomUUID()}-${safeName}`;
+        const { error } = await supabase.storage.from("ai-attachments").upload(path, file, { contentType: file.type, upsert: false });
+        if (error) throw new Error(`Could not upload ${file.name}: ${error.message}`);
+        attachmentMeta.push({ path, name: file.name, mimeType: file.type, size: file.size });
+      }
+      setUploadingAttachments(false);
+      const response = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "coach", message: message || "Please review the attached files.", conversationId, attachments: attachmentMeta, history: coachMessages.slice(-8) }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "The coach could not respond.");
       const completed = [...nextMessages, { role: "assistant" as const, content: result.answer }];
       setCoachMessages(completed);
-      setCoachHistory((old) => [{ id: crypto.randomUUID(), title: completed.find((item) => item.role === "user")?.content.slice(0, 54) || "Conversation", messages: completed, updatedAt: new Date().toISOString() }, ...old.filter((item) => item.messages[0]?.content !== message)].slice(0, 30));
+      setCoachHistory((old) => [{ id: conversationId!, title: old.find((item) => item.id === conversationId)?.title || message.slice(0, 64) || queuedFiles[0]?.name || "Conversation", messages: completed, updatedAt: new Date().toISOString() }, ...old.filter((item) => item.id !== conversationId)].slice(0, 40));
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Unable to contact the AI coach.");
-      setCoachMessages(nextMessages.slice(0, -1)); setCoachInput(message);
-    } finally { setCoachLoading(false); }
+      setCoachMessages(coachMessages); setCoachInput(message); setCoachAttachments(queuedFiles);
+    } finally { setUploadingAttachments(false); setCoachLoading(false); }
+  }
+
+  async function openCoachChat(id: string) {
+    setActiveConversationId(id); setSection("AI Growth Coach"); setMobileOpen(false); setNotice("");
+    const { data, error } = await supabase.from("ai_messages").select("role,content").eq("conversation_id", id).order("created_at", { ascending: true });
+    if (error) return setNotice(error.message);
+    setCoachMessages((data ?? []).map((item) => ({ role: item.role as "user" | "assistant", content: item.content })));
+  }
+
+  async function startNewCoachChat() {
+    if (coachMessages.length && activeConversationId) {
+      setCoachHistory((old) => old.map((item) => item.id === activeConversationId ? { ...item, messages: coachMessages, updatedAt: new Date().toISOString() } : item));
+    }
+    setActiveConversationId(null); setCoachMessages([]); setCoachInput(""); setCoachAttachments([]); setNotice("");
+  }
+
+  async function deleteCoachChat(id: string) {
+    const { error } = await supabase.from("ai_conversations").delete().eq("id", id);
+    if (error) return setNotice(error.message);
+    setCoachHistory((old) => old.filter((item) => item.id !== id));
+    if (activeConversationId === id) { setActiveConversationId(null); setCoachMessages([]); }
   }
 
   async function saveProfile() {
@@ -272,7 +325,35 @@ export default function DashboardWorkspace() {
           {section === "Performance" && <><div className="mb-7"><p className="text-xs font-bold text-[#168B56]">SELLER ANALYTICS</p><h2 className="workspace-page-title mt-2 text-4xl font-extrabold md:text-5xl">Track what is changing.</h2><p className="mt-2 text-sm text-[#777d77]">Enter figures from your Fiverr analytics. We do not fetch private Fiverr account metrics.</p></div><div className="grid gap-5 xl:grid-cols-[.8fr_1.2fr]"><form onSubmit={saveMetrics} className="space-y-3 rounded-xl border border-[#e9ece9] bg-white p-5 md:p-6"><h3 className="text-sm font-bold">Add performance snapshot</h3><label className="block"><span className="mb-1 block text-xs font-semibold">Date</span><input type="date" required className="w-full rounded-lg border border-[#dfe5e9] px-3 py-3 text-sm" value={metricForm.date} onChange={(e)=>setMetricForm((old)=>({...old,date:e.target.value}))}/></label>{[{label:"Impressions",key:"impressions"},{label:"Clicks",key:"clicks"},{label:"Orders",key:"orders"},{label:"Revenue (USD)",key:"revenue"}].map((field)=><label key={field.key} className="block"><span className="mb-1 block text-xs font-semibold">{field.label}</span><input type="number" min="0" step={field.key==="revenue"?"0.01":"1"} required className="w-full rounded-lg border border-[#dfe5e9] px-3 py-3 text-sm" value={metricForm[field.key as keyof typeof metricForm]} onChange={(e)=>setMetricForm((old)=>({...old,[field.key]:e.target.value}))}/></label>)}<label className="block"><span className="mb-1 block text-xs font-semibold">Link to gig (optional)</span><select className="w-full rounded-lg border border-[#dfe5e9] px-3 py-3 text-sm" value={metricForm.gig_id} onChange={(e)=>setMetricForm((old)=>({...old,gig_id:e.target.value}))}><option value="">All gigs / not specified</option>{gigs.map((gig)=><option key={gig.id} value={gig.id}>{gig.title}</option>)}</select></label><button disabled={saving} className="w-full rounded-lg bg-[#222325] px-4 py-3 text-xs font-bold text-white disabled:opacity-50">{saving?"Saving…":"Save snapshot"}</button></form><div className="rounded-xl border border-[#e9ece9] bg-white p-5 md:p-6"><h3 className="text-sm font-bold">Saved performance</h3>{performance.length?<div className="mt-4 overflow-x-auto"><table className="w-full min-w-[460px] text-left text-xs"><thead className="text-[10px] text-[#929992]"><tr>{["DATE","IMPRESSIONS","CLICKS","ORDERS","REVENUE"].map((heading)=><th key={heading} className="pb-3 pr-3">{heading}</th>)}</tr></thead><tbody>{performance.map((row)=><tr key={row.id} className="border-t border-[#eef0ee]"><td className="py-3 pr-3">{row.period_start}</td><td className="pr-3">{row.impressions.toLocaleString()}</td><td className="pr-3">{row.clicks.toLocaleString()}</td><td className="pr-3">{row.orders}</td><td className="pr-3">{row.currency} {Number(row.revenue).toLocaleString()}</td></tr>)}</tbody></table></div>:<div className="flex min-h-[260px] flex-col items-center justify-center text-center"><ChartNoAxesCombined className="mb-3 text-[#168B56]"/><p className="text-xs font-semibold">No snapshots yet</p><p className="mt-1 text-[11px] text-[#929992]">Your saved records will appear here.</p></div>}</div></div></>}
           {section === "Growth Plan" && <div className="max-w-3xl"><div className="mb-7"><p className="text-xs font-bold text-[#168B56]">YOUR ACTION LIST</p><h2 className="workspace-page-title mt-2 text-4xl font-extrabold md:text-5xl">Small steps, saved progress.</h2><p className="mt-2 text-sm text-[#777d77]">Mark tasks complete as you work. Your progress is saved to your account.</p></div><div className="rounded-xl border border-[#e9ece9] bg-white p-5 md:p-7">{tasks.map((task)=><div key={task.id} className="flex items-start gap-3 border-b border-[#eef0ee] py-4 last:border-0"><input type="checkbox" checked={task.status==="completed"} onChange={()=>toggleTask(task)} className="mt-1 h-4 w-4 accent-[#1DBF73]"/><div><p className={task.status==="completed"?"text-sm text-[#9aa19a] line-through":"text-sm font-semibold"}>{task.title}</p><p className="mt-1 text-xs leading-5 text-[#777d77]">{task.description}</p><p className="mt-2 text-[10px] uppercase tracking-wide text-[#929992]">{task.priority} priority · {task.status.replace("_"," ")}</p></div></div>)}</div></div>}
           {section === "Gig Analyzer" && <><div className="mb-7"><p className="text-xs font-bold text-[#168B56]">GIG QUALITY REVIEW</p><h2 className="workspace-page-title mt-2 text-4xl font-extrabold md:text-5xl">Make your offer easier to choose.</h2><p className="mt-2 text-sm text-[#777d77]">A basic checklist, not an official Fiverr score or ranking prediction.</p></div><div className="grid gap-5 xl:grid-cols-[1.2fr_.8fr]"><div className="space-y-4 rounded-xl border border-[#e9ece9] bg-white p-5 md:p-6"><label className="block"><span className="mb-2 block text-xs font-semibold">Choose a saved gig</span><select className="w-full rounded-lg border border-[#dfe5e9] px-3 py-3 text-sm" value={analysisGig} onChange={(e)=>{const gig=gigs.find((item)=>item.id===e.target.value);setAnalysisGig(e.target.value);if(gig)setAnalysisText({title:gig.title,description:gig.description,tags:gig.tags.join(", ")});setAnalysisDone(false);}}><option value="">Enter details manually</option>{gigs.map((gig)=><option key={gig.id} value={gig.id}>{gig.title}</option>)}</select></label><label className="block"><span className="mb-2 block text-xs font-semibold">Gig title</span><input className="w-full rounded-lg border border-[#dfe5e9] px-3 py-3 text-sm" value={analysisText.title} onChange={(e)=>{setAnalysisText((old)=>({...old,title:e.target.value}));setAnalysisDone(false);}}/></label><label className="block"><span className="mb-2 block text-xs font-semibold">Description</span><textarea className="min-h-[170px] w-full rounded-lg border border-[#dfe5e9] px-3 py-3 text-sm" value={analysisText.description} onChange={(e)=>{setAnalysisText((old)=>({...old,description:e.target.value}));setAnalysisDone(false);}} placeholder="Paste your gig description"/></label><label className="block"><span className="mb-2 block text-xs font-semibold">Tags (comma-separated)</span><input className="w-full rounded-lg border border-[#dfe5e9] px-3 py-3 text-sm" value={analysisText.tags} onChange={(e)=>{setAnalysisText((old)=>({...old,tags:e.target.value}));setAnalysisDone(false);}} placeholder="brand identity, logo design, ..."/></label><button onClick={runAiAnalysis} disabled={!analysisGig || aiLoading} className="rounded-lg bg-[#222325] px-5 py-3 text-xs font-bold text-white disabled:opacity-40">{aiLoading?"Analysing…":"Run AI review"}</button><p className="text-[11px] text-[#929992]">AI reviews the saved gig details. Save any edits to My Gigs first.</p></div><div className="rounded-xl border border-[#e9ece9] bg-white p-5 md:p-6"><p className="text-xs font-bold text-[#777d77]">YOUR REVIEW</p>{analysisDone?<><p className="mt-5 text-xs font-bold text-[#168B56]">AI GIG REVIEW</p><div className="mt-4 whitespace-pre-wrap text-sm leading-7 text-[#4b514c]">{aiResult}</div><p className="mt-5 rounded-lg bg-[#f0faf3] p-3 text-[10px] leading-5 text-[#4C6658]">AI guidance is based on the details you saved. Suggestions are hypotheses, not Fiverr ranking or search-volume data.</p></>:<div className="flex min-h-[300px] flex-col items-center justify-center text-center"><FileSearch size={25} className="mb-3 text-[#168B56]"/><p className="text-sm font-semibold">Your AI review will appear here</p><p className="mt-2 max-w-xs text-xs text-[#929992]">Select one of your saved gigs and run an AI review.</p></div>}</div></div></>}
-          {section === "AI Growth Coach" && <div className="max-w-3xl"><div className="mb-7"><div className="flex flex-col justify-between gap-4 md:flex-row md:items-end"><div><p className="text-xs font-bold tracking-[.16em] text-[#168B56]">PERSONALISED SELLER SUPPORT</p><h2 className="mt-3 text-4xl font-extrabold tracking-[-.055em] md:text-5xl">Your growth, with a thinking partner.</h2><p className="mt-3 max-w-2xl text-sm leading-7 text-[#777d77]">Ask about your gigs, positioning or saved performance. Your coach uses your workspace data to make each conversation more relevant.</p></div><button onClick={startNewCoachChat} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[#222325] px-4 py-3 text-xs font-bold text-white hover:bg-[#404145]"><Plus size={15}/> New chat</button></div></div><div className="grid gap-5 xl:grid-cols-[250px_minmax(0,1fr)]"><aside className="rounded-2xl border border-[#e9ece9] bg-white p-4"><div className="mb-3 flex items-center justify-between"><p className="text-xs font-extrabold">Recent conversations</p><span className="text-[10px] text-[#929992]">{coachHistory.length}</span></div>{coachHistory.length ? <div className="space-y-1">{coachHistory.map((chat)=><button key={chat.id} onClick={()=>openCoachChat(chat.id)} className="w-full rounded-xl px-3 py-3 text-left text-xs text-[#62646A] hover:bg-[#f5f7f5]"><span className="block truncate font-semibold">{chat.title}</span><span className="mt-1 block text-[10px] text-[#929992]">{new Date(chat.updatedAt).toLocaleDateString()}</span></button>)}</div> : <p className="py-5 text-xs leading-5 text-[#929992]">Your saved conversations will appear here as you chat.</p>}</aside><div className="min-w-0 rounded-2xl border border-[#e9ece9] bg-white p-5 md:p-7"><div className="mb-5 min-h-[240px] space-y-4">{coachMessages.length ? coachMessages.map((item,index)=><div key={index} className={item.role==="user"?"ml-8 rounded-xl bg-[#f0faf3] p-4":"mr-6 rounded-xl bg-[#f6f7f6] p-4"}><p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-[#168B56]">{item.role==="user"?"You":"Growth Coach"}</p><div className="whitespace-pre-wrap text-sm leading-6 text-[#4b514c]">{item.content}</div></div>) : <div className="flex min-h-[220px] flex-col items-center justify-center text-center"><Bot size={28} className="mb-3 text-[#168B56]"/><p className="text-sm font-semibold">What would you like to improve?</p><p className="mt-2 max-w-sm text-xs leading-5 text-[#929992]">For example: “My gig gets impressions but no clicks. What should I review first?”</p></div>}{coachLoading&&<p className="text-xs text-[#929992]">The coach is thinking…</p>}</div><form onSubmit={sendCoachMessage} className="flex flex-col gap-3 border-t border-[#eef0ee] pt-5 sm:flex-row"><input value={coachInput} onChange={(event)=>setCoachInput(event.target.value)} maxLength={2000} placeholder="Ask a question about your Fiverr growth…" className="min-w-0 flex-1 rounded-xl border border-[#dfe5e9] px-4 py-4 text-sm outline-none focus:border-[#168B56]"/><button disabled={coachLoading||!coachInput.trim()} className="rounded-xl bg-[#222325] px-6 py-4 text-xs font-bold text-white disabled:opacity-40">{coachLoading?"Thinking…":"Send message"}</button></form><p className="mt-3 text-[10px] text-[#929992]">AI advice can be wrong. Verify platform rules and test changes carefully. No ranking or order guarantees.</p></div></div></div>}
+          {section === "AI Growth Coach" && <div className="w-full">
+            <div className="mb-8 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
+              <div><p className="text-[11px] font-extrabold tracking-[.2em] text-[#168B56]">YOUR PERSONAL SELLER INTELLIGENCE</p><h2 className="mt-3 max-w-4xl text-4xl font-extrabold leading-[1.04] tracking-[-.06em] md:text-6xl">A clearer way to<br className="hidden md:block"/> think through growth.</h2><p className="mt-4 max-w-2xl text-sm leading-7 text-[#737b74]">Ask questions, share files and revisit your previous conversations. Your coach can use your saved Fiverr workspace context.</p></div>
+              <button onClick={startNewCoachChat} className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-[#222325] px-5 text-xs font-bold text-white hover:bg-[#404145]"><Plus size={16}/> New conversation</button>
+            </div>
+            <div className="grid min-h-[690px] gap-5 xl:grid-cols-[290px_minmax(0,1fr)]">
+              <aside className="flex flex-col overflow-hidden rounded-2xl border border-[#e5eae6] bg-white">
+                <div className="border-b border-[#edf0ed] p-5"><p className="text-sm font-extrabold">Your conversations</p><p className="mt-1 text-xs text-[#929992]">Private to your account</p></div>
+                <div className="flex-1 space-y-1 overflow-y-auto p-3">
+                  {chatHistoryLoading && <p className="p-3 text-xs text-[#929992]">Loading history…</p>}
+                  {!chatHistoryLoading && !coachHistory.length && <p className="p-4 text-xs leading-6 text-[#929992]">Your saved AI conversations will appear here.</p>}
+                  {coachHistory.map((chat)=><div key={chat.id} className={`group flex items-center gap-1 rounded-xl ${activeConversationId===chat.id?"bg-[#eaf8ef]":"hover:bg-[#f5f7f5]"}`}><button onClick={()=>openCoachChat(chat.id)} className="min-w-0 flex-1 px-3 py-3 text-left"><span className="block truncate text-xs font-bold text-[#343b35]">{chat.title}</span><span className="mt-1 block text-[10px] text-[#929992]">{new Date(chat.updatedAt).toLocaleDateString()}</span></button><button onClick={()=>deleteCoachChat(chat.id)} title="Delete conversation" className="mr-2 rounded-lg p-2 text-[#9aa29b] opacity-0 hover:bg-white hover:text-red-600 group-hover:opacity-100"><Trash2 size={14}/></button></div>)}
+                </div>
+              </aside>
+              <section className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[#e5eae6] bg-white shadow-[0_14px_50px_rgba(24,42,30,.045)]">
+                <div className="flex items-center justify-between border-b border-[#edf0ed] px-5 py-4 md:px-7"><div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eaf8ef] text-[#168B56]"><Bot size={20}/></div><div><p className="text-sm font-extrabold">Growth Coach</p><p className="mt-1 text-[10px] text-[#8b948d]">AI-powered seller support</p></div></div><span className="rounded-full bg-[#f1f8f3] px-3 py-1.5 text-[10px] font-bold text-[#168B56]">Private workspace</span></div>
+                <div className="min-h-[390px] flex-1 space-y-5 overflow-y-auto p-5 md:p-8">
+                  {!coachMessages.length && <div className="flex min-h-[330px] flex-col items-center justify-center text-center"><div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#eaf8ef] text-[#168B56]"><Sparkles size={28}/></div><h3 className="text-xl font-extrabold tracking-tight">What are we working on today?</h3><p className="mt-2 max-w-md text-xs leading-6 text-[#929992]">Ask about your gig, pricing, positioning or performance. You can also attach documents and images for the coach to review.</p><div className="mt-6 flex flex-wrap justify-center gap-2"><button onClick={()=>setCoachInput("Review my gig positioning and tell me what to improve.")} className="rounded-full border border-[#e5eae6] px-4 py-2 text-[11px] font-semibold hover:bg-[#f5f7f5]">Review my gig</button><button onClick={()=>setCoachInput("Help me understand my Fiverr performance.")} className="rounded-full border border-[#e5eae6] px-4 py-2 text-[11px] font-semibold hover:bg-[#f5f7f5]">Understand my metrics</button></div></div>}
+                  {coachMessages.map((item,index)=><div key={index} className={item.role==="user"?"ml-auto max-w-[88%] rounded-2xl rounded-br-md bg-[#eaf8ef] p-4 md:p-5":"mr-auto max-w-[94%] rounded-2xl rounded-bl-md bg-[#f6f8f6] p-4 md:p-5"}><p className="mb-2 text-[10px] font-extrabold uppercase tracking-[.12em] text-[#168B56]">{item.role==="user"?"You":"Growth Coach"}</p><div className="whitespace-pre-wrap text-sm leading-7 text-[#414942]">{item.content}</div></div>)}
+                  {coachLoading && <div className="flex items-center gap-3 text-xs text-[#929992]"><span className="h-2 w-2 animate-pulse rounded-full bg-[#1DBF73]"/>{uploadingAttachments?"Uploading your files…":"Your coach is thinking…"}</div>}
+                </div>
+                <form onSubmit={sendCoachMessage} className="border-t border-[#edf0ed] p-4 md:p-6">
+                  {coachAttachments.length>0 && <div className="mb-3 flex flex-wrap gap-2">{coachAttachments.map((file,index)=><div key={index} className="flex max-w-full items-center gap-2 rounded-xl border border-[#e3e9e4] bg-[#f8faf8] px-3 py-2 text-xs"><FileSearch size={15}/><span className="max-w-[180px] truncate">{file.name}</span><button type="button" onClick={()=>setCoachAttachments(old=>old.filter((_,i)=>i!==index))} className="text-[#929992] hover:text-red-600"><X size={14}/></button></div>)}</div>}
+                  <textarea value={coachInput} onChange={(event)=>setCoachInput(event.target.value)} maxLength={2000} rows={3} placeholder="Message your Growth Coach…" className="min-h-[90px] w-full resize-y rounded-xl border border-[#dfe5e9] p-4 text-sm outline-none focus:border-[#168B56]"/>
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[#e4e9e5] px-3 py-2.5 text-xs font-semibold text-[#59635b] hover:bg-[#f5f8f5]"><Plus size={15}/> Attach files<input type="file" multiple accept=".pdf,.txt,.md,.csv,.json,.jpg,.jpeg,.png,.webp,.gif,.doc,.docx,.xls,.xlsx" className="hidden" onChange={(event)=>{const files=Array.from(event.target.files??[]);const valid=files.filter(file=>file.size<=10*1024*1024);if(files.length!==valid.length)setNotice("Each file must be 10 MB or smaller.");setCoachAttachments(old=>[...old,...valid].slice(0,5));event.target.value="";}}/></label><span className="text-[10px] text-[#929992]">Up to 5 files · 10 MB each</span></div><button disabled={coachLoading||(!coachInput.trim()&&!coachAttachments.length)} className="inline-flex items-center gap-2 rounded-xl bg-[#222325] px-5 py-3 text-xs font-bold text-white disabled:opacity-40">{coachLoading?"Working…":"Send message"}<ArrowUpRight size={15}/></button></div>
+                </form>
+              </section>
+            </div>
+          </div>}
           {(section === "Keyword Research" || section === "Competitor Research") && <div className="max-w-3xl rounded-xl border border-[#e9ece9] bg-white p-7 md:p-10"><Search size={25} className="text-[#168B56]"/><p className="mt-5 text-xs font-bold text-[#168B56]">COMING DEVELOPMENT STAGE</p><h2 className="mt-2 text-2xl font-extrabold">{section}</h2><p className="mt-3 text-sm leading-6 text-[#777d77]">{section==="Keyword Research"?"Research buyer-intent phrases with evidence, without inventing search volume or difficulty.":"Compare public gig positioning, offers and pricing using accessible information and seller-provided links."}</p></div>}
         </>}
         <footer className="mt-10 flex flex-col justify-between gap-2 border-t border-[#e9ece9] py-5 text-[10px] text-[#929992] sm:flex-row"><span>Fiverr Growth Assistant · Seller workspace</span><span>Guidance, not guarantees of rankings or orders.</span></footer>
