@@ -603,3 +603,40 @@ body{background:var(--page);color:var(--ink)}
 .workspace-content button[class*="bg-[#222325]"]:hover{background:#00851e!important}
 :root[data-theme="dark"] .workspace-sidebar nav button[class*="bg-[#eaf8ef]"]{background:#00A525!important;color:#fff!important}
 :root[data-theme="dark"] .workspace-sidebar nav button[class*="bg-[#eaf8ef]"] svg{color:#fff!important}
+
+
+/* MILE automatic hero slideshow — no visible controls */
+.mile-hero-image{position:absolute;inset:0;overflow:hidden;background:#111311}
+.mile-hero-slide{position:absolute;inset:0;background-size:cover;background-position:center 45%;opacity:0;transform:scale(1.045);transition:opacity 1.5s ease,transform 7s cubic-bezier(.2,.65,.25,1)}
+.mile-hero-slide.is-active{opacity:1;transform:scale(1)}
+.mile-hero-image::before,.mile-hero-image::after{display:none!important;content:none!important}
+@media(max-width:760px){.mile-hero-slide{background-position:58% center}}
+@media(prefers-reduced-motion:reduce){.mile-hero-slide{transition:none!important;transform:none!important}}
+
+/* MILE branded first-load experience */
+.mile-loader{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:#00A525;color:#fff;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease}
+.mile-loader.is-leaving{opacity:0;visibility:hidden;pointer-events:none}
+.mile-loader-inner{display:flex;flex-direction:column;align-items:center;gap:22px}
+.mile-loader-mark{width:76px;height:76px;object-fit:contain;filter:drop-shadow(0 8px 22px rgba(0,0,0,.12));animation:mile-mark-arrive .85s cubic-bezier(.2,.8,.2,1) both,mile-mark-breathe 1.8s ease-in-out .85s infinite}
+.mile-loader-wordmark{width:148px;height:auto;filter:brightness(0) invert(1);opacity:0;animation:mile-word-arrive .65s ease .28s forwards}
+.mile-loader-line{width:130px;height:2px;background:rgba(255,255,255,.28);overflow:hidden;border-radius:5px}
+.mile-loader-line:after{content:"";display:block;width:42%;height:100%;background:#C6C304;border-radius:5px;animation:mile-loading-progress 1.25s ease-in-out infinite}
+.mile-loader-caption{font-size:9px;font-weight:600;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.82)}
+@keyframes mile-mark-arrive{from{opacity:0;transform:translateY(14px) scale(.78)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes mile-mark-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes mile-word-arrive{from{opacity:0;transform:translateY(8px);letter-spacing:.22em}to{opacity:1;transform:translateY(0);letter-spacing:normal}}
+@keyframes mile-loading-progress{0%{transform:translateX(-120%)}100%{transform:translateX(340%)}}
+@media(prefers-reduced-motion:reduce){.mile-loader-mark,.mile-loader-wordmark,.mile-loader-line:after{animation:none!important}.mile-loader-wordmark{opacity:1}}
+/* Consistent premium authentication screens */
+main.min-h-screen{background:#f8faf8!important;color:#111311;font-family:var(--font-montserrat),Montserrat,sans-serif}
+main.min-h-screen>div[class*="bg-[#222325]"]{background:#111311!important}
+main.min-h-screen>div[class*="bg-[#222325]"]>a{display:block;width:128px;height:42px;background:url("/mile-logo.svg") left center/contain no-repeat;font-size:0}
+main.min-h-screen>div.flex-1{background:#fff}
+main.min-h-screen a[class*="text-[#168B56]"]{color:#00851e!important}
+main.min-h-screen a[class*="text-[#667583]"]{color:#68716a!important}
+main.min-h-screen p[class*="text-[#168B56]"]{color:#00851e!important}
+main.min-h-screen button[type="submit"]{background:#00A525!important;border-radius:10px!important;transition:background .2s ease,transform .2s ease}
+main.min-h-screen button[type="submit"]:hover{background:#00851e!important;transform:translateY(-1px)}
+main.min-h-screen input:focus{border-color:#00A525!important;box-shadow:0 0 0 3px rgba(0,165,37,.12)}
+main.min-h-screen input{font-family:var(--font-montserrat),Montserrat,sans-serif}
+@media(max-width:1023px){main.min-h-screen>div.flex-1{background:#f8faf8}}
