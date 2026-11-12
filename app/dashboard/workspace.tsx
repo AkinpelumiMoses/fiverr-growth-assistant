@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import CommunityDirectory from "@/app/community/community-directory";
 import KeywordResearch from "@/app/dashboard/keyword-research";
@@ -9,7 +9,7 @@ import { signOut } from "@/app/auth/actions";
 import {
   Activity, ArrowUpRight, Bot, BriefcaseBusiness, ChartNoAxesCombined, Users, Bell,
   CheckCircle2, FileSearch, LayoutDashboard, Lightbulb, LogOut, Menu,
-  Plus, Search, Settings, ShieldCheck, Sparkles, Target, TrendingUp, X,
+  Plus, Search, Settings, ShieldCheck, Target, TrendingUp, X, Mic, Square, Play,
   UserRound, Trash2, ExternalLink, MessageCircle
 } from "lucide-react";
 
@@ -60,6 +60,14 @@ export default function DashboardWorkspace() {
   const [coachMessages, setCoachMessages] = useState<{ role: "user" | "assistant"; content: string; attachments?: { path?: string; name: string; mimeType: string; size: number; url?: string }[] }[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [coachAttachments, setCoachAttachments] = useState<File[]>([]);
+  const [voiceRecording, setVoiceRecording] = useState(false);
+  const [voiceBusy, setVoiceBusy] = useState(false);
+  const [voicePreviewUrl, setVoicePreviewUrl] = useState<string | null>(null);
+  const [voiceBlob, setVoiceBlob] = useState<Blob | null>(null);
+  const [voiceSeconds, setVoiceSeconds] = useState(0);
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const voiceChunksRef = useRef<Blob[]>([]);
+  const voiceTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [chatHistoryLoading, setChatHistoryLoading] = useState(false);
   const [uploadingAttachments, setUploadingAttachments] = useState(false);
   const [coachHistory, setCoachHistory] = useState<{ id: string; title: string; messages: { role: "user" | "assistant"; content: string; attachments?: { path?: string; name: string; mimeType: string; size: number; url?: string }[] }[]; updatedAt: string }[]>([]);
@@ -199,6 +207,80 @@ export default function DashboardWorkspace() {
       setCoachMessages(nextMessages); setCoachInput(message); setCoachAttachments(queuedFiles);
     } finally { setUploadingAttachments(false); setCoachLoading(false); }
   }
+
+
+  function clearVoicePreview() {
+    if (voicePreviewUrl) URL.revokeObjectURL(voicePreviewUrl);
+    setVoicePreviewUrl(null); setVoiceBlob(null); setVoiceSeconds(0);
+  }
+
+  async function startVoiceRecording() {
+    if (typeof window === "undefined" || !navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      setNotice("Voice recording is not supported by this browser. Try a recent version of Chrome.");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"].find((type) => MediaRecorder.isTypeSupported(type));
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      voiceChunksRef.current = [];
+      recorder.ondataavailable = (event) => { if (event.data.size) voiceChunksRef.current.push(event.data); };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((track) => track.stop());
+        const blob = new Blob(voiceChunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        if (blob.size) {
+          const url = URL.createObjectURL(blob);
+          setVoiceBlob(blob); setVoicePreviewUrl(url);
+        }
+      };
+      recorderRef.current = recorder;
+      recorder.start(500);
+      setVoiceRecording(true); setVoiceSeconds(0);
+      voiceTimerRef.current = setInterval(() => setVoiceSeconds((seconds) => {
+        if (seconds >= 119) { if (recorder.state === "recording") recorder.stop(); setVoiceRecording(false); if (voiceTimerRef.current) clearInterval(voiceTimerRef.current); voiceTimerRef.current = null; return 120; }
+        return seconds + 1;
+      }), 1000);
+    } catch {
+      setNotice("Microphone access was blocked. Allow microphone access in your browser and try again.");
+    }
+  }
+
+  function stopVoiceRecording() {
+    if (recorderRef.current?.state === "recording") recorderRef.current.stop();
+    setVoiceRecording(false);
+    if (voiceTimerRef.current) clearInterval(voiceTimerRef.current);
+    voiceTimerRef.current = null;
+  }
+
+  async function sendVoiceToCoach() {
+    if (!voiceBlob || voiceBusy || coachLoading) return;
+    setVoiceBusy(true); setNotice("");
+    try {
+      const bytes = new Uint8Array(await voiceBlob.arrayBuffer());
+      let binary = "";
+      for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      const audioBase64 = btoa(binary);
+      const response = await fetch("/api/ai/transcribe", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ audioBase64, mimeType: voiceBlob.type || "audio/webm" }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Your voice note could not be transcribed.");
+      const transcript = typeof result.transcript === "string" ? result.transcript.trim() : "";
+      if (!transcript) throw new Error("I couldn't hear clear speech in that recording. Please try again.");
+      clearVoicePreview();
+      setCoachInput(transcript);
+      setNotice("Voice note transcribed. Review the text, then send it to your Growth Coach.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Unable to process this voice note.");
+    } finally { setVoiceBusy(false); }
+  }
+
+  useEffect(() => () => {
+    if (voiceTimerRef.current) clearInterval(voiceTimerRef.current);
+    if (voicePreviewUrl) URL.revokeObjectURL(voicePreviewUrl);
+    if (recorderRef.current?.state === "recording") recorderRef.current.stop();
+  }, [voicePreviewUrl]);
 
   async function openCoachChat(id: string) {
     setActiveConversationId(id); setSection("AI Growth Coach"); setMobileOpen(false); setNotice("");
@@ -448,14 +530,14 @@ export default function DashboardWorkspace() {
               <section className="ai-studio-chat flex min-w-0 flex-col overflow-hidden rounded-2xl">
                 <div className="ai-studio-topline flex items-center justify-between border-b px-5 py-4 md:px-7"><div className="flex items-center gap-3"><div className="ai-studio-primary flex h-11 w-11 items-center justify-center rounded-xl"><Bot size={21}/></div><div><p className="text-sm font-extrabold">Growth Coach</p><p className="mt-1 text-[10px] text-[#a9b8ab]">Context-aware freelancer intelligence</p></div></div><span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[10px] font-bold text-[#d9e76b]">PRIVATE SESSION</span></div>
                 <div className="min-h-[390px] flex-1 space-y-5 overflow-y-auto p-5 md:p-8">
-                  {!coachMessages.length && <div className="flex min-h-[330px] flex-col items-center justify-center text-center"><div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-[#d9e76b]/30 bg-[#d9e76b]/10 text-[#d9e76b] shadow-[0_0_45px_rgba(217,231,107,.12)]"><Sparkles size={28}/></div><h3 className="text-xl font-extrabold tracking-tight">What are we working on today?</h3><p className="mt-2 max-w-md text-xs leading-6 text-[#929992]">Ask about your gig, pricing, positioning or performance. You can also attach documents and images for the coach to review.</p><div className="mt-6 flex flex-wrap justify-center gap-2"><button onClick={()=>setCoachInput("Review my gig positioning and tell me what to improve.")} className="ai-studio-suggestion rounded-full px-4 py-2 text-[11px] font-semibold">Review my gig</button><button onClick={()=>setCoachInput("Help me understand my Fiverr performance.")} className="ai-studio-suggestion rounded-full px-4 py-2 text-[11px] font-semibold">Understand my metrics</button></div></div>}
+                  {!coachMessages.length && <div className="flex min-h-[330px] flex-col items-center justify-center text-center"><div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/15 bg-white/5 text-[#d9e76b]"><Bot size={28}/></div><h3 className="text-xl font-extrabold tracking-tight">What are we working on today?</h3><p className="mt-2 max-w-md text-xs leading-6 text-[#929992]">Ask about your gig, pricing, positioning or performance. You can also attach documents and images for the coach to review.</p><div className="mt-6 flex flex-wrap justify-center gap-2"><button onClick={()=>setCoachInput("Review my gig positioning and tell me what to improve.")} className="ai-studio-suggestion rounded-full px-4 py-2 text-[11px] font-semibold">Review my gig</button><button onClick={()=>setCoachInput("Help me understand my Fiverr performance.")} className="ai-studio-suggestion rounded-full px-4 py-2 text-[11px] font-semibold">Understand my metrics</button></div></div>}
                   {coachMessages.map((item,index)=><div key={index} className={item.role==="user"?"ai-studio-user ml-auto max-w-[88%] rounded-2xl rounded-br-md p-4 md:p-5":"ai-studio-assistant mr-auto max-w-[94%] rounded-2xl rounded-bl-md p-4 md:p-5"}><p className="mb-2 text-[10px] font-extrabold uppercase tracking-[.12em] text-[#168B56]">{item.role==="user"?"You":"Growth Coach"}</p><div className="whitespace-pre-wrap text-sm leading-7 text-[#e3ece3]">{item.content}</div>{item.attachments?.length ? <div className="mt-3 flex flex-wrap gap-2">{item.attachments.map((file,i)=><a key={i} href={file.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-lg border border-[#dfe7e1] bg-white/80 px-3 py-2 text-[11px] font-semibold text-[#4f5a51]"><FileSearch size={13}/>{file.name}</a>)}</div> : null}</div>)}
                   {coachLoading && <div className="flex items-center gap-3 text-xs text-[#929992]"><span className="h-2 w-2 animate-pulse rounded-full bg-[#1DBF73]"/>{uploadingAttachments?"Uploading your files…":"Your coach is thinking…"}</div>}
                 </div>
                 <form onSubmit={sendCoachMessage} className="ai-studio-compose border-t p-4 md:p-6">
                   {coachAttachments.length>0 && <div className="mb-3 flex flex-wrap gap-2">{coachAttachments.map((file,index)=><div key={index} className="flex max-w-full items-center gap-2 rounded-xl border border-[#e3e9e4] bg-[#f8faf8] px-3 py-2 text-xs"><FileSearch size={15}/><span className="max-w-[180px] truncate">{file.name}</span><button type="button" onClick={()=>setCoachAttachments(old=>old.filter((_,i)=>i!==index))} className="text-[#929992] hover:text-red-600"><X size={14}/></button></div>)}</div>}
                   <textarea value={coachInput} onChange={(event)=>setCoachInput(event.target.value)} maxLength={2000} rows={3} placeholder="Message your Growth Coach…" className="min-h-[90px] w-full resize-y rounded-xl border border-[#dfe5e9] p-4 text-sm outline-none focus:border-[#168B56]"/>
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 px-3 py-2.5 text-xs font-semibold text-[#d9e5da] hover:bg-white/10"><Plus size={15}/> Attach files<input type="file" multiple accept=".pdf,.txt,.md,.csv,.json,.jpg,.jpeg,.png,.webp,.gif" className="hidden" onChange={(event)=>{const files=Array.from(event.target.files??[]);const valid=files.filter(file=>file.size<=10*1024*1024);if(files.length!==valid.length)setNotice("Each file must be 10 MB or smaller.");setCoachAttachments(old=>[...old,...valid].slice(0,5));event.target.value="";}}/></label><span className="text-[10px] text-[#929992]">Up to 5 files · 10 MB each</span></div><button disabled={coachLoading||(!coachInput.trim()&&!coachAttachments.length)} className="ai-studio-primary inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs font-bold disabled:opacity-40">{coachLoading?"Working…":"Send message"}<ArrowUpRight size={15}/></button></div>
+                  <div className="mb-3 flex flex-wrap items-center gap-2">{voiceRecording ? <button type="button" onClick={stopVoiceRecording} className="inline-flex items-center gap-2 rounded-xl border border-red-300/30 bg-red-500/10 px-3 py-2.5 text-xs font-semibold text-red-200"><Square size={14}/> Stop recording · {Math.floor(voiceSeconds/60)}:{String(voiceSeconds%60).padStart(2,"0")}</button> : <button type="button" onClick={startVoiceRecording} disabled={voiceBusy||coachLoading} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2.5 text-xs font-semibold text-[#d9e5da] hover:bg-white/10 disabled:opacity-40"><Mic size={15}/> Record voice note</button>}{voicePreviewUrl && <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-2"><audio controls src={voicePreviewUrl} className="h-9 min-w-[150px] max-w-full flex-1"/><button type="button" onClick={clearVoicePreview} className="rounded-lg px-2 py-1 text-xs text-[#d9e5da] hover:bg-white/10">Discard</button><button type="button" onClick={sendVoiceToCoach} disabled={voiceBusy||coachLoading} className="ai-studio-primary rounded-lg px-3 py-2 text-xs font-bold disabled:opacity-40">{voiceBusy?"Transcribing…":"Use voice note"}</button></div>}</div><div className="mt-3 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 px-3 py-2.5 text-xs font-semibold text-[#d9e5da] hover:bg-white/10"><Plus size={15}/> Attach files<input type="file" multiple accept=".pdf,.txt,.md,.csv,.json,.jpg,.jpeg,.png,.webp,.gif" className="hidden" onChange={(event)=>{const files=Array.from(event.target.files??[]);const valid=files.filter(file=>file.size<=10*1024*1024);if(files.length!==valid.length)setNotice("Each file must be 10 MB or smaller.");setCoachAttachments(old=>[...old,...valid].slice(0,5));event.target.value="";}}/></label><span className="text-[10px] text-[#929992]">Up to 5 files · 10 MB each</span></div><button disabled={coachLoading||(!coachInput.trim()&&!coachAttachments.length)} className="ai-studio-primary inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs font-bold disabled:opacity-40">{coachLoading?"Working…":"Send message"}<ArrowUpRight size={15}/></button></div>
                 </form>
               </section>
             </div>
