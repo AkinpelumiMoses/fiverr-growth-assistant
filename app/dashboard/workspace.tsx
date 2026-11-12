@@ -168,13 +168,13 @@ export default function DashboardWorkspace() {
     finally { setAiLoading(false); }
   }
 
-  async function sendCoachMessage(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const message = coachInput.trim();
+  async function sendCoachMessage(event?: React.FormEvent<HTMLFormElement>, overrides?: { message?: string; attachments?: File[] }) {
+    event?.preventDefault();
+    const message = (overrides?.message ?? coachInput).trim();
     if ((!message && coachAttachments.length === 0) || coachLoading) return;
     setCoachLoading(true); setNotice(""); setUploadingAttachments(coachAttachments.length > 0);
     let conversationId = activeConversationId;
-    const queuedFiles = [...coachAttachments];
+    const queuedFiles = overrides?.attachments ?? [...coachAttachments];
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     if (!currentUser) { setNotice("Please sign in again before sending a message."); setCoachLoading(false); return; }
     const nextMessages = [...coachMessages, { role: "user" as const, content: message || "Please review the attached files.", attachments: queuedFiles.map((file) => ({ name: file.name, mimeType: file.type, size: file.size })) }];
@@ -252,7 +252,7 @@ export default function DashboardWorkspace() {
     voiceTimerRef.current = null;
   }
 
-  async function sendVoiceToCoach() {
+  async function transcribeVoiceNote() {
     if (!voiceBlob || voiceBusy || coachLoading) return;
     setVoiceBusy(true); setNotice("");
     try {
@@ -270,10 +270,23 @@ export default function DashboardWorkspace() {
       if (!transcript) throw new Error("I couldn't hear clear speech in that recording. Please try again.");
       clearVoicePreview();
       setCoachInput(transcript);
-      setNotice("Voice note transcribed. Review the text, then send it to your Growth Coach.");
+      setNotice("Transcription ready. Review the text, then select Send message.");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Unable to process this voice note.");
     } finally { setVoiceBusy(false); }
+  }
+
+  async function sendVoiceAudioToCoach() {
+    if (!voiceBlob || voiceBusy || coachLoading) return;
+    const mimeType = (voiceBlob.type || "audio/webm").split(";")[0];
+    const extension = mimeType === "audio/mp4" ? "m4a" : mimeType === "audio/ogg" ? "ogg" : "webm";
+    const audioFile = new File([voiceBlob], `mile-voice-note-${Date.now()}.${extension}`, { type: mimeType });
+    setNotice("");
+    await sendCoachMessage(undefined, {
+      message: "Please listen to my voice note and respond to what I said.",
+      attachments: [audioFile],
+    });
+    clearVoicePreview();
   }
 
   useEffect(() => () => {
@@ -534,7 +547,7 @@ export default function DashboardWorkspace() {
                 <form onSubmit={sendCoachMessage} className="ai-studio-compose border-t p-4 md:p-6">
                   {coachAttachments.length>0 && <div className="mb-3 flex flex-wrap gap-2">{coachAttachments.map((file,index)=><div key={index} className="flex max-w-full items-center gap-2 rounded-xl border border-[#e3e9e4] bg-[#f8faf8] px-3 py-2 text-xs"><FileSearch size={15}/><span className="max-w-[180px] truncate">{file.name}</span><button type="button" onClick={()=>setCoachAttachments(old=>old.filter((_,i)=>i!==index))} className="text-[#929992] hover:text-red-600"><X size={14}/></button></div>)}</div>}
                   <textarea value={coachInput} onChange={(event)=>setCoachInput(event.target.value)} maxLength={2000} rows={3} placeholder="Message your Growth Coach…" className="min-h-[90px] w-full resize-y rounded-xl border border-[#dfe5e9] p-4 text-sm outline-none focus:border-[#168B56]"/>
-                  <div className="mb-3 flex flex-wrap items-center gap-2">{voiceRecording ? <button type="button" onClick={stopVoiceRecording} className="inline-flex items-center gap-2 rounded-xl border border-red-300/30 bg-red-500/10 px-3 py-2.5 text-xs font-semibold text-red-200"><Square size={14}/> Stop recording · {Math.floor(voiceSeconds/60)}:{String(voiceSeconds%60).padStart(2,"0")}</button> : <button type="button" onClick={startVoiceRecording} disabled={voiceBusy||coachLoading} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2.5 text-xs font-semibold text-[#d9e5da] hover:bg-white/10 disabled:opacity-40"><Mic size={15}/> Record voice note</button>}{voicePreviewUrl && <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-2"><audio controls src={voicePreviewUrl} className="h-9 min-w-[150px] max-w-full flex-1"/><button type="button" onClick={clearVoicePreview} className="rounded-lg px-2 py-1 text-xs text-[#d9e5da] hover:bg-white/10">Discard</button><button type="button" onClick={sendVoiceToCoach} disabled={voiceBusy||coachLoading} className="ai-studio-primary rounded-lg px-3 py-2 text-xs font-bold disabled:opacity-40">{voiceBusy?"Transcribing…":"Use voice note"}</button></div>}</div><div className="mt-3 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 px-3 py-2.5 text-xs font-semibold text-[#d9e5da] hover:bg-white/10"><Plus size={15}/> Attach files<input type="file" multiple accept=".pdf,.txt,.md,.csv,.json,.jpg,.jpeg,.png,.webp,.gif" className="hidden" onChange={(event)=>{const files=Array.from(event.target.files??[]);const valid=files.filter(file=>file.size<=10*1024*1024);if(files.length!==valid.length)setNotice("Each file must be 10 MB or smaller.");setCoachAttachments(old=>[...old,...valid].slice(0,5));event.target.value="";}}/></label><span className="text-[10px] text-[#929992]">Up to 5 files · 10 MB each</span></div><button disabled={coachLoading||(!coachInput.trim()&&!coachAttachments.length)} className="ai-studio-primary inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs font-bold disabled:opacity-40">{coachLoading?"Working…":"Send message"}<ArrowUpRight size={15}/></button></div>
+                  <div className="mb-3 flex flex-wrap items-center gap-2">{voiceRecording ? <button type="button" onClick={stopVoiceRecording} className="inline-flex items-center gap-2 rounded-xl border border-red-300/30 bg-red-500/10 px-3 py-2.5 text-xs font-semibold text-red-200"><Square size={14}/> Stop recording · {Math.floor(voiceSeconds/60)}:{String(voiceSeconds%60).padStart(2,"0")}</button> : <button type="button" onClick={startVoiceRecording} disabled={voiceBusy||coachLoading} className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-3 py-2.5 text-xs font-semibold text-[#d9e5da] hover:bg-white/10 disabled:opacity-40"><Mic size={15}/> Record voice note</button>}{voicePreviewUrl && <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-2"><audio controls src={voicePreviewUrl} className="h-9 min-w-[150px] max-w-full flex-1"/><button type="button" onClick={clearVoicePreview} className="rounded-lg px-2 py-1 text-xs text-[#d9e5da] hover:bg-white/10">Discard</button><button type="button" onClick={transcribeVoiceNote} disabled={voiceBusy||coachLoading} className="rounded-lg border border-white/15 px-3 py-2 text-xs font-semibold text-[#d9e5da] disabled:opacity-40">{voiceBusy?"Transcribing…":"Transcribe"}</button><button type="button" onClick={sendVoiceAudioToCoach} disabled={voiceBusy||coachLoading} className="ai-studio-primary rounded-lg px-3 py-2 text-xs font-bold disabled:opacity-40">Send audio</button></div>}</div><div className="mt-3 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 px-3 py-2.5 text-xs font-semibold text-[#d9e5da] hover:bg-white/10"><Plus size={15}/> Attach files<input type="file" multiple accept=".pdf,.txt,.md,.csv,.json,.jpg,.jpeg,.png,.webp,.gif" className="hidden" onChange={(event)=>{const files=Array.from(event.target.files??[]);const valid=files.filter(file=>file.size<=10*1024*1024);if(files.length!==valid.length)setNotice("Each file must be 10 MB or smaller.");setCoachAttachments(old=>[...old,...valid].slice(0,5));event.target.value="";}}/></label><span className="text-[10px] text-[#929992]">Up to 5 files · 10 MB each</span></div><button disabled={coachLoading||(!coachInput.trim()&&!coachAttachments.length)} className="ai-studio-primary inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs font-bold disabled:opacity-40">{coachLoading?"Working…":"Send message"}<ArrowUpRight size={15}/></button></div>
                 </form>
               </section>
             </div>
