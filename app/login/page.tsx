@@ -1,39 +1,56 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowLeft, Eye, EyeOff, LockKeyhole } from "lucide-react";
+import { use, useState } from "react";
+import { ArrowLeft, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { signIn } from "@/app/auth/actions";
 
 type Props = { searchParams: Promise<{ error?: string; message?: string; next?: string }> };
 
-export default async function LoginPage({ searchParams }: Props) {
-  const params = await searchParams;
-  return <LoginForm params={params} />;
-}
-
-function LoginForm({ params }: { params: { error?: string; message?: string; next?: string } }) {
+export default function LoginPage({ searchParams }: Props) {
+  const params = use(searchParams);
   const [showPassword, setShowPassword] = useState(false);
 
-  return <main className="flex min-h-screen bg-[#f5f7f8]">
-    <div className="hidden w-1/2 flex-col justify-between bg-[#222325] p-12 text-white lg:flex">
-      <Link href="/" className="text-sm font-bold">MILE</Link>
-      <div className="max-w-lg"><p className="text-[10px] font-bold uppercase tracking-[.2em] text-white/60">Welcome back</p><h1 className="mt-5 text-5xl font-semibold leading-tight tracking-[-.05em]">Your next move starts with clarity.</h1><p className="mt-6 text-sm leading-7 text-white/70">Return to your MILE community, reconnect with your people and keep moving forward.</p></div>
-      <p className="text-[10px] text-white/50">Every step has a purpose.</p>
-    </div>
-    <div className="flex flex-1 items-center justify-center px-5 py-12"><div className="w-full max-w-[410px]">
-      <Link href="/" className="mb-12 inline-flex items-center gap-2 text-xs font-semibold text-[#667583]"><ArrowLeft size={14}/> Back to homepage</Link>
-      <div className="mb-8 flex h-11 w-11 items-center justify-center rounded-xl bg-[#1DBF73] text-white"><LockKeyhole size={19}/></div>
-      <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#168B56]">Your workspace</p><h2 className="mt-3 text-3xl font-semibold tracking-[-.045em] text-[#222222]">Log in</h2><p className="mt-3 text-sm leading-6 text-[#7a858e]">Sign in to reconnect with your freelance community.</p>
-      {params.message === "confirm" && <p role="status" className="mt-5 rounded-lg bg-[#eaf8ef] p-3 text-xs leading-5 text-[#246642]">Account created. Check your email to confirm your address, then log in.</p>}
-      {params.error && <p role="alert" className="mt-5 rounded-lg bg-red-50 p-3 text-xs leading-5 text-red-700">{params.error === "credentials" ? "Email or password is incorrect. Please try again." : "Please check your details and try again."}</p>}
-      <form action={signIn} className="mt-9 space-y-5">
-        <input type="hidden" name="next" value={params.next || "/dashboard"}/>
-        <div><label htmlFor="email" className="mb-2 block text-xs font-semibold text-[#343A40]">Email address</label><input id="email" name="email" type="email" required autoComplete="email" placeholder="you@example.com" className="w-full rounded-lg border border-[#dfe5e9] bg-white px-4 py-3.5 text-sm text-[#222222] outline-none focus:border-[#168B56]"/></div>
-        <div><label htmlFor="password" className="mb-2 block text-xs font-semibold text-[#343A40]">Password</label><div className="relative"><input id="password" name="password" type={showPassword ? "text" : "password"} required autoComplete="current-password" placeholder="Enter your password" className="w-full rounded-lg border border-[#dfe5e9] bg-white px-4 py-3.5 pr-12 text-sm text-[#222222] outline-none focus:border-[#168B56]"/><button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-[#667583] transition hover:bg-[#f0f3f4] hover:text-[#222325]">{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button></div></div>
-        <button type="submit" className="w-full rounded-lg bg-[#222325] px-5 py-4 text-xs font-bold text-white transition hover:bg-[#404145]">Sign in</button>
-      </form>
-      <p className="mt-7 text-center text-xs text-[#7b8791]">New here? <Link href="/signup" className="font-bold text-[#168B56]">Create an account</Link></p>
-    </div></div>
-  </main>;
+  return (
+    <main className="mile-auth-page">
+      <section className="mile-auth-aside">
+        <Link href="/" className="mile-auth-logo"><img src="/mile-logo.svg" alt="MILE" /></Link>
+        <div className="mile-auth-story">
+          <span className="mile-auth-kicker">GOOD TO HAVE YOU BACK</span>
+          <h1>Your next step<br /><em>starts here.</em></h1>
+          <p>Pick up where you left off. Reconnect with your people, find new opportunities and keep good work moving.</p>
+          <div className="mile-auth-manifesto"><span>01</span><div><strong>Independent in your work.</strong><br /><strong>Connected in your journey.</strong></div></div>
+        </div>
+        <span className="mile-auth-footer">EVERY STEP HAS A PURPOSE <i /> MILE COMMUNITY</span>
+        <div className="mile-auth-decoration" aria-hidden="true"><span /><span /><span /></div>
+      </section>
+
+      <section className="mile-auth-main">
+        <Link href="/" className="mile-auth-back"><ArrowLeft size={15}/> Back to homepage</Link>
+        <div className="mile-auth-form-wrap">
+          <span className="mile-auth-mobile-logo"><img src="/mile-logo.svg" alt="MILE" /></span>
+          <p className="mile-auth-eyebrow">YOUR COMMUNITY IS WAITING</p>
+          <h2>Welcome back.</h2>
+          <p className="mile-auth-subtitle">Sign in to continue your journey with MILE.</p>
+
+          {params.message === "confirm" && <p role="status" className="mile-auth-alert success">Your account is ready. Confirm your email address, then sign in.</p>}
+          {params.error && <p role="alert" className="mile-auth-alert error">{params.error === "credentials" ? "That email and password combination doesn’t match. Please try again." : "We couldn’t sign you in. Please check your details and try again."}</p>}
+
+          <form action={signIn} className="mile-auth-form">
+            <input type="hidden" name="next" value={params.next || "/dashboard"} />
+            <label htmlFor="email">Email address</label>
+            <input className="mile-auth-input" id="email" name="email" type="email" required autoComplete="email" placeholder="you@example.com" />
+            <div className="mile-auth-label-row"><label htmlFor="password">Password</label><Link href="/forgot-password">Forgot password?</Link></div>
+            <div className="mile-auth-password">
+              <input className="mile-auth-input" id="password" name="password" type={showPassword ? "text" : "password"} required autoComplete="current-password" placeholder="Enter your password" />
+              <button type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button>
+            </div>
+            <button className="mile-auth-submit" type="submit">Sign in <ArrowRight size={17}/></button>
+          </form>
+          <p className="mile-auth-switch">New to MILE? <Link href="/signup">Create an account</Link></p>
+          <p className="mile-auth-legal">By continuing, you agree to keep your account information safe and use the community respectfully.</p>
+        </div>
+      </section>
+    </main>
+  );
 }
