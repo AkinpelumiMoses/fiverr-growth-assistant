@@ -168,15 +168,15 @@ export default function DashboardWorkspace() {
     finally { setAiLoading(false); }
   }
 
-  async function sendCoachMessage(event?: React.FormEvent<HTMLFormElement>, overrides?: { message?: string; attachments?: File[] }) {
+  async function sendCoachMessage(event?: React.FormEvent<HTMLFormElement>, overrides?: { message?: string; attachments?: File[] }): Promise<boolean> {
     event?.preventDefault();
     const message = (overrides?.message ?? coachInput).trim();
-    if ((!message && coachAttachments.length === 0) || coachLoading) return;
-    setCoachLoading(true); setNotice(""); setUploadingAttachments(coachAttachments.length > 0);
-    let conversationId = activeConversationId;
     const queuedFiles = overrides?.attachments ?? [...coachAttachments];
+    if ((!message && queuedFiles.length === 0) || coachLoading) return false;
+    setCoachLoading(true); setNotice(""); setUploadingAttachments(queuedFiles.length > 0);
+    let conversationId = activeConversationId;
     const { data: { user: currentUser } } = await supabase.auth.getUser();
-    if (!currentUser) { setNotice("Please sign in again before sending a message."); setCoachLoading(false); return; }
+    if (!currentUser) { setNotice("Please sign in again before sending a message."); setCoachLoading(false); return false; }
     const nextMessages = [...coachMessages, { role: "user" as const, content: message || "Please review the attached files.", attachments: queuedFiles.map((file) => ({ name: file.name, mimeType: file.type, size: file.size })) }];
     setCoachMessages(nextMessages); setCoachInput(""); setCoachAttachments([]);
     try {
@@ -202,9 +202,11 @@ export default function DashboardWorkspace() {
       const completed = [...nextMessages.slice(0, -1), { ...nextMessages[nextMessages.length - 1], attachments: displayAttachments }, { role: "assistant" as const, content: result.answer }];
       setCoachMessages(completed);
       setCoachHistory((old) => [{ id: conversationId!, title: old.find((item) => item.id === conversationId)?.title || message.slice(0, 64) || queuedFiles[0]?.name || "Conversation", messages: completed, updatedAt: new Date().toISOString() }, ...old.filter((item) => item.id !== conversationId)].slice(0, 40));
+      return true;
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Unable to contact the AI coach.");
       setCoachMessages(nextMessages); setCoachInput(message); setCoachAttachments(queuedFiles);
+      return false;
     } finally { setUploadingAttachments(false); setCoachLoading(false); }
   }
 
@@ -282,11 +284,11 @@ export default function DashboardWorkspace() {
     const extension = mimeType === "audio/mp4" ? "m4a" : mimeType === "audio/ogg" ? "ogg" : "webm";
     const audioFile = new File([voiceBlob], `mile-voice-note-${Date.now()}.${extension}`, { type: mimeType });
     setNotice("");
-    await sendCoachMessage(undefined, {
+    const sent = await sendCoachMessage(undefined, {
       message: "Please listen to my voice note and respond to what I said.",
       attachments: [audioFile],
     });
-    clearVoicePreview();
+    if (sent) clearVoicePreview();
   }
 
   useEffect(() => () => {
