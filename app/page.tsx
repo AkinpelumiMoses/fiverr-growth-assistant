@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
 
 const navigation = [
@@ -38,6 +38,13 @@ const pillars = [
   },
 ];
 
+const heroImages = [
+  "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=2200&q=88",
+  "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2200&q=88",
+  "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=2200&q=88",
+  "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=2200&q=88",
+];
+
 const steps = [
   ["01", "Set up your profile", "Tell the community what you do, what you are good at and where you can contribute."],
   ["02", "Explore the network", "Find people, skills and opportunities across different areas of independent work."],
@@ -47,6 +54,14 @@ const steps = [
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+    const interval = window.setInterval(() => setHeroIndex((current) => (current + 1) % heroImages.length), 6500);
+    return () => window.clearInterval(interval);
+  }, []);
 
   return (
     <main className="mile-home">
@@ -93,7 +108,7 @@ export default function Home() {
       </header>
 
       <section className="mile-hero" aria-labelledby="mile-hero-title">
-        <div className="mile-hero-image" role="img" aria-label="A group of independent professionals working together" />
+        <div className="mile-hero-image" role="img" aria-label="Freelancers collaborating and building together">{heroImages.map((src, index) => <div key={src} className={`mile-hero-slide${heroIndex === index ? " is-active" : ""}`} style={{ backgroundImage: `url("${src}")` }} aria-hidden="true" />)}</div>
         <div className="mile-hero-shade" />
         <div className="mile-hero-content">
           <div className="mile-hero-copy">
