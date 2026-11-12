@@ -9,8 +9,8 @@ const montserrat = Montserrat({
   display: "swap",
 });
 export const metadata: Metadata = {
-  title:"Fiverr Growth Assistant",
-  description:"Understand your Fiverr performance. Improve your gigs. Make smarter growth decisions."
+  title:"MILE — Every step has a purpose.",
+  description:"MILE connects freelancers to opportunities, collaborators and practical tools that move their work forward."
 };
 export default function RootLayout({children}:{children:React.ReactNode}){
   return <html lang="en" suppressHydrationWarning><body className={montserrat.variable}>{children}</body></html>;
