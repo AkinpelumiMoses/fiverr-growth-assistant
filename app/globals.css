@@ -946,7 +946,7 @@ main.min-h-screen input{font-family:var(--font-montserrat),Montserrat,sans-serif
   --mile-elevation:0 2px 5px rgba(24,42,29,.025),0 12px 30px rgba(24,42,29,.045);
 }
 .workspace-shell{background:var(--mile-paper)!important;color:var(--mile-ink)!important}
-.workspace-sidebar{width:264px!important;padding:25px 17px 18px!important;background:#14291e!important;border:0!important;box-shadow:5px 0 24px rgba(16,37,24,.07)!important}
+.workspace-sidebar{padding:25px 17px 18px!important;background:#14291e!important;border:0!important;box-shadow:5px 0 24px rgba(16,37,24,.07)!important}
 .workspace-sidebar>div:first-child{margin-bottom:34px!important;padding:0 7px}
 .workspace-sidebar>div:first-child>div:first-child>div:first-child{width:38px!important;height:38px!important;border-radius:11px!important;background:#dce88f!important;color:#183523!important;box-shadow:none!important}
 .workspace-sidebar>div:first-child p:first-child{font-size:15px!important;letter-spacing:.02em!important}
