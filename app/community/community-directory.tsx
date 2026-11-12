@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, Users, ExternalLink, BriefcaseBusiness, Globe2 } from "lucide-react";
+import { Search, Users, ExternalLink, BriefcaseBusiness, Globe2, MessageCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 type PublicProfile = {
@@ -83,6 +83,9 @@ export default function CommunityDirectory() {
       <select aria-label="Filter by niche" value={niche} onChange={e => setNiche(e.target.value)} className="rounded-xl border border-[#dfe5e9] bg-white px-4 py-3 text-sm outline-none focus:border-[#168B56] md:min-w-[210px]">
         {niches.map(item => <option key={item} value={item}>{item}</option>)}
       </select>
+      <select aria-label="Filter by platform" value={platform} onChange={e => setPlatform(e.target.value)} className="rounded-xl border border-[#dfe5e9] bg-white px-4 py-3 text-sm outline-none focus:border-[#168B56] md:min-w-[190px]">
+        {platforms.map(item => <option key={item} value={item}>{item}</option>)}
+      </select>
     </div>
     <div className="mb-4 flex items-center justify-between">
       <p className="text-xs font-semibold text-[#69736c]">{loading ? "Finding freelancers…" : `${filtered.length} freelancer${filtered.length === 1 ? "" : "s"} found`}</p>
@@ -103,9 +106,10 @@ export default function CommunityDirectory() {
         <div className="mt-4 flex flex-wrap gap-2">{profile.primary_niche && <span className="rounded-full bg-[#eaf8ef] px-3 py-1.5 text-[10px] font-bold text-[#168B56]">{profile.primary_niche}</span>}{profile.seller_level && <span className="rounded-full bg-[#f3f5f3] px-3 py-1.5 text-[10px] font-semibold text-[#68736b]">{profile.seller_level}</span>}{(profile.work_platforms ?? []).map(item=><span key={item} className="rounded-full border border-[#e5eae6] px-3 py-1.5 text-[10px] font-medium text-[#59645c]">{item}</span>)}</div>
         <p className="mt-4 line-clamp-3 min-h-[60px] text-xs leading-6 text-[#69736c]">{profile.bio || "This freelancer has not added a short introduction yet."}</p>
         {profile.skills && <div className="mt-3"><p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[#929992]">Skills</p><p className="line-clamp-2 text-xs leading-5 text-[#515b53]">{profile.skills}</p></div>}
-        <div className="mt-auto flex items-center justify-between gap-2 border-t border-[#eef0ee] pt-4 mt-5">
+        <div className="mt-auto flex flex-col gap-3 border-t border-[#eef0ee] pt-4 mt-5">
           <span className="text-[10px] text-[#929992]">{profile.experience_years != null ? `${profile.experience_years} years experience` : "Community member"}</span>
           <div className="flex flex-wrap justify-end gap-2">{websiteUrl && <a href={websiteUrl} target="_blank" rel="noreferrer" aria-label="Open portfolio" title="Portfolio" className="rounded-lg border border-[#e5eae6] p-2 text-[#68736b] hover:bg-[#f4f8f4]"><BriefcaseBusiness size={14}/></a>}{upworkUrl && <a href={upworkUrl} target="_blank" rel="noreferrer" aria-label="Open Upwork profile" title="Upwork" className="rounded-lg border border-[#e5eae6] p-2 text-[#68736b] hover:bg-[#f4f8f4]"><ExternalLink size={14}/></a>}{linkedinUrl && <a href={linkedinUrl} target="_blank" rel="noreferrer" aria-label="Open LinkedIn profile" title="LinkedIn" className="rounded-lg border border-[#e5eae6] p-2 text-[#68736b] hover:bg-[#f4f8f4]"><Globe2 size={14}/></a>}{otherUrl && <a href={otherUrl} target="_blank" rel="noreferrer" aria-label="Open other work profile" title="Other profile" className="rounded-lg border border-[#e5eae6] p-2 text-[#68736b] hover:bg-[#f4f8f4]"><ExternalLink size={14}/></a>}{fiverrUrl && <a href={fiverrUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-[#222325] px-3 py-2 text-[10px] font-bold text-white hover:bg-[#404145]">View Fiverr <ExternalLink size={12}/></a>}</div>
+          <a href={`/messages?user=${profile.id}`} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#168B56] px-4 py-3 text-xs font-bold text-white hover:bg-[#117447]">Message freelancer <MessageCircle size={14}/></a>
         </div>
       </article>;
     })}</div>}
