@@ -97,7 +97,7 @@ export default function DirectMessages() {
   useEffect(()=>{
     if(!userId)return;
     const channel=supabase.channel("mile-message-inbox-"+userId)
-      .on("postgres_changes",{event:"INSERT",schema:"public",table:"direct_messages"},payload=>{
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"direct_messages"},async payload=>{
         const message=payload.new as Message;
         if(message.sender_id===userId)return;
         if(message.conversation_id===activeId){
