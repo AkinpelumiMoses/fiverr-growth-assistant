@@ -97,7 +97,10 @@ export default function CommunityDirectory() {
     {!loading && !error && filtered.length > 0 && <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{filtered.map(profile => {
       const initials = (profile.display_name || profile.fiverr_username || "F").split(/[\s._-]+/).filter(Boolean).slice(0,2).map(part=>part[0]?.toUpperCase()).join("");
       const fiverrUrl = profile.fiverr_profile_url?.startsWith("https://") ? profile.fiverr_profile_url : profile.fiverr_username ? `https://www.fiverr.com/${encodeURIComponent(profile.fiverr_username)}` : null;
-      const websiteUrl = profile.website_url?.startsWith("https://") ? profile.website_url : null;\n      const upworkUrl = profile.upwork_profile_url?.startsWith("https://") ? profile.upwork_profile_url : null;\n      const linkedinUrl = profile.linkedin_url?.startsWith("https://") ? profile.linkedin_url : null;\n      const otherUrl = profile.other_work_url?.startsWith("https://") ? profile.other_work_url : null;
+      const websiteUrl = profile.website_url?.startsWith("https://") ? profile.website_url : null;
+      const upworkUrl = profile.upwork_profile_url?.startsWith("https://") ? profile.upwork_profile_url : null;
+      const linkedinUrl = profile.linkedin_url?.startsWith("https://") ? profile.linkedin_url : null;
+      const otherUrl = profile.other_work_url?.startsWith("https://") ? profile.other_work_url : null;
       return <article key={profile.id} className="flex min-w-0 flex-col rounded-2xl border border-[#e9ece9] bg-white p-5 shadow-[0_8px_30px_rgba(27,42,32,.035)]">
         <div className="flex items-center gap-3">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#eaf8ef] text-lg font-bold text-[#168B56]">{profile.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover"/> : initials}</div>
