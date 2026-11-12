@@ -39,7 +39,7 @@ export default function FreelancerProfilePage() {
       const {data:{user}}=await supabase.auth.getUser();
       if(!user||!alive)return;
       channel=supabase.channel("mile-online-members",{config:{presence:{key:user.id}}});
-      const refresh=()=>{if(!alive||!channel)return;setOnline(Boolean(channel.presenceState().filter((_,key)=>key===params.id).length));};
+      const refresh=()=>{if(!alive||!channel)return;setOnline(Object.prototype.hasOwnProperty.call(channel.presenceState(),params.id));};
       channel.on("presence",{event:"sync"},refresh).on("presence",{event:"join"},refresh).on("presence",{event:"leave"},refresh).subscribe(async status=>{
         if(status==="SUBSCRIBED"){await channel?.track({user_id:user.id,online_at:new Date().toISOString()});refresh();}
       });
