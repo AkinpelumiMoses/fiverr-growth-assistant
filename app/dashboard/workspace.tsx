@@ -552,21 +552,57 @@ export default function DashboardWorkspace() {
                   {coachLoading && <div className="flex items-center gap-3 text-xs text-[#929992]"><span className="h-2 w-2 animate-pulse rounded-full bg-[#1DBF73]"/>{uploadingAttachments?"Uploading your files…":"Your coach is thinking…"}</div>}
                 </div>
                 <form onSubmit={sendCoachMessage} className="ai-studio-compose border-t p-4 md:p-6">
-                  {coachAttachments.length>0 && <div className="mb-3 flex flex-wrap gap-2">{coachAttachments.map((file,index)=><div key={index} className="flex max-w-full items-center gap-2 rounded-xl border border-[#e3e9e4] bg-[#f8faf8] px-3 py-2 text-xs"><FileSearch size={15}/><span className="max-w-[180px] truncate">{file.name}</span><button type="button" onClick={()=>setCoachAttachments(old=>old.filter((_,i)=>i!==index))} className="text-[#929992] hover:text-red-600"><X size={14}/></button></div>)}</div>}
-                  <div className="rounded-[26px] border border-[#dfe5e9] bg-white px-4 py-3 shadow-sm transition focus-within:border-[#a9d7bb] focus-within:shadow-[0_0_0_3px_rgba(29,191,115,0.08)]"><textarea value={coachInput} onChange={(event)=>setCoachInput(event.target.value)} onKeyDown={(event)=>{if(event.key==="Enter"&&!event.shiftKey){event.preventDefault();if(!coachLoading&&(coachInput.trim()||coachAttachments.length))void sendCoachMessage();}}} maxLength={2000} rows={2} placeholder="Message your Growth Coach" className="max-h-40 min-h-[54px] w-full resize-none bg-transparent py-1 text-sm leading-6 text-[#222325] outline-none placeholder:text-[#9ca3af]"/>
-                  <div className="mt-3 flex items-center gap-2">
-                     <label title="Attach files" aria-label="Attach files" className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#6b7280] transition hover:bg-[#f1f3f1] hover:text-[#168B56]">
-                       <Paperclip size={19}/>
-                       <input type="file" multiple accept=".pdf,.txt,.md,.csv,.json,.jpg,.jpeg,.png,.webp,.gif" className="hidden" onChange={(event)=>{const files=Array.from(event.target.files??[]);const valid=files.filter(file=>file.size<=10*1024*1024);if(files.length!==valid.length)setNotice("Each file must be 10 MB or smaller.");setCoachAttachments(old=>[...old,...valid].slice(0,5));event.target.value="";}}/>
-                     </label>
-                     {voiceRecording ? <button type="button" onClick={stopVoiceRecording} title="Stop recording" aria-label="Stop recording" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 hover:bg-red-100"><Square size={16}/></button> : <button type="button" onClick={startVoiceRecording} disabled={voiceBusy||coachLoading} title="Record voice note" aria-label="Record voice note" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#6b7280] transition hover:bg-[#f1f3f1] hover:text-[#168B56] disabled:opacity-40"><Mic size={19}/></button>}
-                     <span className="mr-auto text-[11px] text-[#929992]">{voiceRecording?"Recording "+Math.floor(voiceSeconds/60)+":"+String(voiceSeconds%60).padStart(2,"0"):voiceBusy?"Processing voice note…":"Attach or record"}</span>
-                     {voicePreviewUrl && <><button type="button" onClick={transcribeVoiceNote} disabled={voiceBusy||coachLoading} title="Transcribe and send" aria-label="Transcribe and send" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#6b7280] hover:bg-[#f1f3f1] disabled:opacity-40"><AudioLines size={18}/></button><button type="button" onClick={sendVoiceAudioToCoach} disabled={voiceBusy||coachLoading} title="Send audio" aria-label="Send audio" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1DBF73] text-white hover:bg-[#15965b] disabled:opacity-40"><Send size={17}/></button><button type="button" onClick={clearVoicePreview} title="Discard recording" aria-label="Discard recording" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#929992] hover:bg-red-50 hover:text-red-600"><X size={17}/></button></>}
-                     {!voicePreviewUrl && <button type="submit" disabled={coachLoading||(!coachInput.trim()&&!coachAttachments.length)} title="Send message" aria-label="Send message" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1DBF73] text-white transition hover:bg-[#15965b] disabled:cursor-not-allowed disabled:opacity-40">{coachLoading?<LoaderCircle size={18} className="animate-spin"/>:<Send size={17}/>}</button>}
-                   </div>
-                   <p className="mt-2 px-2 text-center text-[10px] text-[#9aa19a]">Enter to send · Shift + Enter for a new line</p>
-                </div>
-                 </form>
+  {coachAttachments.length > 0 && (
+    <div className="mb-3 flex flex-wrap gap-2">
+      {coachAttachments.map((file, index) => (
+        <div key={`${file.name}-${index}`} className="flex max-w-full items-center gap-2 rounded-xl border border-[#e3e9e4] bg-[#f8faf8] px-3 py-2 text-xs">
+          <FileSearch size={15} />
+          <span className="max-w-[180px] truncate">{file.name}</span>
+          <button type="button" title="Remove attachment" aria-label="Remove attachment" onClick={() => setCoachAttachments(old => old.filter((_, i) => i !== index))} className="text-[#929992] hover:text-red-600"><X size={14} /></button>
+        </div>
+      ))}
+    </div>
+  )}
+  <div className="rounded-[26px] border border-[#dfe5e9] bg-white px-4 py-3 shadow-sm transition focus-within:border-[#a9d7bb] focus-within:shadow-[0_0_0_3px_rgba(29,191,115,0.08)]">
+    <textarea
+      value={coachInput}
+      onChange={(event) => setCoachInput(event.target.value)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          if (!coachLoading && (coachInput.trim() || coachAttachments.length)) void sendCoachMessage();
+        }
+      }}
+      maxLength={2000}
+      rows={2}
+      placeholder="Message your Growth Coach"
+      className="max-h-40 min-h-[54px] w-full resize-none bg-transparent py-1 text-sm leading-6 text-[#222325] outline-none placeholder:text-[#9ca3af]"
+    />
+    {voicePreviewUrl && <audio controls src={voicePreviewUrl} className="mt-2 h-9 w-full max-w-[280px]" /> }
+    <div className="mt-3 flex items-center gap-2">
+      <label title="Attach files" aria-label="Attach files" className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#6b7280] transition hover:bg-[#f1f3f1] hover:text-[#168B56]">
+        <Paperclip size={19} />
+        <input type="file" multiple accept=".pdf,.txt,.md,.csv,.json,.jpg,.jpeg,.png,.webp,.gif" className="hidden" onChange={(event) => { const files = Array.from(event.target.files ?? []); const valid = files.filter(file => file.size <= 10 * 1024 * 1024); if (files.length !== valid.length) setNotice("Each file must be 10 MB or smaller."); setCoachAttachments(old => [...old, ...valid].slice(0, 5)); event.target.value = ""; }} />
+      </label>
+      {voiceRecording ? (
+        <button type="button" onClick={stopVoiceRecording} title="Stop recording" aria-label="Stop recording" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 hover:bg-red-100"><Square size={16} /></button>
+      ) : (
+        <button type="button" onClick={startVoiceRecording} disabled={voiceBusy || coachLoading} title="Record voice note" aria-label="Record voice note" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#6b7280] transition hover:bg-[#f1f3f1] hover:text-[#168B56] disabled:opacity-40"><Mic size={19} /></button>
+      )}
+      <span className="mr-auto text-[11px] text-[#929992]">{voiceRecording ? `Recording ${Math.floor(voiceSeconds / 60)}:${String(voiceSeconds % 60).padStart(2, "0")}` : voiceBusy ? "Processing voice note…" : "Attach or record"}</span>
+      {voicePreviewUrl ? (
+        <>
+          <button type="button" onClick={transcribeVoiceNote} disabled={voiceBusy || coachLoading} title="Transcribe and send" aria-label="Transcribe and send" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#6b7280] hover:bg-[#f1f3f1] disabled:opacity-40"><AudioLines size={18} /></button>
+          <button type="button" onClick={sendVoiceAudioToCoach} disabled={voiceBusy || coachLoading} title="Send audio" aria-label="Send audio" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1DBF73] text-white hover:bg-[#15965b] disabled:opacity-40"><Send size={17} /></button>
+          <button type="button" onClick={clearVoicePreview} title="Discard recording" aria-label="Discard recording" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#929992] hover:bg-red-50 hover:text-red-600"><X size={17} /></button>
+        </>
+      ) : (
+        <button type="submit" disabled={coachLoading || (!coachInput.trim() && !coachAttachments.length)} title="Send message" aria-label="Send message" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1DBF73] text-white transition hover:bg-[#15965b] disabled:cursor-not-allowed disabled:opacity-40">{coachLoading ? <LoaderCircle size={18} className="animate-spin" /> : <Send size={17} />}</button>
+      )}
+    </div>
+    <p className="mt-2 px-2 text-center text-[10px] text-[#9aa19a]">Enter to send · Shift + Enter for a new line</p>
+  </div>
+</form>
               </section>
             </div>
           </div>}
