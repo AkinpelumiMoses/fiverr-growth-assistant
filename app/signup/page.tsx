@@ -1,39 +1,56 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowLeft, Eye, EyeOff, UserRoundPlus } from "lucide-react";
+import { use, useState } from "react";
+import { ArrowLeft, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { signUp } from "@/app/auth/actions";
 
 type Props = { searchParams: Promise<{ error?: string }> };
 
-export default async function SignupPage({ searchParams }: Props) {
-  const params = await searchParams;
-  return <SignupForm params={params} />;
-}
-
-function SignupForm({ params }: { params: { error?: string } }) {
+export default function SignupPage({ searchParams }: Props) {
+  const params = use(searchParams);
   const [showPassword, setShowPassword] = useState(false);
 
-  return <main className="flex min-h-screen bg-[#f5f7f8]">
-    <div className="hidden w-1/2 flex-col justify-between bg-[#222325] p-12 text-white lg:flex">
-      <Link href="/" className="text-sm font-bold">MILE</Link>
-      <div className="max-w-lg"><p className="text-[10px] font-bold uppercase tracking-[.2em] text-white/60">A more deliberate way to grow</p><h1 className="mt-5 text-5xl font-semibold leading-tight tracking-[-.05em]">Make sense of your numbers. Move with purpose.</h1><p className="mt-6 text-sm leading-7 text-white/70">Join freelancers who share opportunities, exchange support and build better work together.</p></div>
-      <p className="text-[10px] text-white/50">Every step has a purpose.</p>
-    </div>
-    <div className="flex flex-1 items-center justify-center px-5 py-12"><div className="w-full max-w-[410px]">
-      <Link href="/" className="mb-12 inline-flex items-center gap-2 text-xs font-semibold text-[#667583]"><ArrowLeft size={14}/> Back to homepage</Link>
-      <div className="mb-8 flex h-11 w-11 items-center justify-center rounded-xl bg-[#1DBF73] text-white"><UserRoundPlus size={19}/></div>
-      <p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#168B56]">Get started</p><h2 className="mt-3 text-3xl font-semibold tracking-[-.045em] text-[#222222]">Create your account</h2><p className="mt-3 text-sm leading-6 text-[#7a858e]">Create your place in a community built for connection, collaboration and progress.</p>
-      {params.error && <p role="alert" className="mt-5 rounded-lg bg-red-50 p-3 text-xs leading-5 text-red-700">Please enter your name, a valid email and a password of at least 8 characters. If the details are correct, try again.</p>}
-      <form action={signUp} className="mt-9 space-y-5">
-        <div><label htmlFor="fullName" className="mb-2 block text-xs font-semibold text-[#343A40]">Full name</label><input id="fullName" name="fullName" type="text" required minLength={2} autoComplete="name" placeholder="Your name" className="w-full rounded-lg border border-[#dfe5e9] bg-white px-4 py-3.5 text-sm text-[#222222] outline-none focus:border-[#168B56]"/></div>
-        <div><label htmlFor="email" className="mb-2 block text-xs font-semibold text-[#343A40]">Email address</label><input id="email" name="email" type="email" required autoComplete="email" placeholder="you@example.com" className="w-full rounded-lg border border-[#dfe5e9] bg-white px-4 py-3.5 text-sm text-[#222222] outline-none focus:border-[#168B56]"/></div>
-        <div><label htmlFor="password" className="mb-2 block text-xs font-semibold text-[#343A40]">Create password</label><div className="relative"><input id="password" name="password" type={showPassword ? "text" : "password"} required minLength={8} autoComplete="new-password" placeholder="At least 8 characters" className="w-full rounded-lg border border-[#dfe5e9] bg-white px-4 py-3.5 pr-12 text-sm text-[#222222] outline-none focus:border-[#168B56]"/><button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-[#667583] transition hover:bg-[#f0f3f4] hover:text-[#222325]">{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button></div></div>
-        <button type="submit" className="w-full rounded-lg bg-[#222325] px-5 py-4 text-xs font-bold text-white transition hover:bg-[#404145]">Create account</button>
-        <p className="text-[10px] leading-5 text-[#89939b]">By creating an account, you agree to use accurate information and keep your sign-in details secure.</p>
-      </form>
-      <p className="mt-7 text-center text-xs text-[#7b8791]">Already have an account? <Link href="/login" className="font-bold text-[#168B56]">Log in</Link></p>
-    </div></div>
-  </main>;
+  return (
+    <main className="mile-auth-page mile-auth-signup">
+      <section className="mile-auth-aside">
+        <Link href="/" className="mile-auth-logo"><img src="/mile-logo.svg" alt="MILE" /></Link>
+        <div className="mile-auth-story">
+          <span className="mile-auth-kicker">MAKE ROOM FOR WHAT’S NEXT</span>
+          <h1>Good work<br />grows <em>together.</em></h1>
+          <p>Meet people who understand the work. Share what you know. Find the right support for the next opportunity.</p>
+          <div className="mile-auth-manifesto"><span>02</span><div><strong>Find your people.</strong><br /><strong>Move further together.</strong></div></div>
+        </div>
+        <span className="mile-auth-footer">EVERY STEP HAS A PURPOSE <i /> MILE COMMUNITY</span>
+        <div className="mile-auth-decoration" aria-hidden="true"><span /><span /><span /></div>
+      </section>
+
+      <section className="mile-auth-main">
+        <Link href="/" className="mile-auth-back"><ArrowLeft size={15}/> Back to homepage</Link>
+        <div className="mile-auth-form-wrap">
+          <span className="mile-auth-mobile-logo"><img src="/mile-logo.svg" alt="MILE" /></span>
+          <p className="mile-auth-eyebrow">YOUR NEXT CHAPTER STARTS HERE</p>
+          <h2>Join the network.</h2>
+          <p className="mile-auth-subtitle">Create your MILE account and find your place in the community.</p>
+
+          {params.error && <p role="alert" className="mile-auth-alert error">We couldn’t create your account. Check your details and try again. Your password must be at least 8 characters.</p>}
+
+          <form action={signUp} className="mile-auth-form">
+            <label htmlFor="fullName">Full name</label>
+            <input className="mile-auth-input" id="fullName" name="fullName" type="text" required minLength={2} autoComplete="name" placeholder="How should we call you?" />
+            <label htmlFor="email">Email address</label>
+            <input className="mile-auth-input" id="email" name="email" type="email" required autoComplete="email" placeholder="you@example.com" />
+            <label htmlFor="password">Create password</label>
+            <div className="mile-auth-password">
+              <input className="mile-auth-input" id="password" name="password" type={showPassword ? "text" : "password"} required minLength={8} autoComplete="new-password" placeholder="At least 8 characters" />
+              <button type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button>
+            </div>
+            <button className="mile-auth-submit" type="submit">Create account <ArrowRight size={17}/></button>
+            <p className="mile-auth-terms">By creating an account, you agree to use accurate information and treat other members with respect.</p>
+          </form>
+          <p className="mile-auth-switch">Already part of MILE? <Link href="/login">Sign in</Link></p>
+        </div>
+      </section>
+    </main>
+  );
 }
