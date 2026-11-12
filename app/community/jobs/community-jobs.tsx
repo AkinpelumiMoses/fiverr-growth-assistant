@@ -24,6 +24,7 @@ export default function CommunityJobs() {
   const [search,setSearch] = useState("");
   const [filter,setFilter] = useState("All niches");
   const [showForm,setShowForm] = useState(false);
+  const [editingJobId,setEditingJobId] = useState<string | null>(null);
   const [saving,setSaving] = useState(false);
   const [mine,setMine] = useState(false);
   const [selectedNiches,setSelectedNiches] = useState<string[]>([]);
@@ -88,14 +89,22 @@ export default function CommunityJobs() {
       budget_max:form.budget_max?Number(form.budget_max):null,
       currency:form.currency,deadline:form.deadline||null
     };
-    const {error:insertError}=await supabase.from("community_jobs").insert(payload);
-    if(insertError)setError(insertError.message);
-    else {setForm({title:"",description:"",niche:"Graphic Design",skills:"",budget_type:"not_specified",budget_min:"",budget_max:"",currency:"USD",deadline:""});setShowForm(false);await load();}
+    const result = editingJobId
+      ? await supabase.from("community_jobs").update({...payload, updated_at:new Date().toISOString()}).eq("id",editingJobId).eq("poster_id",user.id)
+      : await supabase.from("community_jobs").insert(payload);
+    if(result.error)setError(result.error.message);
+    else {setForm({title:"",description:"",niche:"Graphic Design",skills:"",budget_type:"not_specified",budget_min:"",budget_max:"",currency:"USD",deadline:""});setEditingJobId(null);setShowForm(false);await load();}
     setSaving(false);
   }
-  async function changeStatus(job:Job,status:"closed"|"filled"){
+  async function changeStatus(job:Job,status:"open"|"closed"|"filled"){
     const {error:updateError}=await supabase.from("community_jobs").update({status,updated_at:new Date().toISOString()}).eq("id",job.id).eq("poster_id",userId);
     if(updateError)setError(updateError.message); else await load();
+  }
+  function editJob(job:Job){
+    setEditingJobId(job.id);
+    setForm({title:job.title,description:job.description,niche:job.niche,skills:job.required_skills.join(", "),budget_type:job.budget_type,budget_min:job.budget_min==null?"":String(job.budget_min),budget_max:job.budget_max==null?"":String(job.budget_max),currency:job.currency,deadline:job.deadline??""});
+    setShowForm(true);
+    window.scrollTo({top:0,behavior:"smooth"});
   }
   const filtered=jobs.filter(j=>(filter==="All niches"||j.niche===filter)&&(!search.trim()||[j.title,j.description,j.niche,...j.required_skills].join(" ").toLowerCase().includes(search.trim().toLowerCase())));
   function budget(j:Job){if(j.budget_type==="not_specified")return "Budget not specified";if(j.budget_type==="volunteer")return "Volunteer / collaboration";const range=[j.budget_min!=null?Number(j.budget_min).toLocaleString():"",j.budget_max!=null?Number(j.budget_max).toLocaleString():""].filter(Boolean).join(" – ");return `${j.currency} ${range||"To be discussed"} · ${j.budget_type}`;}
@@ -129,7 +138,7 @@ export default function CommunityJobs() {
           </div>}
       </div>
     </section>
-    {showForm&&<form onSubmit={submit} className="mb-7 grid gap-4 rounded-2xl border border-[#e5eae6] bg-white p-5 md:grid-cols-2">
+    {showForm&&<form onSubmit={submit} className="mb-7 grid gap-4 rounded-2xl border border-[#e5eae6] bg-white p-5 md:grid-cols-2"><div className="md:col-span-2"><h2 className="text-base font-extrabold">{editingJobId?"Edit your opportunity":"Create an opportunity"}</h2><p className="mt-1 text-xs text-[#788078]">{editingJobId?"Update the details before saving.":"Share enough detail for another freelancer to understand the work."}</p></div>
       <label className="grid gap-1.5 text-xs font-semibold md:col-span-2">Opportunity title<input required minLength={8} maxLength={120} value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="e.g. Need a logo designer for three client projects" className="rounded-xl border p-3 text-sm font-normal"/></label>
       <label className="grid gap-1.5 text-xs font-semibold">Niche<select value={form.niche} onChange={e=>setForm({...form,niche:e.target.value})} className="rounded-xl border p-3 text-sm font-normal">{niches.map(n=><option key={n}>{n}</option>)}</select></label>
       <label className="grid gap-1.5 text-xs font-semibold">Required skills <span className="font-normal text-[#888]">Separate with commas</span><input value={form.skills} onChange={e=>setForm({...form,skills:e.target.value})} placeholder="Illustrator, logo design, branding" className="rounded-xl border p-3 text-sm font-normal"/></label>
@@ -139,11 +148,11 @@ export default function CommunityJobs() {
       <label className="grid gap-1.5 text-xs font-semibold">Minimum budget<input type="number" min="0" value={form.budget_min} onChange={e=>setForm({...form,budget_min:e.target.value})} className="rounded-xl border p-3 text-sm font-normal"/></label>
       <label className="grid gap-1.5 text-xs font-semibold">Maximum budget<input type="number" min="0" value={form.budget_max} onChange={e=>setForm({...form,budget_max:e.target.value})} className="rounded-xl border p-3 text-sm font-normal"/></label>
       <label className="grid gap-1.5 text-xs font-semibold">Deadline (optional)<input type="date" min={new Date().toISOString().slice(0,10)} value={form.deadline} onChange={e=>setForm({...form,deadline:e.target.value})} className="rounded-xl border p-3 text-sm font-normal"/></label>
-      <div className="flex items-end md:col-span-2"><button disabled={saving} className="rounded-xl bg-[#168B56] px-5 py-3 text-sm font-bold text-white disabled:opacity-50">{saving?"Publishing…":"Publish opportunity"}</button></div>
+      <div className="flex items-end md:col-span-2"><button disabled={saving} className="rounded-xl bg-[#168B56] px-5 py-3 text-sm font-bold text-white disabled:opacity-50">{saving?(editingJobId?"Saving changes…":"Publishing…"):(editingJobId?"Save changes":"Publish opportunity")}</button></div>
     </form>}
     {error&&<p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
     <div className="mb-5 flex flex-col gap-3 sm:flex-row"><label className="relative flex-1"><Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#929992]"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search opportunities or skills" className="w-full rounded-xl border bg-white py-3 pl-10 pr-3 text-sm"/></label><select value={filter} onChange={e=>setFilter(e.target.value)} className="rounded-xl border bg-white px-3 py-3 text-sm"><option>All niches</option>{niches.map(n=><option key={n}>{n}</option>)}</select></div>
-    {loading?<p className="py-16 text-center text-sm text-[#777]">Loading opportunities…</p>:filtered.length===0?<div className="rounded-2xl border border-dashed bg-white p-12 text-center"><BriefcaseBusiness className="mx-auto mb-3 text-[#168B56]"/><h2 className="font-bold">No opportunities here yet</h2><p className="mt-2 text-sm text-[#888]">When a freelancer shares a project, it will appear here.</p></div>:<div className="grid gap-4 md:grid-cols-2">{filtered.map(job=><article key={job.id} className="rounded-2xl border border-[#e8ece8] bg-white p-5"><div className="mb-3 flex items-center justify-between gap-3"><span className="rounded-full bg-[#eaf8ef] px-3 py-1.5 text-[10px] font-bold text-[#168B56]">{job.niche}</span><span className="text-[10px] text-[#888]">{new Date(job.created_at).toLocaleDateString()}</span></div><h2 className="text-lg font-extrabold">{job.title}</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#68736b]">{job.description}</p>{job.required_skills.length>0&&<div className="mt-3 flex flex-wrap gap-2">{job.required_skills.map(s=><span key={s} className="rounded-full bg-[#f3f5f3] px-2.5 py-1 text-[10px] text-[#59645c]">{s}</span>)}</div>}<div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4"><div className="text-xs font-semibold">{budget(job)}{job.deadline&&<p className="mt-1 flex items-center gap-1 text-[10px] font-normal text-[#888]"><Clock3 size={11}/> Due {new Date(job.deadline+"T00:00:00").toLocaleDateString()}</p>}</div>{job.poster_id===userId?<div className="flex gap-2"><span className="self-center text-[10px] text-[#888]">Your post · {job.status}</span>{job.status==="open"&&<button onClick={()=>changeStatus(job,"filled")} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Mark filled</button>}</div>:<span className="inline-flex items-center gap-1 text-[10px] text-[#888]"><UserRound size={12}/> Member opportunity</span>}</div></article>)}</div>}
+    {loading?<p className="py-16 text-center text-sm text-[#777]">Loading opportunities…</p>:filtered.length===0?<div className="rounded-2xl border border-dashed bg-white p-12 text-center"><BriefcaseBusiness className="mx-auto mb-3 text-[#168B56]"/><h2 className="font-bold">No opportunities here yet</h2><p className="mt-2 text-sm text-[#888]">When a freelancer shares a project, it will appear here.</p></div>:<div className="grid gap-4 md:grid-cols-2">{filtered.map(job=><article key={job.id} className="rounded-2xl border border-[#e8ece8] bg-white p-5"><div className="mb-3 flex items-center justify-between gap-3"><span className="rounded-full bg-[#eaf8ef] px-3 py-1.5 text-[10px] font-bold text-[#168B56]">{job.niche}</span><span className="text-[10px] text-[#888]">{new Date(job.created_at).toLocaleDateString()}</span></div><h2 className="text-lg font-extrabold">{job.title}</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#68736b]">{job.description}</p>{job.required_skills.length>0&&<div className="mt-3 flex flex-wrap gap-2">{job.required_skills.map(s=><span key={s} className="rounded-full bg-[#f3f5f3] px-2.5 py-1 text-[10px] text-[#59645c]">{s}</span>)}</div>}<div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4"><div className="text-xs font-semibold">{budget(job)}{job.deadline&&<p className="mt-1 flex items-center gap-1 text-[10px] font-normal text-[#888]"><Clock3 size={11}/> Due {new Date(job.deadline+"T00:00:00").toLocaleDateString()}</p>}</div>{job.poster_id===userId?<div className="flex flex-wrap items-center justify-end gap-2"><span className="self-center text-[10px] text-[#888]">Your post · {job.status}</span>{job.status==="open"&&<><button onClick={()=>editJob(job)} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Edit</button><button onClick={()=>changeStatus(job,"filled")} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Mark filled</button><button onClick={()=>changeStatus(job,"closed")} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Close</button></>}{job.status!=="open"&&<button onClick={()=>changeStatus(job,"open")} className="rounded-lg border border-[#168B56] px-3 py-2 text-[10px] font-bold text-[#168B56]">Reopen</button>}{job.status!=="open"&&<button onClick={()=>editJob(job)} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Edit</button>}</div>:<span className="inline-flex items-center gap-1 text-[10px] text-[#888]"><UserRound size={12}/> Member opportunity</span>}</div></article>)}</div>}
     <p className="mt-7 text-[10px] leading-5 text-[#929992]">Please agree on scope, payment and delivery terms directly before starting work. Never share passwords or account access.</p>
   </div>;
 }
