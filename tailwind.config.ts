@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 const config: Config = {
   content:["./app/**/*.{js,ts,jsx,tsx,mdx}","./components/**/*.{js,ts,jsx,tsx,mdx}"],
-  theme:{extend:{colors:{brand:"#7057F5",ink:"#191827",muted:"#858397",canvas:"#F7F7FB"},boxShadow:{soft:"0 8px 30px rgba(26,22,54,.06)"}}},
+  theme:{extend:{colors:{brand:"#00A525",brandYellow:"#C6C304",ink:"#111311",muted:"#68716A",canvas:"#FAFBF9"},boxShadow:{soft:"0 8px 30px rgba(17,19,17,.06)"}}},
   plugins:[]
 };
 export default config;
