@@ -357,7 +357,7 @@ export default function DashboardWorkspace() {
       impressions, clicks, orders, revenue, currency: metricForm.currency,
     }).select("id,period_start,period_end,impressions,clicks,orders,revenue,currency,gig_id").single();
     if (error) setNotice(error.message);
-    else { setPerformance((old) => [data as Performance, ...old]); setMetricForm({ date: new Date().toISOString().slice(0, 10), impressions: "", clicks: "", orders: "", revenue: "", gig_id: "" }); setNotice("Performance snapshot saved."); }
+    else { setPerformance((old) => [data as Performance, ...old]); setMetricForm({ date: new Date().toISOString().slice(0, 10), impressions: "", clicks: "", orders: "", revenue: "", currency: "USD", gig_id: "" }); setNotice("Performance snapshot saved."); }
     setSaving(false);
   }
 
