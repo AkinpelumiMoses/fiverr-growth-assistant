@@ -120,67 +120,35 @@ ${message}`
       if (messageSaveError) return NextResponse.json({ error: "Your message could not be saved. Please try again." }, { status: 500 });
     }
 
-    // Try the current Flash model first, then a lighter stable model if Google is busy.
-    // Keep each attempt bounded so the dashboard receives a useful response before the function times out.
-    const models = ["gemini-3.5-flash-lite", "gemini-3.7-flash"];
-    let result: any = null;
-    let lastError = "The AI service is temporarily unavailable.";
-
-    for (const model of models) {
-      try {
-        const response = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": apiKey,
-            "Api-Revision": "2026-05-20",
-          },
-          body: JSON.stringify({
-            model,
-            input: multimodalInput ?? taskPrompt,
-            system_instruction: SYSTEM_BASE,
-            store: false,
-            generation_config: {
-              max_output_tokens: body.mode === "gig-analysis" ? 1800 : 1000,
-            },
-          }),
-          signal: AbortSignal.timeout(22000),
-        });
-
-        const payload = await response.json().catch(() => ({}));
-        if (response.ok) {
-          result = payload;
-          break;
-        }
-
-        const providerMessage = payload?.error?.message || `Gemini returned HTTP ${response.status}.`;
-        lastError = providerMessage;
-        console.error(`Gemini model ${model} failed:`, payload);
-
-        // Only retry on temporary capacity/rate/server failures. Other errors need configuration fixes.
-        if (![408, 429, 500, 502, 503, 504].includes(response.status)) break;
-      } catch (error) {
-        lastError = error instanceof Error && error.name === "TimeoutError"
-          ? `The ${model} request timed out.`
-          : "The AI provider could not be reached.";
-        console.error(`Gemini model ${model} request failed:`, error);
-      }
+    // Use the stable generateContent REST shape for text and multimodal requests.
+    const parts: { text?: string; inline_data?: { mime_type: string; data: string } }[] = [{ text: taskPrompt }];
+    for (const item of (multimodalInput ?? []).slice(1)) {
+      if (item.data && item.mime_type) parts.push({ inline_data: { mime_type: item.mime_type, data: item.data } });
+      else if (item.text) parts.push({ text: item.text });
     }
 
-    if (!result) {
-      return NextResponse.json({
-        error: "The AI service is busy right now. Your message has not been lost—please try again in a moment.",
-        detail: lastError,
-      }, { status: 503 });
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: SYSTEM_BASE }] },
+        contents: [{ role: "user", parts }],
+        generationConfig: { maxOutputTokens: body.mode === "gig-analysis" ? 1800 : 1200 },
+      }),
+      signal: AbortSignal.timeout(45000),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      console.error("Gemini generateContent failed:", { status: response.status, payload });
+      const detail = payload?.error?.message || `Gemini returned HTTP ${response.status}.`;
+      return NextResponse.json({ error: "The AI service could not complete your request. Please try again.", detail }, { status: response.status === 429 ? 429 : 503 });
     }
 
-    const answer = typeof result.output_text === "string" ? result.output_text : (result.steps ?? [])
-      .filter((step: { type?: string }) => step.type === "model_output")
-      .flatMap((step: { content?: { type?: string; text?: string }[] }) => step.content ?? [])
-      .filter((part: { type?: string }) => part.type === "text")
-      .map((part: { text?: string }) => part.text ?? "")
-      .join("\n\n");
-
+    const answer = (payload?.candidates?.[0]?.content?.parts ?? []).map((part: { text?: string }) => part.text ?? "").join("\n\n").trim();
+    if (!answer) {
+      console.error("Gemini returned no text output:", payload);
+      return NextResponse.json({ error: "The AI returned an empty response. Please try sending your message again." }, { status: 502 });
+    }
     if (body.mode === "gig-analysis") {
       const gigId = body.gigId as string;
       const { error: saveError } = await supabase.from("analysis_reports").insert({
@@ -202,7 +170,10 @@ ${message}`
         content: answer,
         attachments: [],
       });
-      if (assistantSaveError) console.error("Could not save AI response:", assistantSaveError.message);
+      if (assistantSaveError) {
+        console.error("Could not save AI response:", assistantSaveError.message);
+        return NextResponse.json({ error: "The coach replied, but the response could not be saved. Please retry.", detail: assistantSaveError.message }, { status: 500 });
+      }
       await supabase.from("ai_conversations").update({ updated_at: new Date().toISOString() }).eq("id", conversationId).eq("user_id", user.id);
     }
     return NextResponse.json({ answer });
