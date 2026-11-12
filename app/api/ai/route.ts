@@ -185,7 +185,7 @@ ${message}`
       const { error: saveError } = await supabase.from("analysis_reports").insert({
         user_id: user.id,
         gig_id: gigId,
-        report_type: "ai_gig_review",
+        report_type: "gig_audit",
         findings: { text: answer },
         recommendations: [],
       });
