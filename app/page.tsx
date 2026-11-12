@@ -4,9 +4,9 @@ import {useEffect,useState} from "react";
 import {ArrowRight,Check,ChevronLeft,ChevronRight,ChartNoAxesCombined,Target,FileSearch,ShieldCheck,Menu,X,Pause,Play} from "lucide-react";
 
 const slides=[
- {eyebrow:"A clearer way to grow on Fiverr",title:"Stop guessing.",accent:"Start growing.",body:"Understand your seller performance, improve your gigs and make your next move with more confidence.",image:"https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1600&q=88",alt:"Independent professionals collaborating around a table",tag:"Make your next move count"},
- {eyebrow:"Make your numbers make sense",title:"Know what’s",accent:"really happening.",body:"Bring your impressions, clicks, orders and revenue into one clear view. See the story behind the numbers.",image:"https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=88",alt:"Small business team reviewing their work together",tag:"Clarity before action"},
- {eyebrow:"Build better gigs, one step at a time",title:"Turn insight",accent:"into action.",body:"Review how your services are presented and focus on practical improvements that are within your control.",image:"https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=88",alt:"Creative professionals sharing ideas at a workspace",tag:"A practical path forward"}
+ {eyebrow:"A clearer way to move forward",title:"Stop guessing.",accent:"Start growing.",body:"Connect with freelancers, discover opportunities and use practical tools to make your next move with more confidence.",image:"https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1600&q=88",alt:"Independent professionals collaborating around a table",tag:"Make your next move count"},
+ {eyebrow:"Make your work make sense",title:"Know what’s",accent:"really happening.",body:"Bring your work, opportunities and growth tools into one clear place. See what needs attention and decide what to do next.",image:"https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=88",alt:"Small business team reviewing their work together",tag:"Clarity before action"},
+ {eyebrow:"Build better work, one step at a time",title:"Turn insight",accent:"into action.",body:"Find collaborators, share opportunities and use practical tools to improve how you work and grow.",image:"https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1600&q=88",alt:"Creative professionals sharing ideas at a workspace",tag:"A practical path forward"}
 ];
 const benefits=[
  {n:"01",title:"Understand your performance",body:"See what your impressions, clicks and orders are telling you, without getting lost in complicated reports."},
@@ -22,9 +22,9 @@ export default function Home(){
  return <main className="min-h-screen overflow-hidden bg-white text-[#222325]">
   <header className="site-nav sticky top-0 z-50 border-b border-[#e9ece9] bg-white/90 backdrop-blur-xl">
    <div className="mx-auto flex h-[78px] max-w-[1320px] items-center justify-between px-5 md:px-8">
-    <Link href="/" aria-label="Fiverr Growth Assistant home" className="group flex items-center gap-3">
+    <Link href="/" aria-label="MILE home" className="group flex items-center gap-3">
      <span className="brand-mark flex h-10 w-10 items-center justify-center rounded-[13px] bg-[#1DBF73] text-lg font-extrabold text-white">f</span>
-     <span className="flex flex-col"><span className="text-[13px] font-extrabold tracking-[-.035em] text-[#222325]">Fiverr Growth Assistant</span><span className="mt-0.5 text-[9px] font-medium tracking-[.08em] text-[#858b86]">SELL WITH MORE CLARITY</span></span>
+     <span className="flex flex-col"><span className="text-[13px] font-extrabold tracking-[-.035em] text-[#222325]">MILE</span><span className="mt-0.5 text-[9px] font-medium tracking-[.08em] text-[#858b86]">EVERY STEP HAS A PURPOSE</span></span>
     </Link>
     <nav aria-label="Main navigation" className="hidden items-center gap-1 lg:flex">{nav.map(([label,href])=><a key={href} href={href} className="nav-link rounded-full px-4 py-3 text-[11px] font-semibold text-[#62646A]">{label}</a>)}</nav>
     <div className="hidden items-center gap-5 md:flex"><Link href="/login" className="text-[11px] font-bold text-[#404145] transition hover:text-[#15965A]">Log in</Link><Link href="/signup" className="nav-cta inline-flex items-center gap-2 rounded-full bg-[#222325] px-5 py-3.5 text-[11px] font-bold text-white">Get started <ArrowRight size={14}/></Link></div>
@@ -59,7 +59,7 @@ export default function Home(){
    <div className="mx-auto max-w-[1320px] px-5 py-20 md:px-8 md:py-28">
     <div className="founder-editorial reveal">
      <div className="founder-portrait-wrap">
-      <img src="https://myportfolio.creatiftechnologies.com.ng/images/A2S_5186c.jpg%20(1).jpeg" alt="Fiverr Growth Assistant founder, Akinpelumi Moses Temitope" className="founder-portrait"/>
+      <img src="https://myportfolio.creatiftechnologies.com.ng/images/A2S_5186c.jpg%20(1).jpeg" alt="MILE founder, Akinpelumi Moses Temitope" className="founder-portrait"/>
       <div className="founder-photo-caption"><span className="founder-caption-line"/><span>THE PERSON BEHIND THE PLATFORM</span></div>
       <div className="founder-photo-index">01 <span>/ FOUNDER</span></div>
      </div>
@@ -70,8 +70,8 @@ export default function Home(){
       <p className="founder-lead">Starting on Fiverr can be exciting. But after publishing your first gig, the questions often begin.</p>
       <p className="founder-body">Are these the right keywords? Is my gig clear enough? Why am I not getting impressions? If people are clicking, what might be stopping them from ordering? And with so much conflicting advice online, how do I know what is actually worth changing?</p>
       <p className="founder-body">I wanted to create a more practical way to approach those questions. A place where sellers can bring their performance information together, review how their services are presented, and turn uncertainty into clear, manageable next steps.</p>
-      <p className="founder-body">That is the thinking behind Fiverr Growth Assistant: not another promise of overnight success, but a useful workspace built around understanding, honest guidance and better decisions.</p>
-      <div className="founder-signoff"><span className="founder-signoff-name">Akinpelumi Moses Temitope</span><span className="founder-signoff-role">Founder, Fiverr Growth Assistant</span></div>
+      <p className="founder-body">That is the thinking behind MILE: not another promise of overnight success, but a useful workspace built around understanding, honest guidance and better decisions.</p>
+      <div className="founder-signoff"><span className="founder-signoff-name">Akinpelumi Moses Temitope</span><span className="founder-signoff-role">Founder, MILE</span></div>
      </div>
     </div>
     <div className="mt-16 border-t border-[#dfe8e0] pt-9">
@@ -83,7 +83,7 @@ export default function Home(){
       <article className="problem-card"><span>04</span><h3>Knowing what to improve</h3><p>Making sense of impressions, clicks and orders so your next step is based on evidence, not panic.</p></article>
      </div>
     </div>
-    <p className="mt-10 max-w-3xl text-[12px] leading-7 text-[#7b857d]">A clear note: Fiverr Growth Assistant does not control Fiverr search or promise rankings, orders or sales. It is designed to help you understand your own information, strengthen your gig and make better-informed decisions.</p>
+    <p className="mt-10 max-w-3xl text-[12px] leading-7 text-[#7b857d]">A clear note: MILE does not control Fiverr search or promise rankings, orders or sales. It is designed to help you understand your own information, strengthen your gig and make better-informed decisions.</p>
    </div>
   </section>
 
@@ -110,6 +110,6 @@ export default function Home(){
   </section>
 
   <section className="cta-band bg-[#222325]"><div className="mx-auto flex max-w-[1320px] flex-col items-start justify-between gap-8 px-5 py-16 md:flex-row md:items-center md:px-8 md:py-20"><div><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[#1DBF73]">Make your next move count</p><h2 className="mt-4 max-w-xl text-[32px] font-semibold leading-tight tracking-[-.04em] text-white sm:text-[40px]">Build your Fiverr growth around better decisions.</h2></div><Link href="/signup" className="inline-flex shrink-0 items-center gap-3 rounded-full bg-[#1DBF73] px-7 py-4 text-[12px] font-extrabold text-white transition hover:bg-[#15965A]">Create your account <ArrowRight size={15}/></Link></div></section>
-  <footer className="bg-white"><div className="mx-auto flex max-w-[1320px] flex-col gap-4 px-5 py-8 text-[10px] text-[#89938c] md:flex-row md:items-center md:justify-between md:px-8"><Link href="/" className="font-extrabold text-[#343A40]">Fiverr Growth Assistant</Link><span>Independent seller guidance. Not affiliated with or endorsed by Fiverr.</span><span>© {new Date().getFullYear()} Fiverr Growth Assistant</span></div></footer>
+  <footer className="bg-white"><div className="mx-auto flex max-w-[1320px] flex-col gap-4 px-5 py-8 text-[10px] text-[#89938c] md:flex-row md:items-center md:justify-between md:px-8"><Link href="/" className="font-extrabold text-[#343A40]">MILE</Link><span>Independent seller guidance. Not affiliated with or endorsed by Fiverr.</span><span>© {new Date().getFullYear()} MILE</span></div></footer>
  </main>
 }
