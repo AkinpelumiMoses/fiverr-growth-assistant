@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import {useEffect,useState} from "react";
-import {ArrowRight,Check,ChevronLeft,ChevronRight,Users,BriefcaseBusiness,Target,ShieldCheck,Menu,X,Pause,Play,Globe2,Sparkles} from "lucide-react";
+import {ArrowRight,Check,ChevronLeft,ChevronRight,Users,BriefcaseBusiness,Target,ShieldCheck,Menu,X,Pause,Play,Globe2} from "lucide-react";
 
 const slides=[
  {eyebrow:"A network built for independent work",title:"Your next opportunity",accent:"could be one connection away.",body:"MILE brings freelancers together to discover work, find collaborators, solve problems and keep moving forward — wherever they work online.",image:"https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1600&q=88",alt:"Independent professionals collaborating around a table",tag:"Make your next move count"},
@@ -40,9 +40,9 @@ export default function Home(){
    <div className="relative z-10 mx-auto flex min-h-[720px] max-w-[1320px] items-center px-5 py-24 md:min-h-[790px] md:px-8">
     <div className="grid w-full items-center gap-12 lg:grid-cols-[1.05fr_.95fr]">
      <div className="hero-copy max-w-[720px]" key={active}>
-      <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[9px] font-extrabold uppercase tracking-[.2em] text-[#8ce6b6] backdrop-blur-md"><Sparkles size={12}/> {slide.eyebrow}</div>
-      <h1 className="max-w-[760px] text-[50px] font-semibold leading-[.98] tracking-[-.065em] text-white sm:text-[68px] lg:text-[82px]">${slide.title}<br/><span className="text-[#71dfa3]">${slide.accent}</span></h1>
-      <p className="mt-7 max-w-[590px] text-[15px] leading-[1.85] text-white/78 md:text-[17px]">${slide.body}</p>
+      <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[9px] font-extrabold uppercase tracking-[.2em] text-[#8ce6b6] backdrop-blur-md">{slide.eyebrow}</div>
+      <h1 className="max-w-[760px] text-[50px] font-semibold leading-[.98] tracking-[-.065em] text-white sm:text-[68px] lg:text-[82px]">{slide.title}<br/><span className="text-[#71dfa3]">{slide.accent}</span></h1>
+      <p className="mt-7 max-w-[590px] text-[15px] leading-[1.85] text-white/78 md:text-[17px]">{slide.body}</p>
       <div className="mt-9 flex flex-col gap-3 sm:flex-row"><Link href="/signup" className="hero-primary group inline-flex items-center justify-center gap-3 rounded-full bg-[#1DBF73] px-7 py-4 text-[12px] font-extrabold text-white shadow-[0_16px_40px_rgba(29,191,115,.22)] transition duration-300 hover:-translate-y-1 hover:bg-[#20c97b]">Join MILE <ArrowRight size={15} className="transition-transform duration-300 group-hover:translate-x-1"/></Link><a href="#how-it-works" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-7 py-4 text-[12px] font-bold text-white backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:bg-white/15">See how it works</a></div>
       <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-[10px] font-semibold text-white/65"><span className="flex items-center gap-2"><Check size={13} className="text-[#75e0aa]"/> Find people</span><span className="flex items-center gap-2"><Check size={13} className="text-[#75e0aa]"/> Find opportunities</span><span className="flex items-center gap-2"><Check size={13} className="text-[#75e0aa]"/> Keep moving</span></div>
      </div>
