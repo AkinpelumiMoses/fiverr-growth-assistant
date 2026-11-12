@@ -64,9 +64,9 @@ export default function CommunityDirectory() {
 
   return <div className="mx-auto max-w-[1400px]">
     <div className="mb-8">
-      <p className="text-xs font-bold text-[#168B56]">MEET OTHER SELLERS</p>
-      <h2 className="workspace-page-title mt-2 text-4xl font-extrabold md:text-5xl">Freelancers, in one place.</h2>
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-[#777d77]">Discover other Fiverr freelancers, explore their skills and connect through the profiles they choose to share.</p>
+      <p className="text-xs font-bold text-[#168B56]">FREELANCER COMMUNITY</p>
+      <h2 className="workspace-page-title mt-2 text-4xl font-extrabold md:text-5xl">Freelancers, connected.</h2>
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-[#777d77]">Discover freelancers from different platforms and specialties, explore what they do, and find people who can help move work forward.</p>
     </div>
     <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-[#e9ece9] bg-white p-4 md:flex-row">
       <label className="relative min-w-0 flex-1">
@@ -91,17 +91,17 @@ export default function CommunityDirectory() {
       return <article key={profile.id} className="flex min-w-0 flex-col rounded-2xl border border-[#e9ece9] bg-white p-5 shadow-[0_8px_30px_rgba(27,42,32,.035)]">
         <div className="flex items-center gap-3">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#eaf8ef] text-lg font-bold text-[#168B56]">{profile.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover"/> : initials}</div>
-          <div className="min-w-0"><h3 className="truncate text-sm font-extrabold">{profile.display_name || profile.fiverr_username || "Freelancer"}</h3><p className="mt-1 truncate text-xs text-[#929992]">{profile.fiverr_username ? `@${profile.fiverr_username}` : "Fiverr freelancer"}</p></div>
+          <div className="min-w-0"><h3 className="truncate text-sm font-extrabold">{profile.display_name || profile.fiverr_username || "Freelancer"}</h3><p className="mt-1 truncate text-xs text-[#929992]">{profile.fiverr_username ? `@${profile.fiverr_username}` : "Freelancer"}</p></div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">{profile.primary_niche && <span className="rounded-full bg-[#eaf8ef] px-3 py-1.5 text-[10px] font-bold text-[#168B56]">{profile.primary_niche}</span>}{profile.seller_level && <span className="rounded-full bg-[#f3f5f3] px-3 py-1.5 text-[10px] font-semibold text-[#68736b]">{profile.seller_level}</span>}</div>
         <p className="mt-4 line-clamp-3 min-h-[60px] text-xs leading-6 text-[#69736c]">{profile.bio || "This freelancer has not added a short introduction yet."}</p>
         {profile.skills && <div className="mt-3"><p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[#929992]">Skills</p><p className="line-clamp-2 text-xs leading-5 text-[#515b53]">{profile.skills}</p></div>}
         <div className="mt-auto flex items-center justify-between gap-2 border-t border-[#eef0ee] pt-4 mt-5">
           <span className="text-[10px] text-[#929992]">{profile.experience_years != null ? `${profile.experience_years} years experience` : "Community member"}</span>
-          <div className="flex gap-2">{websiteUrl && <a href={websiteUrl} target="_blank" rel="noreferrer" aria-label="Open portfolio" title="Portfolio" className="rounded-lg border border-[#e5eae6] p-2 text-[#68736b] hover:bg-[#f4f8f4]"><BriefcaseBusiness size={14}/></a>}{fiverrUrl && <a href={fiverrUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-[#222325] px-3 py-2 text-[10px] font-bold text-white hover:bg-[#404145]">View Fiverr <ExternalLink size={12}/></a>}</div>
+          <div className="flex gap-2">{websiteUrl && <a href={websiteUrl} target="_blank" rel="noreferrer" aria-label="Open portfolio" title="Portfolio" className="rounded-lg border border-[#e5eae6] p-2 text-[#68736b] hover:bg-[#f4f8f4]"><BriefcaseBusiness size={14}/></a>}{fiverrUrl && <a href={fiverrUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-lg bg-[#222325] px-3 py-2 text-[10px] font-bold text-white hover:bg-[#404145]">View Fiverr profile <ExternalLink size={12}/></a>}</div>
         </div>
       </article>;
     })}</div>}
-    <p className="mt-7 text-[10px] leading-5 text-[#929992]">Only signed-in members can browse this directory. Each freelancer controls whether their profile appears here. Contact details and account email addresses are not displayed.</p>
+    <p className="mt-7 text-[10px] leading-5 text-[#929992]">Only signed-in members can browse this directory. Each freelancer controls whether their profile appears here. Private contact details and account email addresses are not displayed.</p>
   </div>;
 }
