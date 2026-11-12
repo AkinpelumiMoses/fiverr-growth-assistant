@@ -14,7 +14,7 @@ type RequestBody = {
   conversationId?: string;
 };
 
-const SYSTEM_BASE = `You are Fiverr Growth Assistant, a practical and honest coach for Fiverr freelancers.
+const SYSTEM_BASE = `You are MILE Growth Coach, a practical and honest coach for independent freelancers working across marketplaces, direct clients and their own businesses.
 Give clear, specific, commercially useful advice in plain English. Be supportive but candid.
 Never promise rankings, impressions, orders, revenue or first-page placement. Never claim access to Fiverr's private algorithm, live search volume, seller analytics or private competitor data.
 Clearly distinguish observed facts from hypotheses. Do not invent metrics, keyword volumes, competitor information or Fiverr rules.
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       taskPrompt = `Review this seller's Fiverr gig. Analyse buyer clarity, offer positioning, specificity, description structure, trust signals, deliverables, tags relevance and likely buyer objections. Do not infer ranking or search-volume data. Give: (1) concise overall diagnosis, (2) strengths, (3) priority issues with reasons, (4) a suggested improved title, (5) a rewritten description only if the existing description gives enough information—do not invent credentials or deliverables, (6) tag ideas labelled as hypotheses to validate, (7) three practical next actions. If information is missing, say exactly what is missing.\n\nGig data:\n${JSON.stringify(reviewGig)}`;
     } else {
       const message = typeof body.message === "string" ? body.message.trim().slice(0, 2000) : "";
-      if (!message) return NextResponse.json({ error: "Type a question for your growth coach." }, { status: 400 });
+      if (!message && (!Array.isArray(body.attachments) || body.attachments.length === 0)) return NextResponse.json({ error: "Write a message or attach a file for your growth coach to review." }, { status: 400 });
       const history = Array.isArray(body.history) ? body.history.slice(-8).map((item) => ({
         role: item.role === "assistant" ? "assistant" : "user",
         content: typeof item.content === "string" ? item.content.slice(0, 1500) : "",
