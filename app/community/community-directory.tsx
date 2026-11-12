@@ -76,7 +76,7 @@ export default function CommunityDirectory() {
     });
   }, [profiles, search, niche, platform]);
 
-  return <div className="mx-auto max-w-[1400px]">
+  return <div className="community-directory mx-auto max-w-[1400px]">
     <div className="mb-8"><p className="text-xs font-bold text-[#168B56]">FREELANCER COMMUNITY</p><h2 className="workspace-page-title mt-2 text-4xl font-extrabold md:text-5xl">Freelancers, connected.</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-[#777d77]">Discover freelancers from different platforms and specialties, explore what they do, and find people who can help move work forward.</p></div>
     <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-[#e9ece9] bg-white p-4 md:flex-row">
       <label className="relative min-w-0 flex-1"><Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#929992]"/><input aria-label="Search freelancers" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name, username, skill or niche" className="w-full rounded-xl border border-[#dfe5e9] bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-[#168B56]"/></label>
