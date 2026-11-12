@@ -486,3 +486,12 @@ button{-webkit-tap-highlight-color:transparent}
 @media(max-width:760px){
   .mile-brand-logo{width:116px;max-height:40px}
 }
+
+
+/* Keep the MILE hero focused on its single full-background photograph */
+.mile-hero-image::before,
+.mile-hero-image::after{
+  content:none!important;
+  display:none!important;
+  animation:none!important;
+}
