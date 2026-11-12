@@ -565,7 +565,8 @@ export default function DashboardWorkspace() {
                      {!voicePreviewUrl && <button type="submit" disabled={coachLoading||(!coachInput.trim()&&!coachAttachments.length)} title="Send message" aria-label="Send message" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1DBF73] text-white transition hover:bg-[#15965b] disabled:cursor-not-allowed disabled:opacity-40">{coachLoading?<LoaderCircle size={18} className="animate-spin"/>:<Send size={17}/>}</button>}
                    </div>
                    <p className="mt-2 px-2 text-center text-[10px] text-[#9aa19a]">Enter to send · Shift + Enter for a new line</p>
-                </form>
+                </div>
+                 </form>
               </section>
             </div>
           </div>}
