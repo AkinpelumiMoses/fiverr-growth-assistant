@@ -40,7 +40,7 @@ export default function LoginPage({ searchParams }: Props) {
             <input type="hidden" name="next" value={params.next || "/dashboard"} />
             <label htmlFor="email">Email address</label>
             <input className="mile-auth-input" id="email" name="email" type="email" required autoComplete="email" placeholder="you@example.com" />
-            <div className="mile-auth-label-row"><label htmlFor="password">Password</label><Link href="/forgot-password">Forgot password?</Link></div>
+            <div className="mile-auth-label-row"><label htmlFor="password">Password</label></div>
             <div className="mile-auth-password">
               <input className="mile-auth-input" id="password" name="password" type={showPassword ? "text" : "password"} required autoComplete="current-password" placeholder="Enter your password" />
               <button type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button>
