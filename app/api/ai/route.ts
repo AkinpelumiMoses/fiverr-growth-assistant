@@ -75,7 +75,7 @@ export async function POST(request: Request) {
         content: typeof item.content === "string" ? item.content.slice(0, 1500) : "",
       })).filter((item) => item.content) : [];
       const attachmentItems = Array.isArray(body.attachments) ? body.attachments.slice(0, 5) : [];
-      const allowedMime = new Set(["application/pdf","text/plain","text/markdown","text/csv","application/json","image/jpeg","image/png","image/webp","image/gif"]);
+      const allowedMime = new Set(["application/pdf","text/plain","text/markdown","text/csv","application/json","image/jpeg","image/png","image/webp","image/gif","audio/webm","audio/mp4","audio/ogg","audio/mpeg","audio/wav"]);
       const inputParts: { type: string; text?: string; data?: string; mime_type?: string }[] = [{
         type: "text",
         text: `Use the seller context below to answer the seller's latest question. If there is not enough data, ask one focused follow-up question. Diagnose performance carefully: low impressions may relate to relevance, demand, competition or indexing; impressions without clicks may suggest title/thumbnail/positioning issues; clicks without orders may suggest offer, price, trust or conversion friction. Treat these as hypotheses, not facts about Fiverr's algorithm.
@@ -99,9 +99,10 @@ ${message}`
         const { data: file, error: downloadError } = await supabase.storage.from("ai-attachments").download(attachment.path);
         if (downloadError || !file) return NextResponse.json({ error: "An attachment could not be accessed. Please upload it again." }, { status: 400 });
         const bytes = Buffer.from(await file.arrayBuffer());
+        const isAudio = attachment.mimeType.startsWith("audio/");
         inputParts.push({
-          type: attachment.mimeType.startsWith("image/") ? "image" : attachment.mimeType === "application/pdf" ? "document" : "text",
-          ...(attachment.mimeType === "application/pdf" || attachment.mimeType.startsWith("image/") ? { data: bytes.toString("base64"), mime_type: attachment.mimeType } : { text: `Attached file: ${attachment.name}\\n\\n${bytes.toString("utf8").slice(0, 30000)}` }),
+          type: isAudio ? "audio" : attachment.mimeType.startsWith("image/") ? "image" : attachment.mimeType === "application/pdf" ? "document" : "text",
+          ...(isAudio || attachment.mimeType === "application/pdf" || attachment.mimeType.startsWith("image/") ? { data: bytes.toString("base64"), mime_type: attachment.mimeType } : { text: `Attached file: ${attachment.name}\\n\\n${bytes.toString("utf8").slice(0, 30000)}` }),
         });
       }
       multimodalInput = inputParts;
