@@ -462,3 +462,27 @@ button{-webkit-tap-highlight-color:transparent}
     transform:none!important;
   }
 }
+
+
+/* Official MILE wordmark and brand mark */
+.mile-brand-logo{
+  display:block;
+  width:clamp(116px,12vw,154px);
+  height:auto;
+  max-height:48px;
+  object-fit:contain;
+  object-position:left center;
+}
+.mile-footer-brand{
+  display:inline-flex;
+  align-items:center;
+  width:100px;
+  height:38px;
+  background:url("/mile-logo.svg") left center/contain no-repeat;
+  font-size:0!important;
+  letter-spacing:0!important;
+}
+.mile-footer-brand span{display:none}
+@media(max-width:760px){
+  .mile-brand-logo{width:116px;max-height:40px}
+}
