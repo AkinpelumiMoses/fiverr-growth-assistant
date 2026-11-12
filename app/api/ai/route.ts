@@ -110,14 +110,6 @@ ${message}`
       const { data: conversation, error: conversationError } = await supabase.from("ai_conversations").select("id,title").eq("id", body.conversationId!).eq("user_id", user.id).maybeSingle();
       if (conversationError || !conversation) return NextResponse.json({ error: "This conversation could not be found." }, { status: 404 });
       const userMessage = message || "Please review the attached files.";
-      const { error: messageSaveError } = await supabase.from("ai_messages").insert({
-        conversation_id: conversation.id,
-        user_id: user.id,
-        role: "user",
-        content: userMessage,
-        attachments: attachmentItems.map((item) => ({ name: item.name, mimeType: item.mimeType, size: item.size, path: item.path })),
-      });
-      if (messageSaveError) return NextResponse.json({ error: "Your message could not be saved. Please try again." }, { status: 500 });
     }
 
     // Use the stable generateContent REST shape for text and multimodal requests.
@@ -127,21 +119,44 @@ ${message}`
       else if (item.text) parts.push({ text: item.text });
     }
 
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM_BASE }] },
-        contents: [{ role: "user", parts }],
-        generationConfig: { maxOutputTokens: body.mode === "gig-analysis" ? 1800 : 1200 },
-      }),
-      signal: AbortSignal.timeout(45000),
-    });
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      console.error("Gemini generateContent failed:", { status: response.status, payload });
-      const detail = payload?.error?.message || `Gemini returned HTTP ${response.status}.`;
-      return NextResponse.json({ error: "The AI service could not complete your request. Please try again.", detail }, { status: response.status === 429 ? 429 : 503 });
+    // Retry transient Gemini overloads/timeouts on other currently supported stable models.
+    const modelFallbacks = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite"];
+    let payload: any = {};
+    let response: Response | null = null;
+    let lastFailure = "The AI providers did not return a response.";
+    for (const model of modelFallbacks) {
+      try {
+        const attempt = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: SYSTEM_BASE }] },
+            contents: [{ role: "user", parts }],
+            generationConfig: { maxOutputTokens: body.mode === "gig-analysis" ? 1800 : 1200 },
+          }),
+          signal: AbortSignal.timeout(16000),
+        });
+        const attemptPayload = await attempt.json().catch(() => ({}));
+        if (attempt.ok) {
+          response = attempt;
+          payload = attemptPayload;
+          break;
+        }
+        lastFailure = attemptPayload?.error?.message || `Gemini ${model} returned HTTP ${attempt.status}.`;
+        console.error("Gemini model attempt failed:", { model, status: attempt.status, detail: lastFailure });
+        if (![408, 429, 500, 502, 503, 504].includes(attempt.status)) {
+          return NextResponse.json({ error: "The AI service rejected this request.", detail: lastFailure }, { status: 502 });
+        }
+      } catch (attemptError) {
+        lastFailure = attemptError instanceof Error ? attemptError.message : "Gemini request timed out.";
+        console.error("Gemini model attempt timed out:", { model, detail: lastFailure });
+      }
+    }
+    if (!response) {
+      return NextResponse.json({
+        error: "The AI service is temporarily busy. Your message is still here—please try again shortly.",
+        detail: lastFailure,
+      }, { status: 503 });
     }
 
     const answer = (payload?.candidates?.[0]?.content?.parts ?? []).map((part: { text?: string }) => part.text ?? "").join("\n\n").trim();
@@ -163,6 +178,19 @@ ${message}`
 
     if (body.mode === "coach") {
       const conversationId = body.conversationId as string;
+      const userMessage = typeof body.message === "string" && body.message.trim() ? body.message.trim().slice(0, 2000) : "Please review the attached files.";
+      const attachmentItems = Array.isArray(body.attachments) ? body.attachments.slice(0, 5) : [];
+      const { error: messageSaveError } = await supabase.from("ai_messages").insert({
+        conversation_id: conversationId,
+        user_id: user.id,
+        role: "user",
+        content: userMessage,
+        attachments: attachmentItems.map((item) => ({ name: item.name, mimeType: item.mimeType, size: item.size, path: item.path })),
+      });
+      if (messageSaveError) {
+        console.error("Could not save user message:", messageSaveError.message);
+        return NextResponse.json({ error: "The coach replied, but your message could not be saved. Please retry.", detail: messageSaveError.message }, { status: 500 });
+      }
       const { error: assistantSaveError } = await supabase.from("ai_messages").insert({
         conversation_id: conversationId,
         user_id: user.id,
