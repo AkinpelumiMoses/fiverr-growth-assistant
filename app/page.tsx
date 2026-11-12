@@ -97,6 +97,7 @@ export default function Home(){
      </div>
     </div>
     <p className="mt-10 max-w-3xl text-[12px] leading-7 text-[#7b857d]">MILE does not promise clients, rankings, orders or guaranteed income. It gives freelancers a place to connect, discover opportunities and use practical tools to take better steps.</p>
+    </div>
   </section>
 
   <section className="mx-auto max-w-[1320px] px-5 py-20 md:px-8 md:py-28">
