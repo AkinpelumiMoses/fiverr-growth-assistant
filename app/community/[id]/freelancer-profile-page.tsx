@@ -54,9 +54,9 @@ export default function FreelancerProfilePage() {
     {label:"Other work",url:profile.other_work_url,icon:ExternalLink}
   ].filter(item=>item.url?.startsWith("https://")): [];
   const initials=(profile?.display_name||profile?.fiverr_username||"M").split(/[\s._-]+/).filter(Boolean).slice(0,2).map(part=>part[0]?.toUpperCase()).join("");
-  return <main className="min-h-screen bg-[#f7f8f7] px-4 py-7 text-[#222325] md:px-8 md:py-10"><div className="mx-auto max-w-5xl">
+  return <main className="freelancer-profile-page min-h-screen bg-[#f3f5f1] px-4 py-7 text-[#17231b] md:px-8 md:py-10"><div className="mx-auto max-w-5xl">
     <Link href="/community" className="mb-6 inline-flex items-center gap-2 text-xs font-semibold text-[#69736c] hover:text-[#168B56]"><ArrowLeft size={15}/> Back to community</Link>
-    {loading?<div className="h-96 animate-pulse rounded-3xl border border-[#e5eae6] bg-white"/>:error?<div role="alert" className="rounded-2xl border border-[#e5eae6] bg-white p-8 text-sm text-[#69736c]">{error}</div>:profile&&<div className="overflow-hidden rounded-3xl border border-[#e5eae6] bg-white shadow-[0_12px_40px_rgba(27,42,32,.04)]">
+    {loading?<div className="h-96 animate-pulse rounded-3xl border border-[#e5eae6] bg-white"/>:error?<div role="alert" className="rounded-2xl border border-[#e5eae6] bg-white p-8 text-sm text-[#69736c]">{error}</div>:profile&&<div className="profile-surface overflow-hidden rounded-3xl border border-[#e1e7e0] bg-white shadow-[0_12px_40px_rgba(27,42,32,.04)]">
       <div className="h-2 bg-[#168B56]"/>
       <div className="p-6 md:p-10">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
