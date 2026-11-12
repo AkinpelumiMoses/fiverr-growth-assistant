@@ -162,7 +162,7 @@ export default function DirectMessages() {
   const active=conversations.find(item=>item.id===activeId);
   const unreadTotal=conversations.reduce((sum,item)=>sum+item.unread,0);
 
-  return <main className="min-h-screen bg-[#f7f8f7] px-4 py-6 text-[#222325] md:px-8 md:py-10">
+  return <main className="messages-page min-h-screen bg-[#f3f5f1] px-4 py-6 text-[#17231b] md:px-8 md:py-10">
     <div className="mx-auto max-w-6xl">
       <button onClick={()=>router.push("/dashboard")} className="mb-5 inline-flex items-center gap-2 text-xs font-semibold text-[#69736c] hover:text-[#168B56]"><ArrowLeft size={15}/> Back to workspace</button>
       <div className="mb-6 flex items-end justify-between gap-3"><div><p className="text-[11px] font-bold tracking-[.16em] text-[#168B56]">MILE COMMUNITY</p><h1 className="mt-2 text-3xl font-extrabold tracking-tight">Messages</h1><p className="mt-2 text-sm text-[#7b837c]">Build relationships. Share ideas. Move work forward.</p></div>{unreadTotal>0&&<span className="rounded-full bg-[#eaf8ef] px-3 py-2 text-xs font-bold text-[#168B56]">{unreadTotal} unread</span>}</div>
