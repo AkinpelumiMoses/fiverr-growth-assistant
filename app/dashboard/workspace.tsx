@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import CommunityDirectory from "@/app/community/community-directory";
 import KeywordResearch from "@/app/dashboard/keyword-research";
+import CompetitorResearch from "@/app/dashboard/competitor-research";
 import { signOut } from "@/app/auth/actions";
 import {
   Activity, ArrowUpRight, Bot, BriefcaseBusiness, ChartNoAxesCombined, Users, Bell,
@@ -460,7 +461,7 @@ export default function DashboardWorkspace() {
             </div>
           </div>}
           {section === "Keyword Research" && <KeywordResearch />}
-          {section === "Competitor Research" && <div className="max-w-3xl rounded-xl border border-[#e9ece9] bg-white p-7 md:p-10"><Search size={25} className="text-[#168B56]"/><p className="mt-5 text-xs font-bold text-[#168B56]">NEXT RESEARCH MODULE</p><h2 className="mt-2 text-2xl font-extrabold">Competitor Research</h2><p className="mt-3 text-sm leading-6 text-[#777d77]">Compare public gig positioning, offers and pricing using accessible information and seller-provided links. The tag research workspace is now available under Keyword Research.</p></div>}
+          {section === "Competitor Research" && <CompetitorResearch />}
         </>}
         <footer className="mt-10 flex flex-col justify-between gap-2 border-t border-[#e9ece9] py-5 text-[10px] text-[#929992] sm:flex-row"><span>MILE · Freelancer workspace</span><span>Guidance, not guarantees of rankings or orders.</span></footer>
       </div>
