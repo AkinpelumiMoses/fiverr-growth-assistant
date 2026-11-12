@@ -175,11 +175,11 @@ export default function DashboardWorkspace() {
     if ((!message && queuedFiles.length === 0) || coachLoading) return false;
     setCoachLoading(true); setNotice(""); setUploadingAttachments(queuedFiles.length > 0);
     let conversationId = activeConversationId;
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-    if (!currentUser) { setNotice("Please sign in again before sending a message."); setCoachLoading(false); return false; }
     const nextMessages = [...coachMessages, { role: "user" as const, content: message || "Please review the attached files.", attachments: queuedFiles.map((file) => ({ name: file.name, mimeType: file.type, size: file.size })) }];
     setCoachMessages(nextMessages); setCoachInput(""); setCoachAttachments([]);
     try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) throw new Error("Please sign in again before sending a message.");
       if (!conversationId) {
         const { data: created, error } = await supabase.from("ai_conversations").insert({ user_id: currentUser.id, title: message.slice(0, 64) || queuedFiles[0]?.name || "New conversation" }).select("id,title,updated_at").single();
         if (error || !created) throw new Error(error?.message || "Could not create a conversation.");
@@ -197,7 +197,8 @@ export default function DashboardWorkspace() {
       setUploadingAttachments(false);
       const response = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "coach", message: message || "Please review the attached files.", conversationId, attachments: attachmentMeta, history: coachMessages.slice(-8) }) });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "The coach could not respond.");
+      if (!response.ok) throw new Error([result.error, result.detail].filter(Boolean).join(" — ") || "The coach could not respond.");
+      if (typeof result.answer !== "string" || !result.answer.trim()) throw new Error("The coach returned an empty reply. Please try again.");
       const displayAttachments = await Promise.all(attachmentMeta.map(async (file) => { const { data: signed } = await supabase.storage.from("ai-attachments").createSignedUrl(file.path, 300); return { ...file, url: signed?.signedUrl }; }));
       const completed = [...nextMessages.slice(0, -1), { ...nextMessages[nextMessages.length - 1], attachments: displayAttachments }, { role: "assistant" as const, content: result.answer }];
       setCoachMessages(completed);
