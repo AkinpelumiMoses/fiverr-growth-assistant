@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
+import BrandLoader from "./components/brand-loader";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -13,5 +14,5 @@ export const metadata: Metadata = {
   description:"MILE connects freelancers to opportunities, collaborators and practical tools that move their work forward."
 };
 export default function RootLayout({children}:{children:React.ReactNode}){
-  return <html lang="en" suppressHydrationWarning><body className={montserrat.variable}>{children}</body></html>;
+  return <html lang="en" suppressHydrationWarning><body className={montserrat.variable}><BrandLoader />{children}</body></html>;
 }
