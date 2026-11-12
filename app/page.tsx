@@ -53,11 +53,7 @@ export default function Home() {
       <header className="mile-header">
         <div className="mile-header-inner">
           <Link href="/" className="mile-brand" aria-label="MILE home">
-            <span className="mile-brand-mark">M</span>
-            <span className="mile-brand-copy">
-              <strong>MILE</strong>
-              <small>EVERY STEP HAS A PURPOSE</small>
-            </span>
+            <img src="/mile-logo.svg" alt="MILE — Every step has a purpose" className="mile-brand-logo" />
           </Link>
 
           <nav className="mile-desktop-nav" aria-label="Main navigation">
