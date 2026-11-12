@@ -383,3 +383,82 @@ button{-webkit-tap-highlight-color:transparent}
 @media(prefers-reduced-motion:reduce){
  .mile-home *,.mile-home *:before,.mile-home *:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
+
+
+/* MILE hero — quiet photographic movement, keeping the established type system */
+.mile-hero-image{
+  transform:scale(1.035);
+  transform-origin:center;
+  animation:mile-hero-image-drift 34s ease-in-out infinite alternate;
+  will-change:transform;
+}
+.mile-hero-image::before,
+.mile-hero-image::after{
+  content:"";
+  position:absolute;
+  display:block;
+  background-size:cover;
+  background-position:center;
+  border:1px solid rgba(255,255,255,.34);
+  box-shadow:0 24px 70px rgba(0,0,0,.2);
+  opacity:.76;
+  pointer-events:none;
+}
+.mile-hero-image::before{
+  top:11%;
+  right:8%;
+  width:clamp(190px,21vw,310px);
+  height:clamp(230px,30vw,410px);
+  background-image:url("https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=85");
+  transform:rotate(2.5deg);
+  animation:mile-photo-drift-one 19s ease-in-out infinite alternate;
+}
+.mile-hero-image::after{
+  right:26%;
+  bottom:10%;
+  width:clamp(170px,18vw,255px);
+  height:clamp(125px,14vw,190px);
+  background-image:url("https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=900&q=85");
+  transform:rotate(-2deg);
+  animation:mile-photo-drift-two 23s ease-in-out infinite alternate;
+}
+.mile-hero-shade{
+  background:linear-gradient(90deg,rgba(16,27,20,.94) 0%,rgba(16,27,20,.82) 40%,rgba(16,27,20,.43) 100%),linear-gradient(0deg,rgba(16,27,20,.5),transparent 58%);
+}
+@keyframes mile-hero-image-drift{
+  from{transform:scale(1.035) translate3d(-.35%,0,0)}
+  to{transform:scale(1.105) translate3d(.45%,-.4%,0)}
+}
+@keyframes mile-photo-drift-one{
+  from{transform:translate3d(0,0,0) rotate(2.5deg)}
+  to{transform:translate3d(-9px,12px,0) rotate(1deg)}
+}
+@keyframes mile-photo-drift-two{
+  from{transform:translate3d(0,0,0) rotate(-2deg)}
+  to{transform:translate3d(10px,-9px,0) rotate(-.5deg)}
+}
+@media(max-width:760px){
+  .mile-hero-image::before{
+    top:10%;
+    right:-2%;
+    width:150px;
+    height:190px;
+    opacity:.48;
+  }
+  .mile-hero-image::after{
+    right:31%;
+    bottom:12%;
+    width:135px;
+    height:100px;
+    opacity:.42;
+  }
+  .mile-hero-shade{
+    background:linear-gradient(90deg,rgba(16,27,20,.91),rgba(16,27,20,.69)),linear-gradient(0deg,rgba(16,27,20,.65),transparent 68%);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .mile-hero-image,.mile-hero-image::before,.mile-hero-image::after{
+    animation:none!important;
+    transform:none!important;
+  }
+}
