@@ -7,8 +7,8 @@ export default function BrandLoader() {
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
-    const start = window.setTimeout(() => setLeaving(true), 1050);
-    const finish = window.setTimeout(() => setVisible(false), 1650);
+    const start = window.setTimeout(() => setLeaving(true), 2850);
+    const finish = window.setTimeout(() => setVisible(false), 3450);
     return () => {
       window.clearTimeout(start);
       window.clearTimeout(finish);
@@ -18,12 +18,18 @@ export default function BrandLoader() {
   if (!visible) return null;
 
   return (
-    <div className={`mile-loader${leaving ? " is-leaving" : ""}`} role="status" aria-label="Loading MILE">
+    <div className={`mile-loader mile-loader-premium${leaving ? " is-leaving" : ""}`} role="status" aria-label="Loading MILE">
       <div className="mile-loader-inner">
-        <img className="mile-loader-mark" src="/mile-icon.svg" alt="" />
+        <div className="mile-loader-symbol-stage">
+          <span className="mile-loader-orbit mile-loader-orbit-one" />
+          <span className="mile-loader-orbit mile-loader-orbit-two" />
+          <img className="mile-loader-mark" src="/mile-icon.svg" alt="" />
+          <span className="mile-loader-dot" />
+        </div>
         <img className="mile-loader-wordmark" src="/mile-logo.svg" alt="MILE" />
-        <div className="mile-loader-line" aria-hidden="true" />
-        <span className="mile-loader-caption">Every step has a purpose</span>
+        <p className="mile-loader-message">A little further, together.</p>
+        <div className="mile-loader-track" aria-hidden="true"><span /></div>
+        <span className="mile-loader-caption">EVERY STEP HAS A PURPOSE</span>
       </div>
     </div>
   );
