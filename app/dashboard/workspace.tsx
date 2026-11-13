@@ -312,13 +312,11 @@ export default function DashboardWorkspace() {
       if (!response.ok) throw new Error(result.error || "Your voice note could not be transcribed.");
       const transcript = typeof result.transcript === "string" ? result.transcript.trim() : "";
       if (!transcript) throw new Error("I couldn't hear clear speech in that recording. Please try again.");
-      const sent = await sendCoachMessage(undefined, { message: transcript, attachments: [] });
-      if (sent) {
-        clearVoicePreview();
-        setNotice("Your transcribed voice note has been sent to the Growth Coach.");
-      } else {
-        setCoachInput(transcript);
-      }
+      // Never send an AI-generated transcript without letting the user verify it.
+      // Put the transcript in the composer so it can be corrected before submission.
+      setCoachInput(transcript);
+      clearVoicePreview();
+      setNotice("Transcript ready. Review the text, correct anything that is wrong, then press Send.");
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Unable to process this voice note.");
     } finally { setVoiceBusy(false); }
