@@ -67,39 +67,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Your recording could not be uploaded for transcription. Please try again." }, { status: 503 });
     }
 
-    // Gemini 3.5 Transcribe is the right dedicated endpoint, but production
-    // returned completed interactions with zero output tokens. Use the stable
-    // multimodal Flash-Lite model as a transcription fallback instead.
-    const transcription = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent", {
+    // Use Google's dedicated speech-to-text model, not a general audio model.
+    // The prior general model was returning the literal marker "<noise>".
+    const transcription = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-transcribe:generateContent", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({
         contents: [{
-          role: "user",
-          parts: [
-            {
-              fileData: {
-                fileUri,
-                mimeType,
-              },
+          parts: [{
+            fileData: {
+              fileUri,
+              mimeType,
             },
-            {
-              text: "Transcribe the spoken words in this audio accurately and verbatim. Return only the words that were spoken. Do not summarize, answer, interpret, or add commentary. If the audio contains no intelligible speech, return an empty response.",
-            },
-          ],
+          }],
         }],
         generationConfig: {
-          temperature: 0,
-          thinkingConfig: { thinkingLevel: "minimal" },
+          audioTranscriptionConfig: {
+            mode: "VERBATIM",
+          },
         },
       }),
       signal: AbortSignal.timeout(35000),
     });
     const result = await transcription.json().catch(() => ({}));
     if (!transcription.ok) {
-      console.error("Gemini fallback transcription failed:", transcription.status, result?.error?.message);
+      console.error("Gemini dedicated transcription failed:", transcription.status, result?.error?.message);
       return NextResponse.json(
-        { error: "The transcription service could not process that recording. Please try again." },
+        { error: "The speech-to-text service could not process that recording. Please try again." },
         { status: 503 },
       );
     }
@@ -108,11 +102,12 @@ export async function POST(request: Request) {
       .flatMap((candidate: { content?: { parts?: { text?: string }[] } }) => candidate.content?.parts ?? [])
       .map((part: { text?: string }) => typeof part.text === "string" ? part.text : "")
       .join("\\n")
+      .replace(/<noise>|\\[noise\\]|\\(noise\\)/gi, "")
       .trim();
     if (!transcript) {
-      console.error("Gemini fallback returned no transcript:", JSON.stringify(result).slice(0, 1500));
+      console.error("Gemini dedicated transcription returned no speech:", JSON.stringify(result).slice(0, 1500));
       return NextResponse.json(
-        { error: "I couldn't detect clear speech in that recording. Please record a short note and try again." },
+        { error: "I couldn't detect clear spoken words in that recording. Please try again in a quieter place." },
         { status: 422 },
       );
     }
