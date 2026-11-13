@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     if (!audioBase64 || !allowed.has(normalizedMime) || audioBase64.length > 12_000_000) {
       return NextResponse.json({ error: "That voice recording is invalid or too large. Please record a shorter note." }, { status: 400 });
     }
-    const models = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash"];
+    const models = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite"];
     let payload: any = null;
     let lastFailure = "The transcription service did not return a response.";
     for (const model of models) {
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
             ] }],
             generationConfig: { temperature: 0, maxOutputTokens: 1200 }
           }),
-          signal: AbortSignal.timeout(14000),
+          signal: AbortSignal.timeout(25000),
         });
         const attemptPayload = await attempt.json().catch(() => ({}));
         if (attempt.ok) {
