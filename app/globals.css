@@ -1335,3 +1335,52 @@ body{font-family:Arial,Helvetica,sans-serif!important;background:#f7f7f7!importa
 .workspace-content .mile-overview .mile-welcome p{color:#D3E2D8}
 .workspace-content .mile-overview button:focus-visible,.workspace-content .mile-overview a:focus-visible{outline:3px solid #9BCB69!important;outline-offset:3px!important}
 @media(max-width:640px){.workspace-content .mile-overview .mile-stat{min-height:132px;padding:16px!important}.workspace-content .mile-overview .mile-stat p{font-size:26px!important}.workspace-content .mile-overview .mile-welcome{border-radius:18px!important}}
+
+
+/* MILE navigation rail: intentional contrast, rhythm and active states */
+.workspace-sidebar{
+  background:#111512!important;
+  border-right:1px solid #2A342D!important;
+  box-shadow:8px 0 28px rgba(12,20,14,.055)!important;
+  padding:22px 12px 16px!important;
+}
+.workspace-sidebar>div:first-child{margin-bottom:27px!important}
+.workspace-sidebar nav{gap:23px!important;scrollbar-width:thin;scrollbar-color:#435047 transparent}
+.workspace-sidebar nav>div>p{color:#87958A!important;font-size:9px!important;letter-spacing:.16em!important;padding-inline:12px!important}
+.workspace-sidebar .mile-sidebar-link{position:relative;min-height:43px!important;border:1px solid transparent!important;color:#C1CCC3!important;font-size:12px!important;letter-spacing:.005em}
+.workspace-sidebar .mile-sidebar-link svg{flex-shrink:0}
+.workspace-sidebar .mile-sidebar-link:hover{background:#202A23!important;color:#FFFFFF!important}
+.workspace-sidebar .mile-sidebar-link.mile-sidebar-active{
+  background:#26372B!important;
+  border-color:#3B5140!important;
+  color:#FFFFFF!important;
+  box-shadow:inset 3px 0 0 #D7F36A!important;
+}
+.workspace-sidebar .mile-sidebar-link.mile-sidebar-active svg{color:#D7F36A!important}
+.workspace-sidebar .mile-sidebar-link:focus-visible{outline:2px solid #D7F36A!important;outline-offset:2px!important}
+.workspace-sidebar>div:last-child{border-color:#303B33!important}
+.workspace-sidebar>div:last-child button:hover{background:#202A23!important}
+.workspace-sidebar form button:hover{background:#342322!important}
+.workspace-sidebar .rounded-xl{box-shadow:none!important}
+.workspace-sidebar a{ text-decoration:none!important}
+.workspace-sidebar button,.workspace-sidebar a{white-space:nowrap}
+@media(min-width:1024px){
+ .workspace-sidebar{height:100dvh!important}
+ .workspace-sidebar nav{overscroll-behavior:contain}
+}
+@media(max-width:1023px){
+ .workspace-sidebar{width:min(300px,86vw)!important;padding:20px 14px 16px!important;box-shadow:18px 0 48px rgba(0,0,0,.24)!important}
+}
+.workspace-content .mile-overview .mile-welcome{
+ background:#080B09!important;
+ background-image:none!important;
+ box-shadow:0 18px 42px rgba(0,0,0,.12)!important;
+}
+.workspace-content .mile-overview .mile-welcome .rounded-2xl{
+ background:#171E19!important;
+ border:1px solid #303B33!important;
+}
+.workspace-content .mile-overview .mile-welcome .rounded-full.border{
+ border-color:#465348!important;
+ background:#171E19!important;
+}
