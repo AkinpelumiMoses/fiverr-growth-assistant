@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { MessageCircle, Heart, Send, ImagePlus, BriefcaseBusiness, Handshake, MessageSquareText, Trophy, Sparkles, MoreHorizontal, Trash2, ExternalLink, Users } from "lucide-react";
+import { MessageCircle, Heart, Send, ImagePlus, BriefcaseBusiness, Handshake, MessageSquareText, Trophy, Users, MoreHorizontal, Trash2, ExternalLink, Users } from "lucide-react";
 
 type PostType = "showcase" | "opportunity" | "collaboration" | "discussion" | "milestone";
 type Post = {
@@ -12,7 +12,7 @@ type Post = {
 };
 type Comment = { id: string; post_id: string; author_id: string; content: string; created_at: string; author?: { display_name: string | null; avatar_url: string | null } };
 const categories: { id: PostType | "all"; label: string; icon: typeof MessageSquareText }[] = [
-  { id: "all", label: "For you", icon: Sparkles }, { id: "showcase", label: "Showcase", icon: ImagePlus },
+  { id: "all", label: "For you", icon: Users }, { id: "showcase", label: "Showcase", icon: ImagePlus },
   { id: "opportunity", label: "Opportunity", icon: BriefcaseBusiness }, { id: "collaboration", label: "Collaboration", icon: Handshake },
   { id: "discussion", label: "Discussion", icon: MessageSquareText }, { id: "milestone", label: "Milestones", icon: Trophy },
 ];
