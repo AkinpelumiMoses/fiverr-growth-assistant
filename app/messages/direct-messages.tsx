@@ -60,7 +60,7 @@ export default function DirectMessages() {
 
   const openConversation=useCallback(async(id:string)=>{
     setActiveId(id);
-    const {data,error:loadError}=await supabase.from("direct_messages").select("id,conversation_id,sender_id,body,created_at,read_at").eq("conversation_id",id).order("created_at",{ascending:true}).limit(300);
+    const {data,error:loadError}=await supabase.from("direct_messages").select("id,conversation_id,sender_id,body,created_at,read_at,media_path,media_type,duration_seconds").eq("conversation_id",id).order("created_at",{ascending:true}).limit(300);
     if(loadError){setError(loadError.message);return;}
     setMessages(await Promise.all((data??[]).map(async(item)=>{const message=item as Message;if(!message.media_path)return message;const {data:signed}=await supabase.storage.from("message-voice-notes").createSignedUrl(message.media_path,3600);return {...message,audio_url:signed?.signedUrl??null};})));
     const now=new Date().toISOString();
@@ -83,7 +83,7 @@ export default function DirectMessages() {
         if(startError){setError(startError.message);setLoading(false);return;}
         await loadConversations(user.id);
         setActiveId(conversationId);
-        const {data:history}=await supabase.from("direct_messages").select("id,conversation_id,sender_id,body,created_at,read_at").eq("conversation_id",conversationId).order("created_at",{ascending:true}).limit(300);
+        const {data:history}=await supabase.from("direct_messages").select("id,conversation_id,sender_id,body,created_at,read_at,media_path,media_type,duration_seconds").eq("conversation_id",conversationId).order("created_at",{ascending:true}).limit(300);
         if(alive)setMessages(await Promise.all((history??[]).map(async(item)=>{const message=item as Message;if(!message.media_path)return message;const {data:signed}=await supabase.storage.from("message-voice-notes").createSignedUrl(message.media_path,3600);return {...message,audio_url:signed?.signedUrl??null};})));
         router.replace("/messages");
       } else {
