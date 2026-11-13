@@ -566,7 +566,7 @@ export default function DashboardWorkspace() {
         <form action={signOut}><button type="submit" title="Log out" className={`flex min-h-[42px] w-full items-center ${sidebarCollapsed?"justify-center":"gap-3 px-3"} rounded-lg text-[12px] font-semibold text-[#AEB9B0] transition hover:bg-[#342322] hover:text-white`}><LogOut size={17}/>Log out</button></form>
       </div>
     </aside>
-    <section className={`workspace-main min-h-screen transition-[padding] duration-200 ${sidebarCollapsed ? "lg:pl-[76px]" : "lg:pl-[260px]"}`}>
+    <section className="workspace-main min-h-screen lg:pl-[68px]">
       <header className="workspace-topbar sticky top-0 z-20 border-b border-[#e9ece9] bg-white/95 backdrop-blur">
         <div className="flex min-h-[76px] items-center justify-between gap-3 px-4 md:px-8">
           <div className="flex min-w-0 items-center gap-3"><button onClick={() => setMobileOpen(true)} className="rounded-lg p-2 hover:bg-[#f3f5f3] lg:hidden" aria-label="Open navigation"><Menu size={20}/></button><div className="min-w-0"><p className="hidden text-[10px] font-semibold uppercase tracking-[.12em] text-[#929992] sm:block">MILE workspace</p><h1 className="truncate text-lg font-bold tracking-tight text-[#202820]">{section}</h1></div></div>
