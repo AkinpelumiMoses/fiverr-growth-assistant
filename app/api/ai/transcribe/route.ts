@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
         "X-Goog-Upload-Command": "upload, finalize",
       },
       body: audioBytes,
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(20000),
     });
     const uploadedFile = await upload.json().catch(() => ({}));
     const fileUri = uploadedFile?.file?.uri;
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
           },
         },
       }),
-      signal: AbortSignal.timeout(25000),
+      signal: AbortSignal.timeout(45000),
     });
     const result = await transcription.json().catch(() => ({}));
     if (!transcription.ok) {
@@ -87,8 +87,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "The transcription service could not understand that recording. Please try again." }, { status: 503 });
     }
 
+    // Do not treat an incomplete Interactions response as a successful transcript.
+    if (result?.status && result.status !== "completed") {
+      console.error("Gemini transcription did not complete:", result.status, result?.error?.message);
+      return NextResponse.json(
+        { error: "The transcription did not finish in time. Please try a shorter voice note." },
+        { status: 504 },
+      );
+    }
+
     const transcript = typeof result?.output_text === "string" ? result.output_text.trim() : "";
     if (!transcript) {
+      console.error("Gemini returned no transcript:", JSON.stringify(result).slice(0, 1500));
       return NextResponse.json({ error: "I couldn't detect clear speech in that recording. Please try again in a quieter place." }, { status: 422 });
     }
     return NextResponse.json({ transcript });
