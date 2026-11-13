@@ -326,20 +326,9 @@ export default function DashboardWorkspace() {
 
   async function sendVoiceAudioToCoach() {
     if (!voiceBlob || voiceBusy || coachLoading) return;
-    let audioFile: File;
-    try {
-      const compatibleAudio = await convertVoiceToWav(voiceBlob);
-      audioFile = new File([compatibleAudio], `mile-voice-note-${Date.now()}.wav`, { type: "audio/wav" });
-    } catch {
-      setNotice("This recording could not be prepared for the AI service. Please record it again or use Transcribe and send.");
-      return;
-    }
-    setNotice("");
-    const sent = await sendCoachMessage(undefined, {
-      message: "Please listen to my voice note and respond to what I said.",
-      attachments: [audioFile],
-    });
-    if (sent) clearVoicePreview();
+    // Send voice through the same text-based coach path after reliable transcription.
+    // This avoids the extra failure point of asking the final coach response to process audio.
+    await transcribeVoiceNote();
   }
 
   useEffect(() => () => {
@@ -639,7 +628,7 @@ export default function DashboardWorkspace() {
       {voicePreviewUrl ? (
         <>
           <button type="button" onClick={transcribeVoiceNote} disabled={voiceBusy || coachLoading} title="Transcribe and send" aria-label="Transcribe and send" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#6b7280] hover:bg-[#f1f3f1] disabled:opacity-40"><AudioLines size={18} /></button>
-          <button type="button" onClick={sendVoiceAudioToCoach} disabled={voiceBusy || coachLoading} title="Send audio" aria-label="Send audio" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1DBF73] text-white hover:bg-[#15965b] disabled:opacity-40"><Send size={17} /></button>
+          <button type="button" onClick={sendVoiceAudioToCoach} disabled={voiceBusy || coachLoading} title="Send voice note" aria-label="Send voice note" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1DBF73] text-white hover:bg-[#15965b] disabled:opacity-40"><Send size={17} /></button>
           <button type="button" onClick={clearVoicePreview} title="Discard recording" aria-label="Discard recording" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#929992] hover:bg-red-50 hover:text-red-600"><X size={17} /></button>
         </>
       ) : (
