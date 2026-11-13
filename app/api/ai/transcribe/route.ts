@@ -67,27 +67,37 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Your recording could not be uploaded for transcription. Please try again." }, { status: 503 });
     }
 
-    // Use the documented GenerateContent endpoint for Gemini 3.5 Transcribe.
-    // The Interactions endpoint was returning status=completed with zero output
-    // tokens in production, so it produced no usable transcript.
-    const transcription = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-transcribe:generateContent", {
+    // Gemini 3.5 Transcribe is the right dedicated endpoint, but production
+    // returned completed interactions with zero output tokens. Use the stable
+    // multimodal Flash-Lite model as a transcription fallback instead.
+    const transcription = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({
         contents: [{
-          parts: [{
-            fileData: {
-              fileUri,
-              mimeType,
+          role: "user",
+          parts: [
+            {
+              fileData: {
+                fileUri,
+                mimeType,
+              },
             },
-          }],
+            {
+              text: "Transcribe the spoken words in this audio accurately and verbatim. Return only the words that were spoken. Do not summarize, answer, interpret, or add commentary. If the audio contains no intelligible speech, return an empty response.",
+            },
+          ],
         }],
+        generationConfig: {
+          temperature: 0,
+          thinkingConfig: { thinkingLevel: "minimal" },
+        },
       }),
-      signal: AbortSignal.timeout(45000),
+      signal: AbortSignal.timeout(35000),
     });
     const result = await transcription.json().catch(() => ({}));
     if (!transcription.ok) {
-      console.error("Gemini transcription request failed:", transcription.status, result?.error?.message);
+      console.error("Gemini fallback transcription failed:", transcription.status, result?.error?.message);
       return NextResponse.json(
         { error: "The transcription service could not process that recording. Please try again." },
         { status: 503 },
@@ -100,9 +110,9 @@ export async function POST(request: Request) {
       .join("\\n")
       .trim();
     if (!transcript) {
-      console.error("Gemini returned no transcript:", JSON.stringify(result).slice(0, 1500));
+      console.error("Gemini fallback returned no transcript:", JSON.stringify(result).slice(0, 1500));
       return NextResponse.json(
-        { error: "Gemini received the recording but returned no words. Please record a short note and try again." },
+        { error: "I couldn't detect clear speech in that recording. Please record a short note and try again." },
         { status: 422 },
       );
     }
