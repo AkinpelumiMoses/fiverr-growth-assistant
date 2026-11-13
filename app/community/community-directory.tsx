@@ -103,7 +103,8 @@ export default function CommunityDirectory() {
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return profiles.filter(profile => {\n      if (profile.id === currentUserId) return false;
+    return profiles.filter(profile => {
+      if (profile.id === currentUserId) return false;
       const matchesNiche = niche === "All niches" || profile.primary_niche === niche;
       const matchesPlatform = platform === "All platforms" || (profile.work_platforms ?? []).includes(platform);
       const haystack = [profile.display_name, profile.fiverr_username, profile.primary_niche, profile.skills, profile.bio, profile.seller_level, ...(profile.work_platforms ?? [])].filter(Boolean).join(" ").toLowerCase();
