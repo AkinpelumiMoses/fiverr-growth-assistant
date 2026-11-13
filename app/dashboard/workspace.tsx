@@ -125,7 +125,12 @@ export default function DashboardWorkspace() {
         skills: p?.skills ?? "",
         experience_years: p?.experience_years == null ? "" : String(p.experience_years),
         ideal_client: privateProfileResult.data?.ideal_client ?? "",
-        community_discoverable: p?.community_discoverable ?? false,\n        availability_status: p?.availability_status ?? "open",\n        services_offered: p?.services_offered ?? "",\n        looking_for: p?.looking_for ?? "",\n        collaboration_interests: p?.collaboration_interests ?? [],\n        preferred_project_types: p?.preferred_project_types ?? [],
+        community_discoverable: p?.community_discoverable ?? false,
+        availability_status: p?.availability_status ?? "open",
+        services_offered: p?.services_offered ?? "",
+        looking_for: p?.looking_for ?? "",
+        collaboration_interests: p?.collaboration_interests ?? [],
+        preferred_project_types: p?.preferred_project_types ?? [],
       });
       setGigs((gigsResult.data ?? []) as Gig[]);
       setPerformance((performanceResult.data ?? []) as Performance[]);
@@ -433,7 +438,12 @@ export default function DashboardWorkspace() {
       fiverr_profile_url: profileForm.fiverr_profile_url.trim() || null,
       skills: profileForm.skills.trim() || null,
       experience_years: profileForm.experience_years.trim() ? Number(profileForm.experience_years) : null,
-      community_discoverable: profileForm.community_discoverable,\n      availability_status: profileForm.availability_status,\n      services_offered: profileForm.services_offered.trim() || null,\n      looking_for: profileForm.looking_for.trim() || null,\n      collaboration_interests: profileForm.collaboration_interests,\n      preferred_project_types: profileForm.preferred_project_types,
+      community_discoverable: profileForm.community_discoverable,
+      availability_status: profileForm.availability_status,
+      services_offered: profileForm.services_offered.trim() || null,
+      looking_for: profileForm.looking_for.trim() || null,
+      collaboration_interests: profileForm.collaboration_interests,
+      preferred_project_types: profileForm.preferred_project_types,
       onboarding_completed: true,
       updated_at: new Date().toISOString(),
     }).select("*").single();
