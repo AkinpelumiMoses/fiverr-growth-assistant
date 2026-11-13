@@ -532,7 +532,9 @@ export default function DashboardWorkspace() {
       <div className="mt-5 flex flex-1 flex-col items-center gap-2">
         {navigationGroups.flatMap(group=>group.items).slice(0,6).map(item=>{const Icon=item.icon;return <button key={item.label} onClick={()=>go(item.label)} title={item.label} aria-label={item.label} className={`flex h-10 w-10 items-center justify-center rounded-xl transition ${section===item.label?"bg-[#26372B] text-[#D7F36A]":"text-[#AAB7AD] hover:bg-[#202A23] hover:text-white"}`}><Icon size={18}/></button>})}
       </div>
-      <button onClick={()=>go("Profile")} title="Profile and settings" className="flex h-10 w-10 items-center justify-center rounded-full border border-[#435047] bg-[#26342A] text-[#E4EEE6]">{initials}</button>
+      <button onClick={()=>go("Profile")} title="Profile and settings" aria-label="Open profile and settings" className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-[#435047] bg-[#26342A] text-xs font-bold text-[#E4EEE6] transition hover:border-[#D7F36A]">
+        {profile?.avatar_url ? <img src={profile.avatar_url} alt={profileForm.display_name || "Your profile photo"} className="h-full w-full object-cover" /> : initials}
+      </button>
     </aside>
     {(!sidebarCollapsed || mobileOpen) && <button aria-label="Close navigation panel" onClick={()=>{setSidebarCollapsed(true);setMobileOpen(false)}} className="fixed inset-0 z-30 bg-[#080B09]/45 backdrop-blur-[1px]"/>}
 <aside style={{ width: 280 }} className={`workspace-sidebar fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[#29322C] bg-[#111512] px-3 py-5 transition-transform duration-200 ease-out ${(!sidebarCollapsed || mobileOpen) ? "translate-x-0" : "-translate-x-full"}`}>
