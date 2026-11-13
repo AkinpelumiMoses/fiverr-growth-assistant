@@ -67,47 +67,37 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Your recording could not be uploaded for transcription. Please try again." }, { status: 503 });
     }
 
-    // Use Google's dedicated speech-to-text model, not a general audio model.
-    // The prior general model was returning the literal marker "<noise>".
-    const transcription = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-transcribe:generateContent", {
+    // Gemini 3.5 Transcribe file uploads must use the Interactions API.
+    // Audio is passed as an AudioContent object with uri and mime_type.
+    const transcription = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({
-        contents: [{
-          parts: [{
-            fileData: {
-              fileUri,
-              mimeType,
-            },
-          }],
-        }],
-        generationConfig: {
-          audioTranscriptionConfig: {
-            mode: "VERBATIM",
+        model: "gemini-3.5-transcribe",
+        input: [
+          {
+            type: "audio",
+            uri: fileUri,
+            mime_type: mimeType,
           },
-        },
+        ],
       }),
-      signal: AbortSignal.timeout(35000),
+      signal: AbortSignal.timeout(45000),
     });
     const result = await transcription.json().catch(() => ({}));
     if (!transcription.ok) {
-      console.error("Gemini dedicated transcription failed:", transcription.status, result?.error?.message);
+      console.error("Gemini Interactions transcription failed:", transcription.status, result?.error?.message);
       return NextResponse.json(
         { error: "The speech-to-text service could not process that recording. Please try again." },
         { status: 503 },
       );
     }
 
-    const transcript = (result?.candidates ?? [])
-      .flatMap((candidate: { content?: { parts?: { text?: string }[] } }) => candidate.content?.parts ?? [])
-      .map((part: { text?: string }) => typeof part.text === "string" ? part.text : "")
-      .join("\\n")
-      .replace(/<noise>|\\[noise\\]|\\(noise\\)/gi, "")
-      .trim();
-    if (!transcript) {
-      console.error("Gemini dedicated transcription returned no speech:", JSON.stringify(result).slice(0, 1500));
+    const transcript = typeof result?.output_text === "string" ? result.output_text.trim() : "";
+    if (!transcript || result?.status === "incomplete" || result?.status === "failed") {
+      console.error("Gemini Interactions returned no completed transcript:", JSON.stringify(result).slice(0, 1500));
       return NextResponse.json(
-        { error: "I couldn't detect clear spoken words in that recording. Please try again in a quieter place." },
+        { error: "The transcription service did not return a complete transcript. Please try recording again." },
         { status: 422 },
       );
     }
