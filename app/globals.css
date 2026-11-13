@@ -1401,3 +1401,114 @@ body{font-family:Arial,Helvetica,sans-serif!important;background:#f7f7f7!importa
 .workspace-main{padding-left:0!important}
 @media(min-width:1024px){.workspace-main{padding-left:68px!important}}
 @media(max-width:1023px){.workspace-quick-rail{display:none!important}.workspace-sidebar{width:min(300px,88vw)!important}}
+
+
+/* MILE official brand system — Deep Indigo, Electric Lime, White and Dark */
+:root{
+  color-scheme:light;
+  --mile-indigo:#25215C;
+  --mile-lime:#B8E94E;
+  --mile-white:#FFFFFF;
+  --mile-dark:#111318;
+  --page:#F7F7FA;
+  --surface:#FFFFFF;
+  --surface-soft:#F0EFF8;
+  --border:#E4E3ED;
+  --ink:#111318;
+  --muted:#626274;
+  --subtle:#77778A;
+  --accent:#25215C;
+  --accent-strong:#1C1948;
+  --accent-soft:#F0EFF8;
+  --shadow:0 5px 24px rgba(37,33,92,.06);
+  --ws-bg:#F7F7FA;
+  --ws-surface:#FFFFFF;
+  --ws-border:#E4E3ED;
+  --ws-ink:#111318;
+  --ws-muted:#626274;
+  --ws-accent:#25215C;
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --page:#111318;
+  --surface:#191A24;
+  --surface-soft:#202131;
+  --border:#343448;
+  --ink:#FFFFFF;
+  --muted:#C1C1D0;
+  --subtle:#9999AC;
+  --accent:#B8E94E;
+  --accent-strong:#C8F56B;
+  --accent-soft:#292D24;
+  --shadow:0 6px 24px rgba(0,0,0,.24);
+  --ws-bg:#111318;
+  --ws-surface:#191A24;
+  --ws-border:#343448;
+  --ws-ink:#FFFFFF;
+  --ws-muted:#C1C1D0;
+  --ws-accent:#B8E94E;
+}
+body{background:var(--page);color:var(--ink)}
+::selection{background:var(--mile-lime);color:var(--mile-dark)}
+.panel{background:var(--surface);border-color:var(--border);box-shadow:var(--shadow)}
+.nav-item:hover,.nav-item.active{background:var(--accent-soft);color:var(--accent)}
+.field{background:var(--surface);border-color:var(--border);color:var(--ink)}
+.field:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.primary,.hero-primary{background:var(--mile-indigo);color:#fff;box-shadow:none}
+.primary:hover,.hero-primary:hover{background:#1C1948}
+.secondary{background:var(--surface);border-color:var(--border);color:var(--ink)}
+.theme-toggle{background:var(--surface);border-color:var(--border);color:var(--muted)}
+.theme-toggle:hover{background:var(--surface-soft);color:var(--ink)}
+.hero-shell{background:var(--mile-indigo)}
+.hero-shade{background:linear-gradient(90deg,rgba(17,19,24,.94) 0%,rgba(37,33,92,.82) 48%,rgba(37,33,92,.34) 100%),linear-gradient(0deg,rgba(17,19,24,.48),transparent 46%)}
+.hero-control:hover{border-color:var(--mile-lime);background:var(--mile-lime);color:var(--mile-dark)}
+.hero-progress.active{background:var(--mile-lime)}
+.problem-card{border-color:#E5E3F1}
+.problem-card:hover{border-color:var(--mile-lime)}
+.problem-card>span,.founder-kicker{color:var(--mile-indigo)}
+.founder-caption-line,.founder-rule,.founder-kicker span{background:var(--mile-lime)}
+.founder-heading em{color:var(--mile-indigo)}
+.workspace-shell{--ws-bg:#F7F7FA;--ws-surface:#fff;--ws-border:#E4E3ED;--ws-ink:#111318;--ws-muted:#626274;--ws-accent:#25215C;background:var(--ws-bg)!important;color:var(--ws-ink)!important}
+.workspace-sidebar,.workspace-quick-rail{background:var(--mile-indigo)!important;border-color:#39356E!important}
+.workspace-sidebar>div:nth-child(2){background:#302C70!important;border-color:#49458A!important}
+.workspace-sidebar nav>div>p{color:#C4C2E1!important}
+.workspace-sidebar .mile-sidebar-link{color:#E4E3F2!important}
+.workspace-sidebar .mile-sidebar-link:hover{background:#39356E!important;color:#fff!important}
+.workspace-sidebar .mile-sidebar-link.mile-sidebar-active{background:var(--mile-lime)!important;border-color:var(--mile-lime)!important;color:var(--mile-dark)!important;box-shadow:none!important}
+.workspace-sidebar .mile-sidebar-link.mile-sidebar-active svg{color:var(--mile-dark)!important}
+.workspace-sidebar .mile-sidebar-link:focus-visible,.workspace-quick-rail button:focus-visible{outline:2px solid var(--mile-lime)!important}
+.workspace-sidebar>div:last-child{border-color:#49458A!important}
+.workspace-topbar{background:rgba(255,255,255,.94)!important;border-color:var(--border)!important}
+.workspace-content{background:var(--ws-bg)}
+.workspace-page-title,.workspace-topbar h1{color:var(--ink)!important}
+.workspace-content input:not([type=checkbox]),.workspace-content textarea,.workspace-content select{border-color:var(--border)!important;background:var(--surface)!important;color:var(--ink)!important}
+.workspace-content input:focus,.workspace-content textarea:focus,.workspace-content select:focus{border-color:var(--mile-indigo)!important;box-shadow:0 0 0 4px rgba(37,33,92,.12)!important}
+.workspace-content button[class*="bg-[#222325]"]{background:var(--mile-indigo)!important;color:#fff!important}
+.workspace-content button[class*="bg-[#222325]"]:hover{background:#1C1948!important}
+.workspace-content .mile-overview .mile-welcome{background:var(--mile-indigo)!important;background-image:none!important;box-shadow:0 18px 42px rgba(37,33,92,.16)!important}
+.workspace-content .mile-overview .mile-welcome .rounded-2xl{background:#302C70!important;border-color:#49458A!important}
+.workspace-content .mile-overview .mile-stat-green{background:#F0F5E5!important;color:#20251A!important;border-color:#DCE8C5!important}
+.workspace-content .mile-overview .mile-stat-green .rounded-xl{background:#E2F1C3!important;color:#25215C!important}
+.workspace-content .mile-overview .mile-stat-yellow{background:#F3F2FA!important;color:#25215C!important;border-color:#E0DFF0!important}
+.workspace-content .mile-overview .mile-stat-yellow .rounded-xl{background:#E6E4F5!important;color:#25215C!important}
+.workspace-content .mile-overview .mile-stat-ink{background:#25215C!important;color:#fff!important;border-color:#25215C!important}
+.workspace-content .mile-overview .mile-stat-ink .rounded-xl{background:#39356E!important;color:#B8E94E!important}
+.workspace-content .mile-overview .mile-action-card>span:last-child{color:var(--mile-indigo)!important}
+.workspace-content .mile-overview button:focus-visible,.workspace-content .mile-overview a:focus-visible{outline:3px solid var(--mile-lime)!important}
+:root[data-theme="dark"] body{background:var(--page);color:var(--ink)}
+:root[data-theme="dark"] .workspace-shell{--ws-bg:#111318;--ws-surface:#191A24;--ws-border:#343448;--ws-ink:#fff;--ws-muted:#C1C1D0;--ws-accent:#B8E94E;background:var(--ws-bg)!important;color:var(--ws-ink)!important}
+:root[data-theme="dark"] .workspace-sidebar,:root[data-theme="dark"] .workspace-quick-rail{background:#191744!important;border-color:#39356E!important}
+:root[data-theme="dark"] .workspace-topbar{background:rgba(25,26,36,.96)!important;border-color:var(--border)!important}
+:root[data-theme="dark"] .workspace-content .mile-overview .mile-stat-white,:root[data-theme="dark"] .workspace-content .mile-overview .mile-panel,:root[data-theme="dark"] .workspace-content .mile-overview .mile-action-card{background:#191A24!important;border-color:#343448!important;color:#fff!important}
+:root[data-theme="dark"] .workspace-content .mile-overview .mile-stat-green{background:#292D24!important;color:#fff!important;border-color:#414B31!important}
+:root[data-theme="dark"] .workspace-content .mile-overview .mile-stat-yellow{background:#25243A!important;color:#fff!important;border-color:#403E5E!important}
+:root[data-theme="dark"] .workspace-content .mile-overview .mile-welcome{background:#25215C!important}
+:root[data-theme="dark"] .workspace-content .mile-overview .mile-welcome h2,:root[data-theme="dark"] .workspace-content .mile-overview .mile-welcome p{color:#fff!important}
+:root[data-theme="dark"] .workspace-content :is(input,textarea,select){background:#191A24!important;border-color:#45455B!important;color:#fff!important}
+:root[data-theme="dark"] .workspace-content h1,:root[data-theme="dark"] .workspace-content h2,:root[data-theme="dark"] .workspace-content h3{color:#fff!important}
+/* Re-map legacy green utility classes to the official brand. */
+[class*="text-[#1DBF73"],[class*="text-[#15965A"],[class*="text-[#168B56"],[class*="text-[#087a43"],[class*="text-[#00A525"]{color:var(--mile-indigo)!important}
+[class*="bg-[#1DBF73"],[class*="bg-[#15965A"],[class*="bg-[#168B56"],[class*="bg-[#087a43"],[class*="bg-[#00A525"]{background-color:var(--mile-indigo)!important;color:#fff!important}
+[class*="border-[#1DBF73"],[class*="border-[#15965A"],[class*="border-[#168B56"],[class*="border-[#087a43"]{border-color:var(--mile-indigo)!important}
+:root[data-theme="dark"] [class*="text-[#1DBF73"],:root[data-theme="dark"] [class*="text-[#15965A"],:root[data-theme="dark"] [class*="text-[#168B56"],:root[data-theme="dark"] [class*="text-[#087a43"]{color:var(--mile-lime)!important}
+:root[data-theme="dark"] [class*="bg-[#1DBF73"],:root[data-theme="dark"] [class*="bg-[#15965A"],:root[data-theme="dark"] [class*="bg-[#168B56"],:root[data-theme="dark"] [class*="bg-[#087a43"]{background-color:var(--mile-indigo)!important;color:#fff!important}
