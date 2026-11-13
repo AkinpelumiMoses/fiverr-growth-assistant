@@ -15,6 +15,7 @@ type PublicProfile = {
 export default function CommunityDirectory() {
   const supabase = useMemo(() => createClient(), []);
   const [profiles, setProfiles] = useState<PublicProfile[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [onlineIds, setOnlineIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -28,6 +29,7 @@ export default function CommunityDirectory() {
       setLoading(true); setError("");
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) { if (active) { setError("Please sign in to explore the freelancer community."); setLoading(false); } return; }
+      if (active) setCurrentUserId(user.id);
       const { data, error: queryError } = await supabase.from("profiles")
         .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url")
         .eq("community_discoverable", true).order("display_name", { ascending: true }).limit(100);
@@ -66,18 +68,61 @@ export default function CommunityDirectory() {
 
   const niches = useMemo(() => ["All niches", ...Array.from(new Set(profiles.map(p => p.primary_niche?.trim()).filter((v): v is string => Boolean(v))))].sort((a,b) => a === "All niches" ? -1 : a.localeCompare(b)), [profiles]);
   const platforms = useMemo(() => ["All platforms", ...Array.from(new Set(profiles.flatMap(p => p.work_platforms ?? []))).sort()], [profiles]);
+  const myProfile = profiles.find(profile => profile.id === currentUserId) ?? null;
+
+  const matchFor = (candidate: PublicProfile) => {
+    const ownNiche = (myProfile?.primary_niche ?? "").toLowerCase();
+    const theirNiche = (candidate.primary_niche ?? "").toLowerCase();
+    const ownSkills = (myProfile?.skills ?? "").toLowerCase();
+    const theirSkills = (candidate.skills ?? "").toLowerCase();
+    const ownText = `${ownNiche} ${ownSkills}`;
+    const theirText = `${theirNiche} ${theirSkills}`;
+    const groups = [
+      { terms: ["brand", "graphic design", "logo", "visual", "ui/ux", "product design"], complements: ["web", "developer", "software", "copy", "writing", "marketing", "video"] },
+      { terms: ["web", "developer", "software", "frontend", "backend"], complements: ["brand", "graphic", "ui/ux", "copy", "content", "seo", "marketing"] },
+      { terms: ["copy", "writing", "content"], complements: ["brand", "graphic", "web", "developer", "marketing", "video"] },
+      { terms: ["marketing", "social media", "seo"], complements: ["brand", "graphic", "web", "developer", "video", "copy"] },
+      { terms: ["video", "motion", "animation"], complements: ["brand", "graphic", "marketing", "social media", "copy"] },
+    ];
+    const ownGroup = groups.find(group => group.terms.some(term => ownText.includes(term)));
+    const complementary = Boolean(ownGroup && ownGroup.complements.some(term => theirText.includes(term)));
+    const sameNiche = Boolean(ownNiche && theirNiche && (ownNiche === theirNiche || ownNiche.includes(theirNiche) || theirNiche.includes(ownNiche)));
+    const sharedPlatform = (myProfile?.work_platforms ?? []).some(item => (candidate.work_platforms ?? []).includes(item));
+    const ownSkillTerms = ownSkills.split(/[,·|]/).map(value => value.trim()).filter(value => value.length > 2);
+    const sharedSkills = ownSkillTerms.filter(skill => theirText.includes(skill)).length;
+    const score = (complementary ? 5 : 0) + (sameNiche ? 2 : 0) + (sharedPlatform ? 1 : 0) + Math.min(sharedSkills, 2);
+    const reason = complementary ? "Complementary skills" : sameNiche ? "Similar specialisation" : sharedSkills ? "Shared skills" : sharedPlatform ? "Shared work platforms" : "Potential network connection";
+    return { score, reason };
+  };
+
+  const recommended = useMemo(() => profiles
+    .filter(profile => profile.id !== currentUserId)
+    .map(profile => ({ profile, ...matchFor(profile) }))
+    .sort((a, b) => b.score - a.score || (a.profile.display_name ?? "").localeCompare(b.profile.display_name ?? ""))
+    .slice(0, 3), [profiles, currentUserId, myProfile?.primary_niche, myProfile?.skills, myProfile?.work_platforms]);
+
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return profiles.filter(profile => {
+    return profiles.filter(profile => {\n      if (profile.id === currentUserId) return false;
       const matchesNiche = niche === "All niches" || profile.primary_niche === niche;
       const matchesPlatform = platform === "All platforms" || (profile.work_platforms ?? []).includes(platform);
       const haystack = [profile.display_name, profile.fiverr_username, profile.primary_niche, profile.skills, profile.bio, profile.seller_level, ...(profile.work_platforms ?? [])].filter(Boolean).join(" ").toLowerCase();
       return matchesNiche && matchesPlatform && (!term || haystack.includes(term));
     });
-  }, [profiles, search, niche, platform]);
+  }, [profiles, search, niche, platform, currentUserId]);
 
   return <div className="community-directory mx-auto max-w-[1400px]">
     <div className="mb-8"><p className="text-xs font-bold text-[#168B56]">FREELANCER COMMUNITY</p><h2 className="workspace-page-title mt-2 text-4xl font-extrabold md:text-5xl">Freelancers, connected.</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-[#777d77]">Discover freelancers from different platforms and specialties, explore what they do, and find people who can help move work forward.</p></div>
+    {myProfile && recommended.length > 0 && <section className="mb-7 rounded-2xl border border-[#dce9df] bg-[#f7fbf8] p-5 md:p-6">
+      <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row sm:items-end"><div><p className="text-[11px] font-bold uppercase tracking-[.14em] text-[#168B56]">MILE MATCH</p><h3 className="mt-1 text-xl font-extrabold text-[#222925]">Connections worth exploring.</h3><p className="mt-1 max-w-xl text-xs leading-5 text-[#69736c]">A starting point for finding people whose skills, specialisation or work platforms may complement yours.</p></div><span className="text-[10px] text-[#78837b]">Early matching · based on profile details</span></div>
+      <div className="grid gap-3 md:grid-cols-3">{recommended.map(({profile, reason}) => <article key={profile.id} className="flex min-w-0 flex-col rounded-xl border border-[#e4ebe5] bg-white p-4">
+        <div className="flex items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#eaf8ef] text-sm font-bold text-[#168B56]">{profile.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover"/> : (profile.display_name || "F").split(/\s+/).map(part=>part[0]).slice(0,2).join("").toUpperCase()}</div><div className="min-w-0"><p className="truncate text-xs font-bold text-[#303a32]">{profile.display_name || "Freelancer"}</p><p className="truncate text-[10px] text-[#78837b]">{profile.primary_niche || "Independent freelancer"}</p></div></div>
+        <span className="mt-3 inline-flex w-fit rounded-full bg-[#eef8f0] px-2.5 py-1 text-[10px] font-semibold text-[#168B56]">{reason}</span>
+        <p className="mt-2 line-clamp-2 min-h-9 text-[10px] leading-5 text-[#78837b]">{profile.skills || profile.bio || "Explore their profile to learn more about their work."}</p>
+        <Link href={`/community/${profile.id}`} className="mt-3 inline-flex items-center justify-center rounded-lg bg-[#168B56] px-3 py-2.5 text-[11px] font-bold text-white hover:bg-[#117447]">Explore freelancer</Link>
+      </article>)}</div>
+      <p className="mt-3 text-[10px] leading-5 text-[#879188]">Recommendations are heuristic suggestions, not verified compatibility or endorsements. Complete your profile to improve relevance.</p>
+    </section>}
     <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-[#e9ece9] bg-white p-4 md:flex-row">
       <label className="relative min-w-0 flex-1"><Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#929992]"/><input aria-label="Search freelancers" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name, username, skill or niche" className="w-full rounded-xl border border-[#dfe5e9] bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-[#168B56]"/></label>
       <select aria-label="Filter by niche" value={niche} onChange={e => setNiche(e.target.value)} className="rounded-xl border border-[#dfe5e9] bg-white px-4 py-3 text-sm outline-none focus:border-[#168B56] md:min-w-[210px]">{niches.map(item => <option key={item} value={item}>{item}</option>)}</select>
