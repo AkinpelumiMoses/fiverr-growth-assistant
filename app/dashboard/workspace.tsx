@@ -43,6 +43,14 @@ export default function DashboardWorkspace() {
   const [userEmail, setUserEmail] = useState("");
   const [profile, setProfile] = useState<Profile | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropImage, setCropImage] = useState<HTMLImageElement | null>(null);
+  const [cropSource, setCropSource] = useState("");
+  const [cropZoom, setCropZoom] = useState(1);
+  const [cropOffset, setCropOffset] = useState({ x: 0, y: 0 });
+  const [cropDragging, setCropDragging] = useState(false);
+  const cropDragStart = useRef<{ x: number; y: number; offsetX: number; offsetY: number } | null>(null);
+  const [ownOnline, setOwnOnline] = useState(false);
   const [profileForm, setProfileForm] = useState({ display_name: "", work_platforms: [] as string[], fiverr_username: "", seller_level: "", primary_niche: "", website_url: "", upwork_profile_url: "", linkedin_url: "", other_work_url: "", bio: "", fiverr_profile_url: "", skills: "", experience_years: "", ideal_client: "", community_discoverable: false, availability_status: "open" as "open" | "limited" | "unavailable", services_offered: "", looking_for: "", collaboration_interests: [] as string[], preferred_project_types: [] as string[] });
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [performance, setPerformance] = useState<Performance[]>([]);
@@ -83,6 +91,25 @@ export default function DashboardWorkspace() {
     }
     loadChatHistory();
     return () => { active = false; };
+  }, [supabase]);
+
+  useEffect(() => {
+    let active = true;
+    let presenceChannel: ReturnType<typeof supabase.channel> | null = null;
+    async function joinOwnPresence() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user || !active) return;
+      presenceChannel = supabase.channel("mile-online-members", { config: { presence: { key: user.id } } });
+      presenceChannel.subscribe(async status => {
+        if (status === "SUBSCRIBED" && active) {
+          await presenceChannel?.track({ user_id: user.id, online_at: new Date().toISOString() });
+          if (active) setOwnOnline(true);
+        }
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") setOwnOnline(false);
+      });
+    }
+    void joinOwnPresence();
+    return () => { active = false; setOwnOnline(false); if (presenceChannel) void supabase.removeChannel(presenceChannel); };
   }, [supabase]);
 
   useEffect(() => {
@@ -372,52 +399,51 @@ export default function DashboardWorkspace() {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setNotice("Choose a JPG, PNG or WebP image.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setNotice("Your profile picture must be 5 MB or smaller.");
-      return;
-    }
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return setNotice("Please log in again before changing your picture.");
-    setAvatarUploading(true);
-    setNotice("");
-    const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-    const path = `${user.id}/${crypto.randomUUID()}.${extension}`;
-    const { error: uploadError } = await supabase.storage.from("avatars").upload(path, file, {
-      contentType: file.type,
-      cacheControl: "3600",
-      upsert: false,
-    });
-    if (uploadError) {
-      setNotice(uploadError.message);
-      setAvatarUploading(false);
-      return;
-    }
-    const { data: publicFile } = supabase.storage.from("avatars").getPublicUrl(path);
-    const { data, error } = await supabase.from("profiles").upsert({
-      id: user.id,
-      display_name: profileForm.display_name.trim() || null,
-      fiverr_username: profileForm.fiverr_username.trim() || null,
-      seller_level: profileForm.seller_level || null,
-      primary_niche: profileForm.primary_niche.trim() || null,
-      website_url: profileForm.website_url.trim() || null,
-      avatar_url: publicFile.publicUrl,
-      onboarding_completed: true,
-      updated_at: new Date().toISOString(),
-    }).select("*").single();
-    if (error) {
-      await supabase.storage.from("avatars").remove([path]);
-      setNotice(error.message);
-    } else {
-      setProfile(data as Profile);
-      setNotice("Profile picture updated.");
-    }
-    setAvatarUploading(false);
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { setNotice("Choose a JPG, PNG or WebP image."); return; }
+    if (file.size > 5 * 1024 * 1024) { setNotice("Your profile picture must be 5 MB or smaller."); return; }
+    const source = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => { setCropFile(file); setCropImage(image); setCropSource(source); setCropZoom(1); setCropOffset({ x: 0, y: 0 }); setNotice(""); };
+    image.onerror = () => { URL.revokeObjectURL(source); setNotice("That image could not be opened. Please choose another file."); };
+    image.src = source;
   }
 
+  function closeAvatarCropper() {
+    if (cropSource) URL.revokeObjectURL(cropSource);
+    setCropSource(""); setCropImage(null); setCropFile(null); setCropZoom(1); setCropOffset({ x: 0, y: 0 }); setCropDragging(false); cropDragStart.current = null;
+  }
+
+  async function saveCroppedAvatar() {
+    if (!cropImage || !cropFile || avatarUploading) return;
+    const outputSize = 720, stageSize = 280;
+    const baseScale = Math.max(outputSize / cropImage.naturalWidth, outputSize / cropImage.naturalHeight);
+    const drawWidth = cropImage.naturalWidth * baseScale * cropZoom;
+    const drawHeight = cropImage.naturalHeight * baseScale * cropZoom;
+    const scaleFactor = outputSize / stageSize;
+    const canvas = document.createElement("canvas"); canvas.width = outputSize; canvas.height = outputSize;
+    const context = canvas.getContext("2d");
+    if (!context) return setNotice("Your browser could not prepare this image. Please try again.");
+    context.imageSmoothingQuality = "high";
+    context.drawImage(cropImage, (outputSize-drawWidth)/2 + cropOffset.x*scaleFactor, (outputSize-drawHeight)/2 + cropOffset.y*scaleFactor, drawWidth, drawHeight);
+    setAvatarUploading(true); setNotice("");
+    try {
+      const blob = await new Promise<Blob>((resolve,reject)=>canvas.toBlob(result=>result?resolve(result):reject(new Error("The cropped image could not be prepared.")),"image/jpeg",0.92));
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Please log in again before changing your picture.");
+      const path = `${user.id}/${crypto.randomUUID()}.jpg`;
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(path,blob,{contentType:"image/jpeg",cacheControl:"3600",upsert:false});
+      if (uploadError) throw new Error(uploadError.message);
+      const { data: publicFile } = supabase.storage.from("avatars").getPublicUrl(path);
+      const { data,error } = await supabase.from("profiles").upsert({
+        id:user.id,display_name:profileForm.display_name.trim()||null,fiverr_username:profileForm.fiverr_username.trim()||null,
+        seller_level:profileForm.seller_level||null,primary_niche:profileForm.primary_niche.trim()||null,
+        website_url:profileForm.website_url.trim()||null,avatar_url:publicFile.publicUrl,onboarding_completed:true,updated_at:new Date().toISOString(),
+      }).select("*").single();
+      if(error){await supabase.storage.from("avatars").remove([path]);throw new Error(error.message);}
+      setProfile(data as Profile); setNotice("Profile picture updated."); closeAvatarCropper();
+    } catch(error) { setNotice(error instanceof Error ? error.message : "Your profile picture could not be saved."); }
+    finally { setAvatarUploading(false); }
+  }
   async function saveProfile() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return setNotice("Please log in again to save your profile.");
@@ -632,21 +658,9 @@ export default function DashboardWorkspace() {
             </section>
           </div>}
 
-          {section === "Profile" && <><div className="mb-7"><p className="text-xs font-bold text-[#168B56]">YOUR ACCOUNT</p><h2 className="workspace-page-title mt-2 text-4xl font-extrabold md:text-5xl">Seller profile</h2><p className="mt-2 text-sm text-[#777d77]">Keep your details up to date. Your profile helps us tailor future guidance.</p></div><div className="max-w-3xl rounded-xl border border-[#e9ece9] bg-white p-5 md:p-7"><div className="mb-6 rounded-xl bg-[#f5faf6] p-4"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-bold text-[#27352b]">Profile strength</p><p className="mt-1 text-[11px] text-[#78847a]">A complete profile helps other freelancers understand your work.</p></div><strong className="text-xl text-[#00851e]">{profileCompletion}%</strong></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#e2ebe3]"><div className="h-full rounded-full bg-[#00A525] transition-all" style={{width:profileCompletion+"%"}}/></div></div><div className="mb-7 flex flex-wrap items-center gap-5">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#e5ebe6] bg-[#eaf8ef] text-xl font-bold text-[#168B56]">
-                {profile?.avatar_url ? <img src={profile.avatar_url} alt="Your profile picture" className="h-full w-full object-cover"/> : initials}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold">{profileForm.display_name || "Your name"}</p>
-                <p className="mt-1 text-xs text-[#929992]">{userEmail}</p>
-                <div className="mt-3 flex flex-wrap items-center gap-3">
-                  <label className="inline-flex cursor-pointer items-center rounded-lg bg-[#222325] px-4 py-2.5 text-xs font-bold text-white">
-                    {avatarUploading ? "Uploading…" : profile?.avatar_url ? "Change picture" : "Upload picture"}
-                    <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={avatarUploading} onChange={uploadAvatar}/>
-                  </label>
-                  <span className="text-[10px] text-[#929992]">JPG, PNG or WebP · up to 5 MB</span>
-                </div>
-              </div>
+          {section === "Profile" && <><div className="mb-7"><p className="text-xs font-bold text-[#168B56]">YOUR ACCOUNT</p><h2 className="workspace-page-title mt-2 text-4xl font-extrabold md:text-5xl">Seller profile</h2><p className="mt-2 text-sm text-[#777d77]">Keep your details up to date. Your profile helps us tailor future guidance.</p></div><div className="max-w-5xl rounded-2xl border border-[#e9ece9] bg-white p-5 shadow-sm md:p-8"><div className="mb-6 rounded-xl bg-[#f5faf6] p-4"><div className="flex items-center justify-between gap-3"><div><p className="text-xs font-bold text-[#27352b]">Profile strength</p><p className="mt-1 text-[11px] text-[#78847a]">A complete profile helps other freelancers understand your work.</p></div><strong className="text-xl text-[#00851e]">{profileCompletion}%</strong></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#e2ebe3]"><div className="h-full rounded-full bg-[#00A525] transition-all" style={{width:profileCompletion+"%"}}/></div></div><div className="mb-8 flex flex-col gap-6 rounded-2xl border border-[#e3ebe5] bg-[#f8fbf8] p-5 sm:flex-row sm:items-center sm:p-7">
+              <div className="relative h-32 w-32 shrink-0 sm:h-36 sm:w-36"><div className="h-full w-full overflow-hidden rounded-full border-4 border-white bg-[#eaf8ef] text-3xl font-bold text-[#168B56] shadow-[0_8px_26px_rgba(24,52,34,.13)]">{profile?.avatar_url ? <img src={profile.avatar_url} alt="Your profile picture" className="h-full w-full object-cover"/> : <div className="flex h-full w-full items-center justify-center">{initials}</div>}</div><span className={`absolute bottom-1 right-1 h-6 w-6 rounded-full border-[3px] border-white shadow-sm ${ownOnline?"bg-[#16a34a]":"bg-[#aab4ad]"}`} title={ownOnline?"Online now":"Offline"} aria-label={ownOnline?"Online now":"Offline"}/></div>
+              <div className="min-w-0 flex-1"><p className="text-lg font-extrabold tracking-tight text-[#202722]">{profileForm.display_name || "Your name"}</p><p className="mt-1 text-sm text-[#78847a]">{userEmail}</p><p className="mt-2 inline-flex items-center gap-2 text-xs font-semibold text-[#526258]"><span className={`h-2 w-2 rounded-full ${ownOnline?"bg-[#16a34a]":"bg-[#aab4ad]"}`}/>{ownOnline?"Online now":"Currently offline"}</p><div className="mt-4 flex flex-wrap items-center gap-3"><label className="inline-flex cursor-pointer items-center rounded-lg bg-[#202722] px-4 py-3 text-xs font-bold text-white transition hover:bg-[#087A43]">{avatarUploading?"Saving…":profile?.avatar_url?"Change profile photo":"Upload profile photo"}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={avatarUploading} onChange={uploadAvatar}/></label><span className="text-[11px] text-[#78847a]">JPG, PNG or WebP · up to 5 MB</span></div></div>
             </div><div className="grid gap-4 sm:grid-cols-2">
               {[{label:"Full name",key:"display_name",placeholder:"Your name"},{label:"Primary niche",key:"primary_niche",placeholder:"e.g. Brand identity design"},{label:"Portfolio / website",key:"website_url",placeholder:"https://yourportfolio.com"},{label:"Upwork profile link",key:"upwork_profile_url",placeholder:"https://www.upwork.com/freelancers/..."},{label:"LinkedIn profile",key:"linkedin_url",placeholder:"https://www.linkedin.com/in/..."},{label:"Other work profile",key:"other_work_url",placeholder:"https://..."},{label:"Skills / services",key:"skills",placeholder:"Brand identity, logo design, packaging"}].map((field)=> <label key={field.key} className="block"><span className="mb-2 block text-xs font-semibold">{field.label}</span><input className="w-full rounded-lg border border-[#dfe5e9] bg-white px-3.5 py-3 text-sm outline-none focus:border-[#168B56]" value={profileForm[field.key as "display_name" | "primary_niche" | "website_url" | "upwork_profile_url" | "linkedin_url" | "other_work_url" | "skills"]} placeholder={field.placeholder} onChange={(event)=>setProfileForm((old)=>({...old,[field.key]:event.target.value}))}/></label>)}
               <div className="sm:col-span-2"><p className="mb-3 text-xs font-semibold">Where do you work?</p><div className="grid grid-cols-2 gap-2 sm:grid-cols-3">{["Fiverr","Upwork","Freelancer.com","Contra","Direct clients","Other"].map((platform)=><label key={platform} className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-3 text-xs font-medium transition ${profileForm.work_platforms.includes(platform)?"border-[#00A525] bg-[#f0faf2] text-[#087a27]":"border-[#e1e7e1] bg-white text-[#59635b]"}`}><input type="checkbox" checked={profileForm.work_platforms.includes(platform)} onChange={(event)=>setProfileForm((old)=>({...old,work_platforms:event.target.checked?[...old.work_platforms,platform]:old.work_platforms.filter((item)=>item!==platform)}))} className="h-3.5 w-3.5 accent-[#00A525]"/>{platform}</label>)}</div><p className="mt-2 text-[10px] text-[#929992]">Choose every platform you currently use. MILE supports independent work across different channels.</p></div>{profileForm.work_platforms.includes("Fiverr") && <><label className="block"><span className="mb-2 block text-xs font-semibold">Fiverr username</span><input className="w-full rounded-lg border border-[#dfe5e9] px-3.5 py-3 text-sm outline-none focus:border-[#168B56]" value={profileForm.fiverr_username} placeholder="Your Fiverr username" onChange={(event)=>setProfileForm((old)=>({...old,fiverr_username:event.target.value}))}/></label><label className="block"><span className="mb-2 block text-xs font-semibold">Fiverr profile link</span><input className="w-full rounded-lg border border-[#dfe5e9] px-3.5 py-3 text-sm outline-none focus:border-[#168B56]" value={profileForm.fiverr_profile_url} placeholder="https://www.fiverr.com/yourusername" onChange={(event)=>setProfileForm((old)=>({...old,fiverr_profile_url:event.target.value}))}/></label><label className="block"><span className="mb-2 block text-xs font-semibold">Fiverr seller level</span><select className="w-full rounded-lg border border-[#dfe5e9] bg-white px-3.5 py-3 text-sm outline-none focus:border-[#168B56]" value={profileForm.seller_level} onChange={(event)=>setProfileForm((old)=>({...old,seller_level:event.target.value}))}><option value="">Select your level</option><option value="New Seller">New Seller</option><option value="Level 1">Level 1</option><option value="Level 2">Level 2</option><option value="Top Rated Seller">Top Rated Seller</option><option value="Pro">Pro</option></select></label></>}
@@ -664,7 +678,7 @@ export default function DashboardWorkspace() {
                   <span><span className="block text-xs font-bold text-[#343b35]">Make my profile discoverable in the freelancer community</span><span className="mt-1 block text-[11px] leading-5 text-[#777d77]">When the community launches, other members may find your public professional profile. Your email address and private account details will not be displayed.</span></span>
                 </label>
               </div>
-            </div><button onClick={saveProfile} disabled={saving} className="mt-6 rounded-lg bg-[#222325] px-5 py-3 text-xs font-bold text-white disabled:opacity-50">{saving?"Saving…":"Save profile"}</button></div></>}
+            </div><button onClick={saveProfile} disabled={saving} className="mt-6 rounded-lg bg-[#222325] px-5 py-3 text-xs font-bold text-white disabled:opacity-50">{saving?"Saving…":"Save profile"}</button></div></>{cropImage && <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#101712]/75 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="avatar-crop-title"><div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl sm:p-6"><div className="flex items-start justify-between gap-4"><div><h3 id="avatar-crop-title" className="text-lg font-extrabold text-[#202722]">Adjust your profile photo</h3><p className="mt-1 text-xs leading-5 text-[#78847a]">Drag to reposition. Use the slider to zoom in or out.</p></div><button type="button" onClick={closeAvatarCropper} disabled={avatarUploading} className="rounded-lg p-2 text-[#68756b] hover:bg-[#f1f5f1]" aria-label="Close crop editor"><X size={18}/></button></div><div className="mx-auto mt-5 h-[280px] w-[280px] max-w-full touch-none overflow-hidden rounded-full bg-[#e8eee9] ring-1 ring-[#dce5de]" onPointerDown={event=>{event.currentTarget.setPointerCapture(event.pointerId);cropDragStart.current={x:event.clientX,y:event.clientY,offsetX:cropOffset.x,offsetY:cropOffset.y};setCropDragging(true);}} onPointerMove={event=>{if(!cropDragStart.current)return;setCropOffset({x:cropDragStart.current.offsetX+event.clientX-cropDragStart.current.x,y:cropDragStart.current.offsetY+event.clientY-cropDragStart.current.y});}} onPointerUp={()=>{cropDragStart.current=null;setCropDragging(false);}} onPointerCancel={()=>{cropDragStart.current=null;setCropDragging(false);}}><img src={cropSource} alt="Crop preview" draggable={false} className={`h-full w-full select-none object-cover ${cropDragging?"cursor-grabbing":"cursor-grab"}`} style={{transform:`translate(${cropOffset.x}px,${cropOffset.y}px) scale(${cropZoom})`}}/></div><div className="mt-5"><div className="mb-2 flex items-center justify-between text-xs font-semibold text-[#465249]"><label htmlFor="avatar-zoom">Zoom</label><span>{Math.round(cropZoom*100)}%</span></div><input id="avatar-zoom" type="range" min="1" max="3" step="0.01" value={cropZoom} onChange={event=>setCropZoom(Number(event.target.value))} className="w-full accent-[#087A43]"/></div><p className="mt-2 text-[10px] text-[#929992]">The circular frame shows how your photo will appear. It will be saved as a square image.</p><div className="mt-5 flex justify-end gap-2"><button type="button" onClick={closeAvatarCropper} disabled={avatarUploading} className="rounded-lg border border-[#dfe7e1] px-4 py-2.5 text-xs font-bold text-[#526258]">Cancel</button><button type="button" onClick={saveCroppedAvatar} disabled={avatarUploading} className="rounded-lg bg-[#087A43] px-4 py-2.5 text-xs font-bold text-white disabled:opacity-50">{avatarUploading?"Saving…":"Save photo"}</button></div></div></div>}}
           {section === "My Gigs" && <><div className="mb-7"><p className="text-xs font-bold text-[#168B56]">YOUR SERVICES</p><h2 className="workspace-page-title mt-2 text-4xl font-extrabold md:text-5xl">My gigs</h2><p className="mt-2 text-sm text-[#777d77]">Save your public Fiverr gig links and details in one place.</p></div><div className="grid gap-5 xl:grid-cols-[.9fr_1.1fr]"><form onSubmit={saveGig} className="space-y-4 rounded-xl border border-[#e9ece9] bg-white p-5 md:p-6"><h3 className="text-sm font-bold">Add a gig</h3><label className="block"><span className="mb-2 block text-xs font-semibold">Gig title *</span><input required className="w-full rounded-lg border border-[#dfe5e9] px-3.5 py-3 text-sm outline-none focus:border-[#168B56]" value={gigForm.title} onChange={(e)=>setGigForm((old)=>({...old,title:e.target.value}))} placeholder="I will design a brand identity"/></label><label className="block"><span className="mb-2 block text-xs font-semibold">Public Fiverr gig URL</span><input type="url" className="w-full rounded-lg border border-[#dfe5e9] px-3.5 py-3 text-sm outline-none focus:border-[#168B56]" value={gigForm.gig_url} onChange={(e)=>setGigForm((old)=>({...old,gig_url:e.target.value}))} placeholder="https://www.fiverr.com/username/gig-name"/></label><label className="block"><span className="mb-2 block text-xs font-semibold">Description</span><textarea className="min-h-[115px] w-full rounded-lg border border-[#dfe5e9] px-3.5 py-3 text-sm outline-none focus:border-[#168B56]" value={gigForm.description} onChange={(e)=>setGigForm((old)=>({...old,description:e.target.value}))} placeholder="Paste your gig description"/></label><label className="block"><span className="mb-2 block text-xs font-semibold">Tags (comma-separated)</span><input className="w-full rounded-lg border border-[#dfe5e9] px-3.5 py-3 text-sm outline-none focus:border-[#168B56]" value={gigForm.tags} onChange={(e)=>setGigForm((old)=>({...old,tags:e.target.value}))} placeholder="logo design, branding, brand identity"/></label><div className="grid grid-cols-2 gap-3"><label><span className="mb-2 block text-xs font-semibold">Category</span><input className="w-full rounded-lg border border-[#dfe5e9] px-3 py-3 text-sm outline-none focus:border-[#168B56]" value={gigForm.category} onChange={(e)=>setGigForm((old)=>({...old,category:e.target.value}))} placeholder="Graphics & Design"/></label><label><span className="mb-2 block text-xs font-semibold">Starting price (USD)</span><input type="number" min="0" step="0.01" className="w-full rounded-lg border border-[#dfe5e9] px-3 py-3 text-sm outline-none focus:border-[#168B56]" value={gigForm.starting_price} onChange={(e)=>setGigForm((old)=>({...old,starting_price:e.target.value}))} placeholder="25"/></label></div><label className="block"><span className="mb-2 block text-xs font-semibold">Status</span><select className="w-full rounded-lg border border-[#dfe5e9] px-3.5 py-3 text-sm outline-none focus:border-[#168B56]" value={gigForm.status} onChange={(e)=>setGigForm((old)=>({...old,status:e.target.value as typeof old.status}))}><option value="active">Active</option><option value="paused">Paused</option><option value="draft">Draft</option></select></label><button disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-[#222325] px-5 py-3 text-xs font-bold text-white disabled:opacity-50"><Plus size={15}/>{saving?"Saving…":"Save gig"}</button></form><div className="rounded-xl border border-[#e9ece9] bg-white p-5 md:p-6"><div className="flex items-center justify-between"><div><h3 className="text-sm font-bold">Saved gigs</h3><p className="mt-1 text-xs text-[#929992]">{gigs.length} gig{gigs.length===1?"":"s"} in your workspace</p></div></div>{gigs.length ? <div className="mt-4 divide-y divide-[#eef0ee]">{gigs.map((gig)=><div key={gig.id} className="py-4"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="text-sm font-semibold">{gig.title}</p><p className="mt-1 text-[11px] capitalize text-[#929992]">{gig.status}{gig.starting_price!==null? ` · $ ${gig.starting_price}`:""}</p>{gig.tags.length>0&&<p className="mt-2 text-[11px] text-[#777d77]">{gig.tags.join(" · ")}</p>}</div><button onClick={()=>deleteGig(gig.id)} className="rounded-md p-2 text-[#929992] hover:bg-red-50 hover:text-red-600" aria-label="Delete gig"><Trash2 size={16}/></button></div>{gig.gig_url&&<a href={gig.gig_url} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-[#168B56]">Open Fiverr gig <ExternalLink size={12}/></a>}<button onClick={()=>{setAnalysisGig(gig.id);setAnalysisText({title:gig.title,description:gig.description,tags:gig.tags.join(", ")});go("Gig Analyzer")}} className="ml-4 text-[11px] font-semibold text-[#62646A]">Review details</button></div>)}</div> : <div className="flex min-h-[280px] flex-col items-center justify-center text-center"><BriefcaseBusiness size={25} className="mb-3 text-[#168B56]"/><p className="text-xs font-semibold">Your saved gigs will appear here</p><p className="mt-1 text-[11px] text-[#929992]">Add a gig using the form.</p></div>}</div></div></>}
           {section === "Performance" && <><div className="mb-7"><p className="text-xs font-bold text-[#168B56]">SELLER ANALYTICS</p><h2 className="workspace-page-title mt-2 text-4xl font-extrabold md:text-5xl">Track what is changing.</h2><p className="mt-2 text-sm text-[#777d77]">Enter figures from your Fiverr analytics. We do not fetch private Fiverr account metrics.</p></div><div className="grid gap-5 xl:grid-cols-[.8fr_1.2fr]"><form onSubmit={saveMetrics} className="space-y-3 rounded-xl border border-[#e9ece9] bg-white p-5 md:p-6"><h3 className="text-sm font-bold">Add performance snapshot</h3><label className="block"><span className="mb-1 block text-xs font-semibold">Date</span><input type="date" required className="w-full rounded-lg border border-[#dfe5e9] px-3 py-3 text-sm" value={metricForm.date} onChange={(e)=>setMetricForm((old)=>({...old,date:e.target.value}))}/></label>{[{label:"Impressions",key:"impressions"},{label:"Clicks",key:"clicks"},{label:"Orders",key:"orders"},{label:`Revenue (${metricForm.currency})`,key:"revenue"}].map((field)=><label key={field.key} className="block"><span className="mb-1 block text-xs font-semibold">{field.label}</span><input type="number" min="0" step={field.key==="revenue"?"0.01":"1"} required className="w-full rounded-lg border border-[#dfe5e9] px-3 py-3 text-sm" value={metricForm[field.key as keyof typeof metricForm]} onChange={(e)=>setMetricForm((old)=>({...old,[field.key]:e.target.value}))}/></label>)}<label className="block"><span className="mb-1 block text-xs font-semibold">Link to gig (optional)</span><select className="w-full rounded-lg border border-[#dfe5e9] px-3 py-3 text-sm" value={metricForm.gig_id} onChange={(e)=>setMetricForm((old)=>({...old,gig_id:e.target.value}))}><option value="">All gigs / not specified</option>{gigs.map((gig)=><option key={gig.id} value={gig.id}>{gig.title}</option>)}</select></label><label className="block"><span className="mb-1 block text-xs font-semibold">Revenue currency</span><select className="w-full rounded-lg border border-[#dfe5e9] px-3 py-3 text-sm" value={metricForm.currency} onChange={(e)=>setMetricForm((old)=>({...old,currency:e.target.value}))}><option value="USD">USD — US Dollar</option><option value="NGN">NGN — Nigerian Naira</option><option value="GBP">GBP — British Pound</option><option value="EUR">EUR — Euro</option><option value="CAD">CAD — Canadian Dollar</option><option value="AUD">AUD — Australian Dollar</option></select></label><button disabled={saving} className="w-full rounded-lg bg-[#222325] px-4 py-3 text-xs font-bold text-white disabled:opacity-50">{saving?"Saving…":"Save snapshot"}</button></form><div className="rounded-xl border border-[#e9ece9] bg-white p-5 md:p-6"><h3 className="text-sm font-bold">Saved performance</h3>{performance.length?<div className="mt-4 overflow-x-auto"><table className="w-full min-w-[460px] text-left text-xs"><thead className="text-[10px] text-[#929992]"><tr>{["DATE","IMPRESSIONS","CLICKS","ORDERS","REVENUE"].map((heading)=><th key={heading} className="pb-3 pr-3">{heading}</th>)}</tr></thead><tbody>{performance.map((row)=><tr key={row.id} className="border-t border-[#eef0ee]"><td className="py-3 pr-3">{row.period_start}</td><td className="pr-3">{row.impressions.toLocaleString()}</td><td className="pr-3">{row.clicks.toLocaleString()}</td><td className="pr-3">{row.orders}</td><td className="pr-3">{row.currency} {Number(row.revenue).toLocaleString()}</td></tr>)}</tbody></table></div>:<div className="flex min-h-[260px] flex-col items-center justify-center text-center"><ChartNoAxesCombined className="mb-3 text-[#168B56]"/><p className="text-xs font-semibold">No snapshots yet</p><p className="mt-1 text-[11px] text-[#929992]">Your saved records will appear here.</p></div>}</div></div></>}
           {section === "Growth Plan" && <div className="max-w-3xl"><div className="mb-7"><p className="text-xs font-bold text-[#168B56]">YOUR ACTION LIST</p><h2 className="workspace-page-title mt-2 text-4xl font-extrabold md:text-5xl">Small steps, saved progress.</h2><p className="mt-2 text-sm text-[#777d77]">Mark tasks complete as you work. Your progress is saved to your account.</p></div><div className="rounded-xl border border-[#e9ece9] bg-white p-5 md:p-7">{tasks.map((task)=><div key={task.id} className="flex items-start gap-3 border-b border-[#eef0ee] py-4 last:border-0"><input type="checkbox" checked={task.status==="completed"} onChange={()=>toggleTask(task)} className="mt-1 h-4 w-4 accent-[#1DBF73]"/><div><p className={task.status==="completed"?"text-sm text-[#9aa19a] line-through":"text-sm font-semibold"}>{task.title}</p><p className="mt-1 text-xs leading-5 text-[#777d77]">{task.description}</p><p className="mt-2 text-[10px] uppercase tracking-wide text-[#929992]">{task.priority} priority · {task.status.replace("_"," ")}</p></div></div>)}</div></div>}
