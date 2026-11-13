@@ -2172,3 +2172,14 @@ button:focus-visible,a:focus-visible{outline:2px solid #B8E94E!important;outline
 .mile-home .mile-steps-list .mile-step:last-child{padding-bottom:12px!important}
 .mile-home .mile-footer .mile-footer-brand{filter:brightness(0) invert(1)!important}
 @media(max-width:760px){.mile-home .mile-steps-list{padding:14px 18px!important}.mile-home .mile-steps-list .mile-step{padding:20px 0!important}}
+
+/* Freelancer directory cards: simple white surfaces, one indigo action */
+.community-directory{color:#171722!important}
+.community-directory article{background:#fff!important;border-color:#E6E6ED!important;box-shadow:none!important}
+.community-directory section{background:#F7F7FA!important;border-color:#E6E6ED!important}
+.community-directory [class*="bg-[#eaf8ef"],.community-directory [class*="bg-[#eef8f0"]{background:#F0EFF8!important;color:#25215C!important}
+.community-directory [class*="text-[#168B56"],.community-directory [class*="text-[#087A43"]{color:#25215C!important}
+.community-directory a[class*="bg-[#168B56"],.community-directory a[class*="bg-[#222325"]{background:#25215C!important;color:#fff!important}
+.community-directory input,.community-directory select{border-color:#DCDCE6!important}
+.community-directory input:focus,.community-directory select:focus{border-color:#7773A8!important;box-shadow:0 0 0 3px rgba(37,33,92,.08)!important}
+:root[data-theme="dark"] .community-directory article,:root[data-theme="dark"] .community-directory section{background:#191A24!important;border-color:#343448!important;color:#fff!important}
