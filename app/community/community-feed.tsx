@@ -17,7 +17,7 @@ const categories: { id: PostType | "all"; label: string; icon: typeof MessageSqu
   { id: "discussion", label: "Discussion", icon: MessageSquareText }, { id: "milestone", label: "Milestones", icon: Trophy },
 ];
 const categoryLabel: Record<PostType,string> = { showcase: "Project showcase", opportunity: "Opportunity", collaboration: "Collaboration", discussion: "Discussion", milestone: "Milestone" };
-const categoryTone: Record<PostType,string> = { showcase: "bg-violet-50 text-violet-700", opportunity: "bg-amber-50 text-amber-800", collaboration: "bg-blue-50 text-blue-700", discussion: "bg-slate-100 text-slate-700", milestone: "bg-emerald-50 text-emerald-700" };
+const categoryTone: Record<PostType,string> = { showcase: "bg-[#F0EFF8] text-[#25215C]", opportunity: "bg-[#F0EFF8] text-[#25215C]", collaboration: "bg-[#F0EFF8] text-[#25215C]", discussion: "bg-[#F0EFF8] text-[#25215C]", milestone: "bg-[#F0EFF8] text-[#25215C]" };
 const initials = (name?: string | null) => (name || "MILE Member").split(/\s+/).map(s=>s[0]).slice(0,2).join("").toUpperCase();
 
 export default function CommunityFeed() {
@@ -96,7 +96,7 @@ export default function CommunityFeed() {
     if(error)setNotice("Couldn't delete this post. "+error.message);else setPosts(old=>old.filter(p=>p.id!==postId));setMenuPost(null);
   }
 
-  return <div className="mx-auto max-w-[1380px]">
+  return <div className="mile-community-feed mx-auto max-w-[1380px]">
     <div className="mb-7 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
       <div><p className="text-[11px] font-extrabold uppercase tracking-[.16em] text-[#168B56]">MILE COMMUNITY</p><h2 className="mt-2 text-3xl font-extrabold tracking-tight text-[#17231b] md:text-4xl">Good work moves further together.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[#69756c]">Share what you're building, learn from other freelancers and find people to move the next project forward.</p></div>
       <button onClick={()=>setComposerOpen(true)} className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#087A43] px-5 text-sm font-bold text-white transition hover:bg-[#066638]"><ImagePlus size={16}/> Create a post</button>
