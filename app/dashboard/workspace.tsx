@@ -255,17 +255,57 @@ export default function DashboardWorkspace() {
     voiceTimerRef.current = null;
   }
 
+  async function convertVoiceToWav(blob: Blob): Promise<Blob> {
+    const audioContext = new AudioContext();
+    try {
+      const decoded = await audioContext.decodeAudioData(await blob.arrayBuffer());
+      const sampleRate = 16000;
+      const frameCount = Math.ceil(decoded.duration * sampleRate);
+      const offline = new OfflineAudioContext(1, frameCount, sampleRate);
+      const source = offline.createBufferSource();
+      source.buffer = decoded;
+      source.connect(offline.destination);
+      const rendered = await offline.startRendering();
+      const samples = rendered.getChannelData(0);
+      const wavBuffer = new ArrayBuffer(44 + samples.length * 2);
+      const view = new DataView(wavBuffer);
+      const writeText = (offset: number, value: string) => {
+        for (let index = 0; index < value.length; index++) view.setUint8(offset + index, value.charCodeAt(index));
+      };
+      writeText(0, "RIFF");
+      view.setUint32(4, 36 + samples.length * 2, true);
+      writeText(8, "WAVE");
+      writeText(12, "fmt ");
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeText(36, "data");
+      view.setUint32(40, samples.length * 2, true);
+      for (let index = 0; index < samples.length; index++) {
+        const sample = Math.max(-1, Math.min(1, samples[index]));
+        view.setInt16(44 + index * 2, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true);
+      }
+      return new Blob([wavBuffer], { type: "audio/wav" });
+    } finally {
+      await audioContext.close().catch(() => undefined);
+    }
+  }
+
   async function transcribeVoiceNote() {
     if (!voiceBlob || voiceBusy || coachLoading) return;
     setVoiceBusy(true); setNotice("");
     try {
-      const bytes = new Uint8Array(await voiceBlob.arrayBuffer());
+      const compatibleAudio = await convertVoiceToWav(voiceBlob);\n      const bytes = new Uint8Array(await compatibleAudio.arrayBuffer());
       let binary = "";
       for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
       const audioBase64 = btoa(binary);
       const response = await fetch("/api/ai/transcribe", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audioBase64, mimeType: voiceBlob.type || "audio/webm" }),
+        body: JSON.stringify({ audioBase64, mimeType: "audio/wav" }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Your voice note could not be transcribed.");
@@ -285,9 +325,14 @@ export default function DashboardWorkspace() {
 
   async function sendVoiceAudioToCoach() {
     if (!voiceBlob || voiceBusy || coachLoading) return;
-    const mimeType = (voiceBlob.type || "audio/webm").split(";")[0];
-    const extension = mimeType === "audio/mp4" ? "m4a" : mimeType === "audio/ogg" ? "ogg" : "webm";
-    const audioFile = new File([voiceBlob], `mile-voice-note-${Date.now()}.${extension}`, { type: mimeType });
+    let audioFile: File;
+    try {
+      const compatibleAudio = await convertVoiceToWav(voiceBlob);
+      audioFile = new File([compatibleAudio], `mile-voice-note-${Date.now()}.wav`, { type: "audio/wav" });
+    } catch {
+      setNotice("This recording could not be prepared for the AI service. Please record it again or use Transcribe and send.");
+      return;
+    }
     setNotice("");
     const sent = await sendCoachMessage(undefined, {
       message: "Please listen to my voice note and respond to what I said.",
