@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { MessageCircle, Heart, Send, ImagePlus, BriefcaseBusiness, Handshake, MessageSquareText, Trophy, Users, MoreHorizontal, Trash2, ExternalLink, Users } from "lucide-react";
+import { MessageCircle, Heart, Send, ImagePlus, BriefcaseBusiness, Handshake, MessageSquareText, Trophy, Users, MoreHorizontal, Trash2, ExternalLink } from "lucide-react";
 
 type PostType = "showcase" | "opportunity" | "collaboration" | "discussion" | "milestone";
 type Post = {
