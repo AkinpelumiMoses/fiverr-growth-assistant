@@ -36,7 +36,7 @@ export default function DashboardWorkspace() {
   const supabase = useMemo(() => createClient(), []);
   const [section, setSection] = useState<Section>("Overview");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
@@ -526,39 +526,47 @@ export default function DashboardWorkspace() {
   function go(next: Section) { setSection(next); setMobileOpen(false); setNotice(""); }
 
   return <main className="workspace-shell min-h-screen bg-[#f7f8f7] text-[#222325]">
-    <aside style={{ width: sidebarCollapsed ? 76 : 264 }} className={`workspace-sidebar fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[#29322C] bg-[#111512] px-3 py-5 transition-[width,transform] duration-200 ease-out lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
-      <div className={`mb-7 flex min-h-11 items-center ${sidebarCollapsed ? "justify-center" : "justify-between px-1"}`}>
-        <button onClick={()=>go("Overview")} className={`flex min-w-0 items-center ${sidebarCollapsed?"justify-center":"gap-3"} rounded-lg text-left`} aria-label="MILE home">
+    <aside aria-label="Quick navigation rail" className="workspace-quick-rail fixed inset-y-0 left-0 z-30 hidden w-[68px] flex-col items-center border-r border-[#29322C] bg-[#111512] py-4 lg:flex">
+      <button onClick={()=>setSidebarCollapsed(false)} aria-label="Open navigation" title="Open navigation" className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#354139] bg-[#1B241E] text-[#E7EFE9] transition hover:border-[#D7F36A] hover:bg-[#26342A]"><Menu size={19}/></button>
+      <button onClick={()=>go("Overview")} title="MILE overview" className="mt-5 flex h-10 w-10 items-center justify-center rounded-xl bg-[#D7F36A] text-[#142019]"><TrendingUp size={19}/></button>
+      <div className="mt-5 flex flex-1 flex-col items-center gap-2">
+        {navigationGroups.flatMap(group=>group.items).slice(0,6).map(item=>{const Icon=item.icon;return <button key={item.label} onClick={()=>go(item.label)} title={item.label} aria-label={item.label} className={`flex h-10 w-10 items-center justify-center rounded-xl transition ${section===item.label?"bg-[#26372B] text-[#D7F36A]":"text-[#AAB7AD] hover:bg-[#202A23] hover:text-white"}`}><Icon size={18}/></button>})}
+      </div>
+      <button onClick={()=>go("Profile")} title="Profile and settings" className="flex h-10 w-10 items-center justify-center rounded-full border border-[#435047] bg-[#26342A] text-[#E4EEE6]">{initials}</button>
+    </aside>
+    {(!sidebarCollapsed || mobileOpen) && <button aria-label="Close navigation panel" onClick={()=>{setSidebarCollapsed(true);setMobileOpen(false)}} className="fixed inset-0 z-30 bg-[#080B09]/45 backdrop-blur-[1px]"/>}
+<aside style={{ width: 280 }} className={`workspace-sidebar fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[#29322C] bg-[#111512] px-3 py-5 transition-transform duration-200 ease-out ${(!sidebarCollapsed || mobileOpen) ? "translate-x-0" : "-translate-x-full"}`}>
+      <div className="mb-7 flex min-h-11 items-center justify-between px-1">
+        <button onClick={()=>go("Overview")} className="flex min-w-0 items-center gap-3 rounded-lg text-left" aria-label="MILE home">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#D7F36A] text-[#142019]"><TrendingUp size={21} strokeWidth={2.4}/></span>
-          {!sidebarCollapsed&&<span className="min-w-0"><span className="block text-[17px] font-black tracking-[.12em] text-white">MILE</span><span className="mt-0.5 block whitespace-nowrap text-[8px] font-bold tracking-[.17em] text-[#AAB7AD]">EVERY STEP HAS A PURPOSE</span></span>}
+          <span className="min-w-0"><span className="block text-[17px] font-black tracking-[.12em] text-white">MILE</span><span className="mt-0.5 block whitespace-nowrap text-[8px] font-bold tracking-[.17em] text-[#AAB7AD]">EVERY STEP HAS A PURPOSE</span></span>
         </button>
-        <div className={`flex items-center ${sidebarCollapsed?"absolute -right-3 top-[66px]":"ml-2"}`}>
-          <button onClick={()=>setSidebarCollapsed(v=>!v)} className="hidden h-8 w-8 items-center justify-center rounded-lg border border-[#354139] bg-[#1B241E] text-[#C5D0C8] transition hover:border-[#73866F] hover:bg-[#26342A] lg:flex" aria-label={sidebarCollapsed?"Expand sidebar":"Collapse sidebar"} title={sidebarCollapsed?"Expand sidebar":"Collapse sidebar"}><Menu size={15}/></button>
+        <div className="ml-2 flex items-center">
+          <button onClick={()=>setSidebarCollapsed(true)} className="hidden h-8 w-8 items-center justify-center rounded-lg border border-[#354139] bg-[#1B241E] text-[#C5D0C8] transition hover:border-[#73866F] hover:bg-[#26342A] lg:flex" aria-label="Close navigation panel" title="Close navigation panel"><Menu size={15}/></button>
           <button onClick={()=>setMobileOpen(false)} className="flex h-8 w-8 items-center justify-center rounded-lg text-[#C5D0C8] hover:bg-[#26342A] lg:hidden" aria-label="Close navigation"><X size={18}/></button>
         </div>
       </div>
 
-      {!sidebarCollapsed&&<div className="mb-5 rounded-xl border border-[#303C33] bg-[#1A241D] px-3.5 py-3"><p className="text-[9px] font-extrabold uppercase tracking-[.15em] text-[#A7B6AA]">Your workspace</p><p className="mt-1 text-[12px] font-semibold text-white">Make your next move.</p></div>}
+      <div className="mb-5 rounded-xl border border-[#303C33] bg-[#1A241D] px-3.5 py-3"><p className="text-[9px] font-extrabold uppercase tracking-[.15em] text-[#A7B6AA]">Your workspace</p><p className="mt-1 text-[12px] font-semibold text-white">Make your next move.</p></div>
 
       <nav aria-label="Main navigation" className="workspace-nav-scroll min-h-0 flex-1 space-y-6 overflow-y-auto pb-3">
         {navigationGroups.map(group=><div key={group.title}>
-          {!sidebarCollapsed&&<p className="mb-2.5 px-3 text-[9px] font-extrabold uppercase tracking-[.16em] text-[#87958A]">{group.title}</p>}
-          <div className="space-y-1">{group.items.map(item=>{const Icon=item.icon;const active=section===item.label;return <button key={item.label} title={sidebarCollapsed?item.label:undefined} aria-label={item.label} aria-current={active?"page":undefined} onClick={()=>go(item.label)} className={`mile-sidebar-link group relative flex min-h-[43px] w-full items-center ${sidebarCollapsed?"justify-center":"gap-3 px-3"} rounded-lg text-left text-[12px] font-semibold transition-colors duration-150 ${active?"mile-sidebar-active":"text-[#C1CCC3] hover:bg-[#202A23] hover:text-white"}`}><Icon size={17} strokeWidth={1.9} className={active?"text-[#D7F36A]":"text-[#AAB7AD] group-hover:text-white"}/>{!sidebarCollapsed&&<><span className="min-w-0 flex-1">{item.label}</span>{item.label==="AI Growth Coach"&&<span className="rounded-md border border-[#4D624D] bg-[#26382A] px-1.5 py-0.5 text-[9px] font-extrabold text-[#D7F36A]">AI</span>}</>}</button>})}</div>
+          <p className="mb-2.5 px-3 text-[9px] font-extrabold uppercase tracking-[.16em] text-[#87958A]">{group.title}</p>
+          <div className="space-y-1">{group.items.map(item=>{const Icon=item.icon;const active=section===item.label;return <button key={item.label} title={undefined} aria-label={item.label} aria-current={active?"page":undefined} onClick={()=>go(item.label)} className={`mile-sidebar-link group relative flex min-h-[43px] w-full items-center gap-3 px-3 rounded-lg text-left text-[12px] font-semibold transition-colors duration-150 ${active?"mile-sidebar-active":"text-[#C1CCC3] hover:bg-[#202A23] hover:text-white"}`}><Icon size={17} strokeWidth={1.9} className={active?"text-[#D7F36A]":"text-[#AAB7AD] group-hover:text-white"}/><><span className="min-w-0 flex-1">{item.label}</span>{item.label==="AI Growth Coach"&&<span className="rounded-md border border-[#4D624D] bg-[#26382A] px-1.5 py-0.5 text-[9px] font-extrabold text-[#D7F36A]">AI</span>}</></button>})}</div>
         </div>)}
         <div className="border-t border-[#303B33] pt-4">
-          {!sidebarCollapsed&&<p className="mb-2.5 px-3 text-[9px] font-extrabold uppercase tracking-[.16em] text-[#87958A]">Your network</p>}
-          {[{label:"Messages",href:"/messages",icon:MessageCircle},{label:"Opportunities",href:"/community/jobs",icon:Handshake},{label:"Notifications",href:"/community/notifications",icon:Bell}].map(item=>{const Icon=item.icon;return <a key={item.label} href={item.href} title={sidebarCollapsed?item.label:undefined} className={`mile-sidebar-link flex min-h-[43px] items-center ${sidebarCollapsed?"justify-center":"gap-3 px-3"} rounded-lg text-[12px] font-semibold text-[#C1CCC3] transition-colors hover:bg-[#202A23] hover:text-white`}><Icon size={17} strokeWidth={1.9} className="text-[#AAB7AD]"/>{!sidebarCollapsed&&item.label}</a>})}
+          <p className="mb-2.5 px-3 text-[9px] font-extrabold uppercase tracking-[.16em] text-[#87958A]">Your network</p>
+          {[{label:"Messages",href:"/messages",icon:MessageCircle},{label:"Opportunities",href:"/community/jobs",icon:Handshake},{label:"Notifications",href:"/community/notifications",icon:Bell}].map(item=>{const Icon=item.icon;return <a key={item.label} href={item.href} title={sidebarCollapsed?item.label:undefined} className={`mile-sidebar-link flex min-h-[43px] items-center gap-3 px-3 rounded-lg text-[12px] font-semibold text-[#C1CCC3] transition-colors hover:bg-[#202A23] hover:text-white`}><Icon size={17} strokeWidth={1.9} className="text-[#AAB7AD]"/>{item.label}</a>})}
         </div>
       </nav>
 
       <div className="mt-4 space-y-2 border-t border-[#303B33] pt-4">
-        {!sidebarCollapsed&&<div className="rounded-xl border border-[#39472F] bg-[#202C21] p-3.5"><div className="flex items-center gap-2"><span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#D7F36A] text-[#17231A]"><Lightbulb size={15}/></span><p className="text-[11px] font-bold text-white">Grow with clarity</p></div><p className="mt-2 text-[10px] leading-[1.6] text-[#C0CDC2]">Understand your numbers. Improve your offer. Make deliberate moves.</p></div>}
-        <button onClick={()=>go("Profile")} title={sidebarCollapsed?"Profile & settings":undefined} className={`flex min-h-[42px] w-full items-center ${sidebarCollapsed?"justify-center":"gap-3 px-3"} rounded-lg text-[12px] font-semibold text-[#C1CCC3] transition hover:bg-[#202A23] hover:text-white`}><UserRound size={17}/>{!sidebarCollapsed&&"Profile & settings"}</button>
-        <form action={signOut}><button type="submit" title={sidebarCollapsed?"Log out":undefined} className={`flex min-h-[42px] w-full items-center ${sidebarCollapsed?"justify-center":"gap-3 px-3"} rounded-lg text-[12px] font-semibold text-[#AEB9B0] transition hover:bg-[#342322] hover:text-white`}><LogOut size={17}/>{!sidebarCollapsed&&"Log out"}</button></form>
+        <div className="rounded-xl border border-[#39472F] bg-[#202C21] p-3.5"><div className="flex items-center gap-2"><span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#D7F36A] text-[#17231A]"><Lightbulb size={15}/></span><p className="text-[11px] font-bold text-white">Grow with clarity</p></div><p className="mt-2 text-[10px] leading-[1.6] text-[#C0CDC2]">Understand your numbers. Improve your offer. Make deliberate moves.</p></div>
+        <button onClick={()=>go("Profile")} title="Profile & settings" className={`flex min-h-[42px] w-full items-center ${sidebarCollapsed?"justify-center":"gap-3 px-3"} rounded-lg text-[12px] font-semibold text-[#C1CCC3] transition hover:bg-[#202A23] hover:text-white`}><UserRound size={17}/>Profile & settings</button>
+        <form action={signOut}><button type="submit" title="Log out" className={`flex min-h-[42px] w-full items-center ${sidebarCollapsed?"justify-center":"gap-3 px-3"} rounded-lg text-[12px] font-semibold text-[#AEB9B0] transition hover:bg-[#342322] hover:text-white`}><LogOut size={17}/>Log out</button></form>
       </div>
     </aside>
-    {mobileOpen && <button aria-label="Close navigation" onClick={() => setMobileOpen(false)} className="fixed inset-0 z-30 bg-black/25 lg:hidden"/>}
-    <section className={`workspace-main min-h-screen transition-[padding] duration-200 ${sidebarCollapsed ? "lg:pl-[76px]" : "lg:pl-[260px]"}`}>
+    <section className="workspace-main min-h-screen lg:pl-[68px]">
       <header className="workspace-topbar sticky top-0 z-20 border-b border-[#e9ece9] bg-white/95 backdrop-blur">
         <div className="flex min-h-[76px] items-center justify-between gap-3 px-4 md:px-8">
           <div className="flex min-w-0 items-center gap-3"><button onClick={() => setMobileOpen(true)} className="rounded-lg p-2 hover:bg-[#f3f5f3] lg:hidden" aria-label="Open navigation"><Menu size={20}/></button><div className="min-w-0"><p className="hidden text-[10px] font-semibold uppercase tracking-[.12em] text-[#929992] sm:block">MILE workspace</p><h1 className="truncate text-lg font-bold tracking-tight text-[#202820]">{section}</h1></div></div>
