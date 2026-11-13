@@ -299,7 +299,8 @@ export default function DashboardWorkspace() {
     if (!voiceBlob || voiceBusy || coachLoading) return;
     setVoiceBusy(true); setNotice("");
     try {
-      const compatibleAudio = await convertVoiceToWav(voiceBlob);\n      const bytes = new Uint8Array(await compatibleAudio.arrayBuffer());
+      const compatibleAudio = await convertVoiceToWav(voiceBlob);
+      const bytes = new Uint8Array(await compatibleAudio.arrayBuffer());
       let binary = "";
       for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
       const audioBase64 = btoa(binary);
