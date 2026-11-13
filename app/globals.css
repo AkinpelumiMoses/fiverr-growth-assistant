@@ -1901,3 +1901,166 @@ button:focus-visible,a:focus-visible{outline:2px solid #B8E94E!important;outline
 :root[data-theme="dark"] .workspace-content .mile-overview .mile-stat-yellow .rounded-xl{
   background:#B8E94E!important;color:#111318!important;
 }
+
+
+/* =========================================================
+   MILE PUBLIC HOMEPAGE — final visual and contrast system
+   Scoped to .mile-home so workspace screens are not affected.
+   ========================================================= */
+.mile-home{
+  --home-indigo:#25215C;
+  --home-lime:#B8E94E;
+  --home-dark:#111318;
+  --home-white:#FFFFFF;
+  --home-canvas:#F7F7FA;
+  --home-muted:#626274;
+  background:var(--home-white)!important;
+  color:var(--home-dark)!important;
+}
+.mile-home .mile-header{
+  background:#FFFFFF!important;
+  border-bottom:1px solid #E4E3ED!important;
+  box-shadow:0 2px 14px rgba(17,19,24,.035)!important;
+}
+.mile-home .mile-brand,.mile-home .mile-brand-logo{color:var(--home-indigo)!important}
+.mile-home .mile-desktop-nav a,
+.mile-home .mile-login{color:#454557!important}
+.mile-home .mile-desktop-nav a:hover,
+.mile-home .mile-login:hover{color:var(--home-indigo)!important}
+.mile-home .mile-button-dark{
+  background:var(--home-indigo)!important;
+  color:#FFFFFF!important;
+  border:1px solid var(--home-indigo)!important;
+}
+.mile-home .mile-button-dark:hover{background:#1C1948!important;color:#FFFFFF!important}
+.mile-home .mile-menu-toggle{color:var(--home-indigo)!important;border-color:#D8D7E5!important}
+.mile-home .mile-mobile-menu{background:#FFFFFF!important;border-color:#E4E3ED!important}
+.mile-home .mile-mobile-menu a{color:var(--home-dark)!important;border-color:#E4E3ED!important}
+.mile-home .mile-mobile-menu .mile-mobile-join{
+  background:var(--home-lime)!important;color:var(--home-dark)!important;
+}
+
+/* Hero: one photograph, one flat dark overlay, high-contrast type */
+.mile-home .mile-hero{background:var(--home-dark)!important;color:#FFFFFF!important}
+.mile-home .mile-hero-image{filter:saturate(.78) brightness(.72)!important}
+.mile-home .mile-hero-shade{
+  background:rgba(17,19,24,.70)!important;
+  opacity:1!important;
+}
+.mile-home .mile-hero-content,
+.mile-home .mile-hero-copy,
+.mile-home .mile-hero-note,
+.mile-home .mile-hero-footer{color:#FFFFFF!important}
+.mile-home .mile-hero h1,
+.mile-home .mile-hero h1 em{color:#FFFFFF!important}
+.mile-home .mile-hero h1 em{font-style:normal!important;color:var(--home-lime)!important}
+.mile-home .mile-hero-description{color:#F0F0F5!important}
+.mile-home .mile-eyebrow-light,
+.mile-home .mile-hero-note-number{color:var(--home-lime)!important}
+.mile-home .mile-hero-note p{color:#FFFFFF!important}
+.mile-home .mile-hero-note p strong{color:var(--home-lime)!important}
+.mile-home .mile-hero-note-rule{background:var(--home-lime)!important}
+.mile-home .mile-hero-footer{border-color:rgba(255,255,255,.22)!important;color:#E5E5EF!important}
+.mile-home .mile-button-green{
+  background:var(--home-lime)!important;
+  color:var(--home-dark)!important;
+  border:1px solid var(--home-lime)!important;
+  box-shadow:none!important;
+}
+.mile-home .mile-button-green:hover{background:#A9D83F!important;color:var(--home-dark)!important}
+.mile-home .mile-text-link-light{color:#FFFFFF!important}
+.mile-home .mile-text-link-light:hover{color:var(--home-lime)!important}
+
+/* Light content sections: dark ink, indigo labels, lime only for small accents */
+.mile-home .mile-founder-section,
+.mile-home .mile-purpose-section,
+.mile-home .mile-steps-section,
+.mile-home .mile-belief-section{background:#FFFFFF!important;color:var(--home-dark)!important}
+.mile-home .mile-eyebrow{color:var(--home-indigo)!important}
+.mile-home .mile-eyebrow>span{background:var(--home-lime)!important}
+.mile-home .mile-founder-copy h2,
+.mile-home .mile-section-heading h2,
+.mile-home .mile-belief-copy h2{color:var(--home-dark)!important}
+.mile-home .mile-founder-copy h2 em,
+.mile-home .mile-section-heading h2 em,
+.mile-home .mile-belief-copy h2 em{color:var(--home-indigo)!important}
+.mile-home .mile-founder-lead{color:#303044!important}
+.mile-home .mile-founder-copy>p:not(.mile-eyebrow),
+.mile-home .mile-section-heading>p:last-child,
+.mile-home .mile-purpose-item p,
+.mile-home .mile-steps-list .mile-step p,
+.mile-home .mile-belief-copy>p:not(.mile-eyebrow){color:var(--home-muted)!important}
+.mile-home .mile-founder-image-frame{background:#F0EFF8!important}
+.mile-home .mile-founder-image-caption{border-color:#E4E3ED!important;color:#626274!important}
+.mile-home .mile-founder-signature strong{color:var(--home-dark)!important}
+.mile-home .mile-founder-signature span{color:#626274!important}
+.mile-home .mile-purpose-list{border-color:#E4E3ED!important}
+.mile-home .mile-purpose-item{
+  background:#FFFFFF!important;
+  border-color:#E4E3ED!important;
+  color:var(--home-dark)!important;
+  box-shadow:none!important;
+}
+.mile-home .mile-purpose-item h3{color:var(--home-dark)!important}
+.mile-home .mile-purpose-number,
+.mile-home .mile-purpose-arrow{color:var(--home-indigo)!important}
+.mile-home .mile-purpose-item:hover{border-color:var(--home-lime)!important}
+.mile-home .mile-steps-section{background:#F7F7FA!important}
+.mile-home .mile-steps-list{border-color:#E4E3ED!important}
+.mile-home .mile-step{border-color:#E4E3ED!important;color:var(--home-dark)!important}
+.mile-home .mile-step h3{color:var(--home-dark)!important}
+.mile-home .mile-step>span{color:var(--home-indigo)!important}
+.mile-home .mile-step>svg{color:var(--home-indigo)!important}
+
+/* Indigo feature band: white body copy and lime labels */
+.mile-home .mile-network-section{
+  background:var(--home-indigo)!important;
+  color:#FFFFFF!important;
+}
+.mile-home .mile-network-intro h2,
+.mile-home .mile-network-intro h2 em{color:#FFFFFF!important}
+.mile-home .mile-network-intro h2 em{font-style:normal!important;color:var(--home-lime)!important}
+.mile-home .mile-network-intro>p:last-child{color:#E7E6F2!important}
+.mile-home .mile-network-details article,
+.mile-home .mile-network-details article:first-child{border-color:rgba(255,255,255,.24)!important}
+.mile-home .mile-network-details article>span{color:var(--home-lime)!important}
+.mile-home .mile-network-details h3{color:#FFFFFF!important}
+.mile-home .mile-network-details p{color:#E7E6F2!important}
+
+/* Closing statement and footer */
+.mile-home .mile-belief-copy h2{color:var(--home-dark)!important}
+.mile-home .mile-inline-link{
+  color:var(--home-indigo)!important;
+  border-color:var(--home-indigo)!important;
+}
+.mile-home .mile-inline-link:hover{color:#1C1948!important;border-color:var(--home-lime)!important}
+.mile-home .mile-final-cta{
+  background:var(--home-indigo)!important;
+  color:#FFFFFF!important;
+}
+.mile-home .mile-final-cta h2,
+.mile-home .mile-final-cta h2 em{color:#FFFFFF!important}
+.mile-home .mile-final-cta h2 em{font-style:normal!important;color:var(--home-lime)!important}
+.mile-home .mile-final-cta .mile-eyebrow{color:var(--home-lime)!important}
+.mile-home .mile-footer{
+  background:var(--home-dark)!important;
+  color:#FFFFFF!important;
+  border-top:1px solid #343448!important;
+}
+.mile-home .mile-footer-brand{color:#FFFFFF!important}
+.mile-home .mile-footer p,
+.mile-home .mile-footer>span{color:#C4C2D8!important}
+.mile-home .mile-footer-brand span{color:var(--home-lime)!important}
+
+/* Clear keyboard focus and responsive menu contrast */
+.mile-home a:focus-visible,
+.mile-home button:focus-visible{
+  outline:3px solid var(--home-lime)!important;
+  outline-offset:3px!important;
+}
+@media(max-width:760px){
+  .mile-home .mile-menu-toggle{background:#FFFFFF!important;color:var(--home-indigo)!important}
+  .mile-home .mile-mobile-menu .mile-mobile-join{background:var(--home-lime)!important;color:var(--home-dark)!important}
+  .mile-home .mile-hero-shade{background:rgba(17,19,24,.74)!important}
+  .mile-home .mile-hero-footer{color:#E5E5EF!important}
+}
