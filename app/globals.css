@@ -1308,3 +1308,30 @@ body{font-family:Arial,Helvetica,sans-serif!important;background:#f7f7f7!importa
   .workspace-content .text-xs,.community-directory .text-xs,.community-jobs-page .text-xs,.messages-page .text-xs{font-size:13px!important}
   .workspace-content :is(input,textarea,select),.community-directory :is(input,select),.community-jobs-page :is(input,textarea,select),.messages-page :is(input,textarea){font-size:16px!important}
 }
+
+
+/* Signature MILE overview palette and visual hierarchy */
+.workspace-content .mile-overview{color:#202722!important}
+.workspace-content .mile-overview .mile-welcome{background:linear-gradient(112deg,#123D2B 0%,#174B34 58%,#245C3D 100%)!important;box-shadow:0 18px 42px rgba(18,61,43,.12)!important}
+.workspace-content .mile-overview .mile-stat{min-height:154px;border:1px solid #DCE5DE!important;box-shadow:0 3px 12px rgba(27,48,32,.035)!important}
+.workspace-content .mile-overview .mile-stat-green{background:#E5F2E8!important;color:#173D29!important;border-color:#C8DDCD!important}
+.workspace-content .mile-overview .mile-stat-green .rounded-xl{background:#CDE7D4!important;color:#075F35!important}
+.workspace-content .mile-overview .mile-stat-white{background:#FFFFFF!important;color:#202722!important}
+.workspace-content .mile-overview .mile-stat-white .rounded-xl{background:#EEF2EF!important;color:#3E5545!important}
+.workspace-content .mile-overview .mile-stat-yellow{background:#F8F1D9!important;color:#453B1D!important;border-color:#E8DCA9!important}
+.workspace-content .mile-overview .mile-stat-yellow .rounded-xl{background:#EFE3B8!important;color:#6A5310!important}
+.workspace-content .mile-overview .mile-stat-ink{background:#263C31!important;color:#FFFFFF!important;border-color:#263C31!important}
+.workspace-content .mile-overview .mile-stat-ink .rounded-xl{background:#3A5546!important;color:#E3F0E7!important}
+.workspace-content .mile-overview .mile-stat p,.workspace-content .mile-overview .mile-stat span{color:inherit!important}
+.workspace-content .mile-overview .mile-stat .text-\[11px\]{opacity:.84}
+.workspace-content .mile-overview .mile-panel{background:#FFFFFF!important;border:1px solid #DCE5DE!important;box-shadow:0 4px 18px rgba(27,48,32,.035)!important}
+.workspace-content .mile-overview .mile-action-card{display:block;border:1px solid #DCE5DE!important;background:#FFFFFF!important;box-shadow:0 4px 18px rgba(27,48,32,.035)!important}
+.workspace-content .mile-overview .mile-action-card:hover{border-color:#9BBCA5!important;box-shadow:0 12px 26px rgba(27,48,32,.075)!important}
+.workspace-content .mile-overview .mile-action-card h3{color:#202722!important}
+.workspace-content .mile-overview .mile-action-card p{color:#59665D!important}
+.workspace-content .mile-overview .mile-action-card a,.workspace-content .mile-overview .mile-action-card span{color:inherit}
+.workspace-content .mile-overview .mile-action-card>span:last-child{color:#087A43!important}
+.workspace-content .mile-overview .mile-welcome h2{color:#FFFFFF!important}
+.workspace-content .mile-overview .mile-welcome p{color:#D3E2D8}
+.workspace-content .mile-overview button:focus-visible,.workspace-content .mile-overview a:focus-visible{outline:3px solid #9BCB69!important;outline-offset:3px!important}
+@media(max-width:640px){.workspace-content .mile-overview .mile-stat{min-height:132px;padding:16px!important}.workspace-content .mile-overview .mile-stat p{font-size:26px!important}.workspace-content .mile-overview .mile-welcome{border-radius:18px!important}}
