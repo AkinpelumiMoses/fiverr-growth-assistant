@@ -67,39 +67,44 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Your recording could not be uploaded for transcription. Please try again." }, { status: 503 });
     }
 
-    const transcription = await fetch("https://generativelanguage.googleapis.com/v1beta/interactions", {
+    // Use the documented GenerateContent endpoint for Gemini 3.5 Transcribe.
+    // The Interactions endpoint was returning status=completed with zero output
+    // tokens in production, so it produced no usable transcript.
+    const transcription = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-transcribe:generateContent", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       body: JSON.stringify({
-        model: "gemini-3.5-transcribe",
-        input: [{ type: "audio", uri: fileUri, mime_type: mimeType }],
-        generation_config: {
-          transcription_config: {
-            mode: { type: "verbatim" },
-          },
-        },
+        contents: [{
+          parts: [{
+            fileData: {
+              fileUri,
+              mimeType,
+            },
+          }],
+        }],
       }),
       signal: AbortSignal.timeout(45000),
     });
     const result = await transcription.json().catch(() => ({}));
     if (!transcription.ok) {
       console.error("Gemini transcription request failed:", transcription.status, result?.error?.message);
-      return NextResponse.json({ error: "The transcription service could not understand that recording. Please try again." }, { status: 503 });
-    }
-
-    // Do not treat an incomplete Interactions response as a successful transcript.
-    if (result?.status && result.status !== "completed") {
-      console.error("Gemini transcription did not complete:", result.status, result?.error?.message);
       return NextResponse.json(
-        { error: "The transcription did not finish in time. Please try a shorter voice note." },
-        { status: 504 },
+        { error: "The transcription service could not process that recording. Please try again." },
+        { status: 503 },
       );
     }
 
-    const transcript = typeof result?.output_text === "string" ? result.output_text.trim() : "";
+    const transcript = (result?.candidates ?? [])
+      .flatMap((candidate: { content?: { parts?: { text?: string }[] } }) => candidate.content?.parts ?? [])
+      .map((part: { text?: string }) => typeof part.text === "string" ? part.text : "")
+      .join("\\n")
+      .trim();
     if (!transcript) {
       console.error("Gemini returned no transcript:", JSON.stringify(result).slice(0, 1500));
-      return NextResponse.json({ error: "I couldn't detect clear speech in that recording. Please try again in a quieter place." }, { status: 422 });
+      return NextResponse.json(
+        { error: "Gemini received the recording but returned no words. Please record a short note and try again." },
+        { status: 422 },
+      );
     }
     return NextResponse.json({ transcript });
   } catch (error) {
