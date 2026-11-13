@@ -2183,3 +2183,177 @@ button:focus-visible,a:focus-visible{outline:2px solid #B8E94E!important;outline
 .community-directory input,.community-directory select{border-color:#DCDCE6!important}
 .community-directory input:focus,.community-directory select:focus{border-color:#7773A8!important;box-shadow:0 0 0 3px rgba(37,33,92,.08)!important}
 :root[data-theme="dark"] .community-directory article,:root[data-theme="dark"] .community-directory section{background:#191A24!important;border-color:#343448!important;color:#fff!important}
+
+/* MILE product polish — marketplace-grade visual hierarchy */
+.workspace-shell,
+.workspace-shell *{
+  --mile-indigo:#25215C;
+  --mile-lime:#B8E94E;
+  --mile-ink:#171722;
+  --mile-muted:#6B6B78;
+  --mile-border:#E5E5EB;
+  --mile-surface:#FFFFFF;
+  --mile-canvas:#F7F7F9;
+}
+.workspace-shell .workspace-content{
+  max-width:1440px;
+}
+.workspace-shell .workspace-content > *{
+  max-width:1180px;
+}
+.workspace-shell .workspace-content section,
+.workspace-shell .workspace-content article,
+.workspace-shell .workspace-content .mile-panel,
+.workspace-shell .workspace-content .workspace-stat-card{
+  border-radius:12px!important;
+}
+.workspace-shell .workspace-content [class*="shadow-"]{
+  box-shadow:0 1px 3px rgba(17,19,24,.035)!important;
+}
+.workspace-shell .workspace-content .grid{
+  row-gap:20px;
+}
+.workspace-shell .workspace-content h1{
+  letter-spacing:-.025em!important;
+  font-weight:700!important;
+}
+.workspace-shell .workspace-content h2{
+  letter-spacing:-.018em!important;
+  font-weight:650!important;
+}
+.workspace-shell .workspace-content h3{
+  font-weight:650!important;
+}
+.workspace-shell .workspace-content p{
+  line-height:1.55;
+}
+.workspace-shell .workspace-content button:not([aria-label*="close" i]),
+.workspace-shell .workspace-content a{
+  transition:background-color .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease,transform .16s ease!important;
+}
+.workspace-shell .workspace-content button:not([disabled]):hover{
+  transform:translateY(-1px);
+}
+.workspace-shell .workspace-content button:not([disabled]):active{
+  transform:translateY(0);
+}
+.workspace-shell .workspace-content button[class*="bg-[#25215C"],
+.workspace-shell .workspace-content a[class*="bg-[#25215C"]{
+  background:#25215C!important;
+  color:#FFFFFF!important;
+}
+.workspace-shell .workspace-content button[class*="bg-[#B8E94E"],
+.workspace-shell .workspace-content a[class*="bg-[#B8E94E"]{
+  background:#B8E94E!important;
+  color:#111318!important;
+}
+.workspace-shell .workspace-content [class*="bg-yellow-"],
+.workspace-shell .workspace-content [class*="bg-amber-"],
+.workspace-shell .workspace-content [class*="bg-green-"],
+.workspace-shell .workspace-content [class*="bg-emerald-"],
+.workspace-shell .workspace-content [class*="bg-lime-"],
+.workspace-shell .workspace-content [class*="bg-teal-"]{
+  background:#F2F1F8!important;
+  color:#25215C!important;
+}
+.workspace-shell .workspace-content [class*="text-yellow-"],
+.workspace-shell .workspace-content [class*="text-amber-"],
+.workspace-shell .workspace-content [class*="text-green-"],
+.workspace-shell .workspace-content [class*="text-emerald-"],
+.workspace-shell .workspace-content [class*="text-lime-"],
+.workspace-shell .workspace-content [class*="text-teal-"]{
+  color:#25215C!important;
+}
+.workspace-shell .workspace-content [class*="border-yellow-"],
+.workspace-shell .workspace-content [class*="border-amber-"],
+.workspace-shell .workspace-content [class*="border-green-"],
+.workspace-shell .workspace-content [class*="border-emerald-"],
+.workspace-shell .workspace-content [class*="border-lime-"],
+.workspace-shell .workspace-content [class*="border-teal-"]{
+  border-color:#E0DFE8!important;
+}
+.workspace-shell .workspace-content [class*="bg-gradient"],
+.workspace-shell .workspace-content [class*="from-"],
+.workspace-shell .workspace-content [class*="via-"],
+.workspace-shell .workspace-content [class*="to-"]{
+  background-image:none!important;
+}
+.workspace-shell .workspace-content [style*="gradient"]{
+  background-image:none!important;
+}
+.workspace-shell .workspace-content svg{
+  flex-shrink:0;
+}
+.workspace-shell .workspace-content .rounded-full[class*="bg-"]{
+  box-shadow:none!important;
+}
+.workspace-shell .workspace-content .mile-overview .mile-stat{
+  min-height:112px!important;
+  padding:20px!important;
+}
+.workspace-shell .workspace-content .mile-overview .mile-panel{
+  padding:22px!important;
+}
+.workspace-shell .workspace-content .mile-overview .mile-welcome{
+  padding:26px!important;
+}
+.workspace-shell .workspace-content table{
+  border-collapse:separate!important;
+  border-spacing:0!important;
+  overflow:hidden;
+  border:1px solid #E5E5EB!important;
+  border-radius:12px!important;
+  background:#fff!important;
+}
+.workspace-shell .workspace-content th{
+  background:#F7F7F9!important;
+  color:#6B6B78!important;
+  font-size:12px!important;
+  font-weight:600!important;
+  letter-spacing:.02em!important;
+  text-transform:uppercase;
+}
+.workspace-shell .workspace-content td{
+  color:#252532!important;
+  border-color:#EEEEF2!important;
+}
+.workspace-shell .workspace-content hr{
+  border-color:#E8E8EE!important;
+}
+.workspace-shell .workspace-content [role="tablist"]{
+  background:#F1F1F5!important;
+  border:1px solid #E5E5EB!important;
+  padding:3px!important;
+  border-radius:9px!important;
+}
+.workspace-shell .workspace-content [role="tab"]{
+  color:#6B6B78!important;
+  border-radius:7px!important;
+}
+.workspace-shell .workspace-content [role="tab"][aria-selected="true"]{
+  background:#FFFFFF!important;
+  color:#25215C!important;
+  box-shadow:0 1px 2px rgba(17,19,24,.08)!important;
+}
+.workspace-shell .workspace-sidebar{
+  width:236px!important;
+}
+.workspace-shell .workspace-topbar{
+  min-height:68px!important;
+}
+.workspace-shell .workspace-topbar h1{
+  font-size:18px!important;
+}
+.workspace-shell .workspace-content .badge,
+.workspace-shell .workspace-content [class*="badge"]{
+  font-weight:600!important;
+}
+@media(max-width:900px){
+  .workspace-shell .workspace-sidebar{width:220px!important}
+  .workspace-shell .workspace-content{padding:20px!important}
+}
+@media(max-width:640px){
+  .workspace-shell .workspace-content{padding:16px!important}
+  .workspace-shell .workspace-content .mile-overview .mile-welcome{padding:20px!important}
+  .workspace-shell .workspace-content .mile-overview .mile-panel{padding:18px!important}
+}
