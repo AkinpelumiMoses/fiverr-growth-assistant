@@ -1751,7 +1751,14 @@ body{background:var(--page);color:var(--ink)}
 
 /* Legacy green primary actions become indigo; lime is reserved for emphasis and selected states */
 [class*="bg-[#1DBF73"],[class*="bg-[#15965A"],[class*="bg-[#168B56"],[class*="bg-[#087A43"],[class*="bg-[#087a43"],[class*="bg-[#087a35"],[class*="bg-[#087a27"],[class*="bg-[#00A525"],[class*="bg-[#117447"],[class*="bg-[#18a957"],[class*="bg-[#176e43"]{background:#25215C!important;color:#fff!important}
+/* Legacy green text is mapped to indigo only on light surfaces. Dark brand surfaces receive white/lime text below. */
 [class*="text-[#1DBF73"],[class*="text-[#15965A"],[class*="text-[#168B56"],[class*="text-[#087A43"],[class*="text-[#087a43"],[class*="text-[#087a35"],[class*="text-[#087a27"],[class*="text-[#00A525"],[class*="text-[#117447"],[class*="text-[#18a957"],[class*="text-[#176e43"]{color:#25215C!important}
+.workspace-overview-hero [class*="text-[#1DBF73"],.workspace-overview-hero [class*="text-[#15965A"],.research-hero [class*="text-[#1DBF73"],.research-hero [class*="text-[#15965A"],.mile-welcome [class*="text-[#1DBF73"],.mile-welcome [class*="text-[#15965A"],.mile-network-section [class*="text-[#1DBF73"],.mile-network-section [class*="text-[#15965A"],.mile-final-cta [class*="text-[#1DBF73"],.mile-final-cta [class*="text-[#15965A"],.mile-auth-aside [class*="text-[#1DBF73"],.mile-auth-aside [class*="text-[#15965A"],.workspace-sidebar [class*="text-[#1DBF73"],.workspace-sidebar [class*="text-[#15965A"]{color:#B8E94E!important}
+.workspace-overview-hero,.research-hero,.mile-welcome,.mile-network-section,.mile-final-cta,.mile-auth-aside{color:#FFFFFF!important}
+.workspace-overview-hero h1,.workspace-overview-hero h2,.workspace-overview-hero h3,.research-hero h1,.research-hero h2,.research-hero h3,.mile-welcome h1,.mile-welcome h2,.mile-welcome h3,.mile-network-section h1,.mile-network-section h2,.mile-network-section h3,.mile-final-cta h1,.mile-final-cta h2,.mile-final-cta h3,.mile-auth-aside h1,.mile-auth-aside h2,.mile-auth-aside h3{color:#FFFFFF!important}
+.workspace-sidebar .mile-sidebar-link{color:#E4E3F2!important}
+.workspace-sidebar .mile-sidebar-link.mile-sidebar-active{background:#B8E94E!important;color:#111318!important}
+.workspace-sidebar .mile-sidebar-link.mile-sidebar-active svg{color:#111318!important}
 [class*="border-[#1DBF73"],[class*="border-[#15965A"],[class*="border-[#168B56"],[class*="border-[#087A43"],[class*="border-[#087a43"],[class*="border-[#087a35"],[class*="border-[#087a27"]{border-color:#25215C!important}
 [class*="bg-[#eaf8ef"],[class*="bg-[#eef8f0"],[class*="bg-[#f7fbf8"],[class*="bg-[#f4f8f4"],[class*="bg-[#f0faf2"],[class*="bg-[#f5fbf6"],[class*="bg-[#f5f9f4"],[class*="bg-[#e7f7ee"]{background:#F0EFF8!important}
 [class*="text-[#d7f36a"],[class*="text-[#D7F36A"],[class*="text-[#D5D20A"]{color:#B8E94E!important}
@@ -1794,4 +1801,103 @@ button:focus-visible,a:focus-visible{outline:2px solid #B8E94E!important;outline
  .mile-auth-back{top:25px!important;left:24px!important}
  .mile-auth-mobile-logo{display:block!important;width:116px;height:40px;margin-bottom:30px}
  .mile-auth-mobile-logo img{width:100%;height:100%;object-fit:contain;object-position:left center}
+}
+
+/* MILE contrast correction — final tokens and component states */
+:root{
+  --accent:#25215C;
+  --accent-strong:#1C1948;
+  --accent-soft:#F0EFF8;
+  --ink:#111318;
+  --muted:#626274;
+  --subtle:#77778A;
+  --mile-indigo:#25215C;
+  --mile-lime:#B8E94E;
+  --mile-dark:#111318;
+  --mile-white:#FFFFFF;
+  --mile-canvas:#F7F7FA;
+  --mile-border:#E4E3ED;
+  --mile-muted:#626274;
+  --mile-green:#25215C;
+  --mile-green-2:#25215C;
+  --mile-green-soft:#F0EFF8;
+  --mile-yellow:#B8E94E;
+}
+:root[data-theme="dark"]{
+  --accent:#B8E94E;
+  --accent-strong:#A9D83F;
+  --accent-soft:#29283D;
+  --ink:#FFFFFF;
+  --muted:#C4C2D8;
+  --subtle:#A7A5BB;
+  --mile-green:#B8E94E;
+  --mile-green-2:#B8E94E;
+  --mile-green-soft:#29283D;
+}
+/* Dashboard stat tiles: neutral cards, one lime indicator — never green/yellow. */
+.workspace-content .mile-overview .mile-stat-green,
+.workspace-content .mile-overview .mile-stat-yellow{
+  background:#FFFFFF!important;
+  color:#111318!important;
+  border:1px solid #E4E3ED!important;
+  box-shadow:0 4px 16px rgba(17,19,24,.04)!important;
+}
+.workspace-content .mile-overview .mile-stat-green .rounded-xl,
+.workspace-content .mile-overview .mile-stat-yellow .rounded-xl{
+  background:#B8E94E!important;
+  color:#111318!important;
+}
+.workspace-content .mile-overview .mile-stat-green *,
+.workspace-content .mile-overview .mile-stat-yellow *{color:inherit}
+.workspace-content .mile-overview .mile-stat-green .rounded-xl *,
+.workspace-content .mile-overview .mile-stat-yellow .rounded-xl *{color:#111318!important}
+.mile-auth-alert.success{
+  background:#F0EFF8!important;
+  border-color:#D8D6EA!important;
+  color:#25215C!important;
+}
+/* Solid, high-contrast controls */
+.primary,.mile-auth-submit,.workspace-content button[class*="bg-[#222325]"]{
+  background:#25215C!important;
+  color:#FFFFFF!important;
+}
+.primary:hover,.mile-auth-submit:hover,.workspace-content button[class*="bg-[#222325]"]:hover{
+  background:#1C1948!important;
+  color:#FFFFFF!important;
+}
+.mile-button-green,.mile-mobile-menu .mile-mobile-join,
+.workspace-sidebar .mile-sidebar-link.mile-sidebar-active{
+  background:#B8E94E!important;
+  color:#111318!important;
+}
+.mile-button-green:hover,.mile-mobile-menu .mile-mobile-join:hover{
+  background:#A9D83F!important;
+  color:#111318!important;
+}
+/* Make text on every indigo panel readable, including nested legacy utility classes. */
+.workspace-sidebar,.workspace-quick-rail,.mile-auth-aside,.mile-network-section,.mile-final-cta,
+.workspace-overview-hero,.research-hero,.workspace-content .mile-overview .mile-welcome{
+  color:#FFFFFF!important;
+}
+.workspace-sidebar h1,.workspace-sidebar h2,.workspace-sidebar h3,
+.workspace-quick-rail h1,.workspace-quick-rail h2,.workspace-quick-rail h3,
+.mile-auth-aside h1,.mile-auth-aside h2,.mile-auth-aside h3,
+.mile-network-section h1,.mile-network-section h2,.mile-network-section h3,
+.mile-final-cta h1,.mile-final-cta h2,.mile-final-cta h3,
+.workspace-overview-hero h1,.workspace-overview-hero h2,.workspace-overview-hero h3,
+.research-hero h1,.research-hero h2,.research-hero h3,
+.workspace-content .mile-overview .mile-welcome h1,
+.workspace-content .mile-overview .mile-welcome h2,
+.workspace-content .mile-overview .mile-welcome h3{color:#FFFFFF!important}
+.workspace-sidebar p,.workspace-sidebar span,.workspace-sidebar label,
+.workspace-quick-rail p,.workspace-quick-rail span{color:#E4E3F2!important}
+.workspace-sidebar .mile-sidebar-link.mile-sidebar-active,
+.workspace-sidebar .mile-sidebar-link.mile-sidebar-active *{color:#111318!important}
+:root[data-theme="dark"] .workspace-content .mile-overview .mile-stat-green,
+:root[data-theme="dark"] .workspace-content .mile-overview .mile-stat-yellow{
+  background:#191A24!important;color:#FFFFFF!important;border-color:#343448!important;
+}
+:root[data-theme="dark"] .workspace-content .mile-overview .mile-stat-green .rounded-xl,
+:root[data-theme="dark"] .workspace-content .mile-overview .mile-stat-yellow .rounded-xl{
+  background:#B8E94E!important;color:#111318!important;
 }
