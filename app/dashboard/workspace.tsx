@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import CommunityDirectory from "@/app/community/community-directory";
+import CommunityFeed from "@/app/community/community-feed";
 import KeywordResearch from "@/app/dashboard/keyword-research";
 import CompetitorResearch from "@/app/dashboard/competitor-research";
 import { signOut } from "@/app/auth/actions";
@@ -613,7 +614,7 @@ export default function DashboardWorkspace() {
       <div className="workspace-content mx-auto max-w-[1760px] px-4 py-6 sm:px-6 md:px-8 md:py-8 2xl:px-10">
         {notice && <div role="status" className="mb-5 rounded-lg border border-[#d8eadf] bg-[#f0faf3] px-4 py-3 text-xs text-[#246642]">{notice}</div>}
         {loading ? <div className="py-24 text-center text-sm text-[#777d77]">Loading your workspace…</div> : <>
-          {section === "Community" && <CommunityDirectory />}
+          {section === "Community" && <CommunityFeed /> }
           {section === "Overview" && <div className="mile-overview space-y-7">
             <section className="mile-welcome relative overflow-hidden rounded-[22px] bg-[#123D2B] text-white">
               <div className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full border-[42px] border-white/[.045]"/>
