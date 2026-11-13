@@ -1205,3 +1205,106 @@ body{font-family:Arial,Helvetica,sans-serif!important;background:#f7f7f7!importa
 @media(min-width:1024px){.workspace-shell{height:100vh!important;overflow:hidden!important}.workspace-sidebar{height:100vh!important}.workspace-main{height:100vh!important;overflow-y:auto!important}.workspace-content{padding-top:28px!important}}
 @media(max-width:1023px){.workspace-sidebar{width:280px!important}.workspace-main{padding-left:0!important}.workspace-topbar>div:first-child{padding-inline:16px!important}.workspace-content{padding:24px 18px 44px!important}}
 @media(max-width:640px){.workspace-content{padding:20px 14px 36px!important}.workspace-topbar>div:first-child{min-height:64px!important}.workspace-topbar>div:last-child{gap:1px!important}}
+
+
+/* MILE accessibility and legibility standard — consistent across every workspace */
+:root{
+  --mile-ink:#202722;
+  --mile-body:#424b44;
+  --mile-muted:#5f6b62;
+  --mile-subtle:#68756b;
+  --mile-line:#d7dfd9;
+  --mile-green:#087a43;
+  --mile-green-hover:#066536;
+}
+.workspace-shell,.community-directory,.community-jobs-page,.messages-page,.freelancer-profile-page{
+  color:var(--mile-ink)!important;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+.workspace-content p,.community-directory p,.community-jobs-page p,.messages-page p,.freelancer-profile-page p{
+  line-height:1.65;
+}
+.workspace-content [class*="text-[#929"],.workspace-content [class*="text-[#9"],.workspace-content [class*="text-[#a0"],.workspace-content [class*="text-[#879"],.workspace-content [class*="text-[#858"],.workspace-content [class*="text-[#788"],.workspace-content [class*="text-[#777"],.workspace-content [class*="text-[#707"],.workspace-content [class*="text-[#697"],.community-directory [class*="text-[#929"],.community-directory [class*="text-[#9"],.community-directory [class*="text-[#879"],.community-directory [class*="text-[#788"],.community-directory [class*="text-[#777"],.community-directory [class*="text-[#697"],.community-jobs-page [class*="text-[#929"],.community-jobs-page [class*="text-[#9"],.community-jobs-page [class*="text-[#879"],.community-jobs-page [class*="text-[#788"],.community-jobs-page [class*="text-[#777"],.community-jobs-page [class*="text-[#697"],.messages-page [class*="text-[#929"],.messages-page [class*="text-[#9"],.messages-page [class*="text-[#879"],.messages-page [class*="text-[#788"],.messages-page [class*="text-[#777"],.messages-page [class*="text-[#697"]{
+  color:#5f6b62!important;
+}
+.workspace-content [class*="text-[#168B56"],.community-directory [class*="text-[#168B56"],.community-jobs-page [class*="text-[#168B56"],.messages-page [class*="text-[#168B56"]{
+  color:#087a43!important;
+}
+.workspace-content [class*="text-[#303a32"],.workspace-content [class*="text-[#354239"],.workspace-content [class*="text-[#202820"],.community-directory [class*="text-[#303a32"],.community-directory [class*="text-[#354239"],.community-jobs-page [class*="text-[#303a32"],.community-jobs-page [class*="text-[#354239"]{
+  color:#202722!important;
+}
+.workspace-content :is(p,span,label,li),.community-directory :is(p,span,label,li),.community-jobs-page :is(p,span,label,li),.messages-page :is(p,span,label,li){
+  text-wrap:pretty;
+}
+.workspace-content .text-\[9px\],.workspace-content .text-\[10px\],.workspace-content .text-\[11px\],
+.community-directory .text-\[9px\],.community-directory .text-\[10px\],.community-directory .text-\[11px\],
+.community-jobs-page .text-\[9px\],.community-jobs-page .text-\[10px\],.community-jobs-page .text-\[11px\],
+.messages-page .text-\[9px\],.messages-page .text-\[10px\],.messages-page .text-\[11px\]{
+  font-size:12px!important;
+  line-height:1.55!important;
+}
+.workspace-content .text-xs,.community-directory .text-xs,.community-jobs-page .text-xs,.messages-page .text-xs{
+  font-size:13px!important;
+  line-height:1.6!important;
+}
+.workspace-content h1,.workspace-content h2,.workspace-content h3,
+.community-directory h1,.community-directory h2,.community-directory h3,
+.community-jobs-page h1,.community-jobs-page h2,.community-jobs-page h3,
+.messages-page h1,.messages-page h2,.messages-page h3{
+  color:#202722!important;
+}
+.workspace-content input:not([type="checkbox"]),.workspace-content textarea,.workspace-content select,
+.community-directory input,.community-directory select,.community-jobs-page input,.community-jobs-page textarea,.community-jobs-page select,
+.messages-page input,.messages-page textarea{
+  color:#202722!important;
+  background:#fff!important;
+  border:1px solid #bfcac1!important;
+  font-size:14px!important;
+  min-height:44px;
+}
+.workspace-content :is(input,textarea,select)::placeholder,
+.community-directory :is(input,textarea,select)::placeholder,
+.community-jobs-page :is(input,textarea,select)::placeholder,
+.messages-page :is(input,textarea)::placeholder{color:#68756b!important;opacity:1!important}
+.workspace-content :is(input,textarea,select):focus-visible,
+.community-directory :is(input,textarea,select):focus-visible,
+.community-jobs-page :is(input,textarea,select):focus-visible,
+.messages-page :is(input,textarea):focus-visible{
+  outline:3px solid rgba(8,122,67,.22)!important;
+  outline-offset:1px!important;
+  border-color:#087a43!important;
+}
+.workspace-content button:focus-visible,.workspace-sidebar button:focus-visible,
+.community-directory a:focus-visible,.community-directory button:focus-visible,
+.community-jobs-page a:focus-visible,.community-jobs-page button:focus-visible,
+.messages-page button:focus-visible,.messages-page a:focus-visible{
+  outline:3px solid rgba(8,122,67,.28)!important;
+  outline-offset:2px!important;
+}
+.workspace-content button[class*="bg-[#168B56]"],.community-directory a[class*="bg-[#168B56]"],.community-jobs-page button[class*="bg-[#168B56]"],.messages-page button[class*="bg-[#168B56]"]{
+  background:#087a43!important;color:#fff!important;
+}
+.community-directory article,.community-jobs-page article,.community-jobs-page form,.messages-page .messages-layout{
+  border-color:#d7dfd9!important;
+}
+.community-directory article p,.community-jobs-page article p,.messages-page .message-thread p{
+  color:#424b44!important;
+}
+.community-directory article [class*="bg-[#eaf8ef]"],.community-directory article [class*="bg-[#eef8f0]"]{
+  color:#075f35!important;
+}
+.workspace-content .ai-studio-shell,.workspace-content .ai-studio-shell p,
+.workspace-content .ai-studio-shell span{color:#303a32!important}
+.workspace-content .ai-studio-shell .ai-studio-primary{background:#087a43!important;color:#fff!important}
+.messages-page .message-bubble-own{background:#e3f5e9!important;color:#173d28!important;border-color:#b8dfc5!important}
+.messages-page .message-bubble-other{background:#f5f7f5!important;color:#202722!important;border-color:#d7dfd9!important}
+.workspace-sidebar nav button{font-size:13px!important}
+.workspace-topbar h1{color:#202722!important}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+@media(max-width:640px){
+  .workspace-content .text-xs,.community-directory .text-xs,.community-jobs-page .text-xs,.messages-page .text-xs{font-size:13px!important}
+  .workspace-content :is(input,textarea,select),.community-directory :is(input,select),.community-jobs-page :is(input,textarea,select),.messages-page :is(input,textarea){font-size:16px!important}
+}
