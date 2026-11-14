@@ -59,8 +59,8 @@ export default function FreelancerProfilePage() {
     {loading?<div className="h-96 animate-pulse rounded-3xl border border-[#e5eae6] bg-white"/>:error?<div role="alert" className="rounded-2xl border border-[#e5eae6] bg-white p-8 text-sm text-[#69736c]">{error}</div>:profile&&<div className="profile-surface overflow-hidden rounded-3xl border border-[#e1e7e0] bg-white shadow-[0_12px_40px_rgba(27,42,32,.04)]">
       <div className="relative aspect-[4/1] min-h-[112px] sm:min-h-0 overflow-hidden bg-[#111318]">{profile.cover_image_url?<img src={profile.cover_image_url} alt="" className="h-full w-full object-cover"/>:<div className="relative flex h-full items-center justify-end px-6 sm:px-10"><div className="relative z-10 max-w-[68%] text-right"><p className="text-[9px] font-bold tracking-[.2em] text-[#D7F36A]">MILE MEMBER PROFILE</p><p className="mt-3 text-sm font-extrabold tracking-[.12em] text-white sm:text-base">EVERY STEP HAS A PURPOSE</p></div><div className="absolute -right-8 -top-20 h-64 w-64 rounded-full border-[28px] border-white/[.06]"/></div>}</div>
       <div className="px-4 pb-7 pt-0 sm:px-8 md:px-10">
-        <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
-          <div className="-mt-10 relative h-24 w-24 shrink-0 sm:-mt-14 sm:h-32 sm:w-32">
+        <div className="relative z-10 flex flex-col gap-4 pt-5 sm:flex-row sm:items-center sm:gap-6">
+          <div className="relative h-20 w-20 shrink-0 sm:h-24 sm:w-24">
             <div className="h-full w-full overflow-hidden rounded-full border-4 border-white bg-[#eaf8ef] text-3xl font-extrabold text-[#168B56] shadow-lg">{profile.avatar_url?<img src={profile.avatar_url} alt="" className="h-full w-full object-cover"/>:<div className="flex h-full w-full items-center justify-center">{initials}</div>}</div>
             <span className={`absolute bottom-1 right-1 h-4 w-4 rounded-full border-[3px] border-white ${online?"bg-[#18a957]":"bg-[#b9c0bb]"}`}/>
           </div>
