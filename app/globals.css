@@ -1521,6 +1521,9 @@ body{background:var(--page);color:var(--ink)}
 .workspace-sidebar [class*="bg-[#D7F36A]"],
 .workspace-quick-rail [class*="bg-[#D7F36A]"]{color:#111512!important}
 .workspace-sidebar .mile-sidebar-active{background:#D7F36A!important;border-color:#D7F36A!important}
+.workspace-quick-rail button[title]:not(:hover){color:#C1CCC3!important}
+.workspace-quick-rail button[title][class*="bg-[#D7F36A]"]{background:#D7F36A!important;color:#111512!important}
+.workspace-quick-rail button[title][class*="bg-[#D7F36A]"] svg{color:#111512!important}
 .workspace-sidebar .mile-sidebar-active svg{color:#111512!important}
 .workspace-sidebar .mile-sidebar-link:not(.mile-sidebar-active) svg{color:inherit}
 .workspace-topbar form button{background:#D7F36A!important;color:#111512!important;border-color:#D7F36A!important}
