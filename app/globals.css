@@ -1764,7 +1764,7 @@ body{background:var(--page);color:var(--ink)}
 /* Minimal MILE loader: official icon only, with a soft breathing fade. */
 .mile-loader-premium{background:#000080!important;display:flex;align-items:center;justify-content:center}
 .mile-loader-premium .mile-loader-inner{display:flex;align-items:center;justify-content:center;width:auto;height:auto;min-height:0;padding:0;background:transparent!important;border:0!important;box-shadow:none!important}
-.mile-loader-premium .mile-loader-icon{display:block;width:clamp(76px,14vw,112px);height:clamp(76px,14vw,112px);object-fit:contain;filter:none;animation:mile-icon-breathe 1.8s ease-in-out infinite}
+.mile-loader-premium .mile-loader-icon{display:block;width:clamp(92px,16vw,132px);height:clamp(92px,16vw,132px);object-fit:contain;filter:none;animation:mile-icon-breathe 1.8s ease-in-out infinite}
 .mile-loader-premium.is-leaving .mile-loader-icon{animation:none;opacity:0;transition:opacity .45s ease}
 @keyframes mile-icon-breathe{0%,100%{opacity:1}50%{opacity:.38}}
 @media(prefers-reduced-motion:reduce){.mile-loader-premium .mile-loader-icon{animation:none}}
