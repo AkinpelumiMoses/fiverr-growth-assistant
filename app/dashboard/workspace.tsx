@@ -642,7 +642,7 @@ export default function DashboardWorkspace() {
   return <main className="workspace-shell min-h-screen bg-[#f7f8f7] text-[#222325]">
     <aside aria-label="Quick navigation rail" className="workspace-quick-rail fixed inset-y-0 left-0 z-30 hidden w-[68px] flex-col items-center border-r border-[#29322C] bg-[#111512] py-4 lg:flex">
       <button onClick={()=>setSidebarCollapsed(false)} aria-label="Open navigation" title="Open navigation" className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#354139] bg-[#1B241E] text-[#E7EFE9] transition hover:border-[#D7F36A] hover:bg-[#26342A]"><Menu size={19}/></button>
-      <button onClick={()=>go("Overview")} title="MILE overview" className="mt-5 flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white"><img src="https://i.pinimg.com/736x/fd/1f/37/fd1f37539891a4a17d8ea3f0e10f420b.jpg" alt="MILE" className="h-full w-full object-contain"/></button>
+      <button onClick={()=>go("Overview")} title="MILE overview" className="mt-5 flex h-10 w-10 items-center justify-center rounded-xl bg-[#D7F36A] text-[#142019]"><TrendingUp size={19}/></button>
       <div className="mt-5 flex flex-1 flex-col items-center gap-2">
         {navigationGroups.flatMap(group=>group.items).slice(0,6).map(item=>{const Icon=item.icon;return <button key={item.label} onClick={()=>go(item.label)} title={item.label} aria-label={item.label} className={`flex h-10 w-10 items-center justify-center rounded-xl transition ${section===item.label?"bg-[#D7F36A] text-[#111512]":"text-[#B8C3BA] hover:bg-[#202A23] hover:text-white"}`}><Icon size={18}/></button>})}
       </div>
@@ -654,8 +654,8 @@ export default function DashboardWorkspace() {
 <aside style={{ width: 280 }} className={`workspace-sidebar fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[#29322C] bg-[#111512] px-3 py-5 transition-transform duration-200 ease-out ${(!sidebarCollapsed || mobileOpen) ? "translate-x-0" : "-translate-x-full"}`}>
       <div className="mb-7 flex min-h-11 items-center justify-between px-1">
         <button onClick={()=>go("Overview")} className="flex min-w-0 items-center gap-3 rounded-lg text-left" aria-label="MILE home">
-          <img src="https://i.pinimg.com/736x/fd/1f/37/fd1f37539891a4a17d8ea3f0e10f420b.jpg" alt="" className="h-10 w-10 shrink-0 rounded-xl bg-white object-contain"/>
-          <img src="https://i.pinimg.com/736x/d1/f5/8b/d1f58b8552ed26d79e91cc7ce7ed1d22.jpg" alt="MILE — Every step has a purpose" className="block h-auto max-h-10 w-[142px] object-contain object-left"/>
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#D7F36A] text-[#142019]"><TrendingUp size={21} strokeWidth={2.4}/></span>
+          <span className="min-w-0"><span className="block text-[17px] font-black tracking-[.12em] text-white">MILE</span><span className="mt-0.5 block whitespace-nowrap text-[8px] font-bold tracking-[.17em] text-[#B8C3BA]">EVERY STEP HAS A PURPOSE</span></span>
         </button>
         <div className="ml-2 flex items-center">
           <button onClick={()=>setSidebarCollapsed(true)} className="hidden h-8 w-8 items-center justify-center rounded-lg border border-[#354139] bg-[#1B241E] text-[#C5D0C8] transition hover:border-[#73866F] hover:bg-[#26342A] lg:flex" aria-label="Close navigation panel" title="Close navigation panel"><Menu size={15}/></button>
