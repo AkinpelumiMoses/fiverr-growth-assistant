@@ -476,16 +476,13 @@ button{-webkit-tap-highlight-color:transparent}
 .mile-footer-brand{
   display:inline-flex;
   align-items:center;
-  width:150px;
-  height:48px;
+  width:100px;
+  height:38px;
+  background:url("/mile-logo.svg") left center/contain no-repeat;
+  font-size:0!important;
+  letter-spacing:0!important;
 }
-.mile-footer-brand img{
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  object-position:left center;
-}
+.mile-footer-brand span{display:none}
 @media(max-width:760px){
   .mile-brand-logo{width:116px;max-height:40px}
 }
