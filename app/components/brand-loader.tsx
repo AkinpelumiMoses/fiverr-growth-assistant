@@ -23,10 +23,10 @@ export default function BrandLoader() {
         <div className="mile-loader-symbol-stage">
           <span className="mile-loader-orbit mile-loader-orbit-one" />
           <span className="mile-loader-orbit mile-loader-orbit-two" />
-          <img className="mile-loader-mark" src="/mile-icon.svg" alt="" />
-          <span className="mile-loader-dot" />
+          
+          
         </div>
-        <img className="mile-loader-wordmark" src="/mile-logo.svg" alt="MILE" />
+        <img className="mile-loader-wordmark" src="/mile-logo.png" alt="MILE — Every step has a purpose" />
         <p className="mile-loader-message">A little further, together.</p>
         <div className="mile-loader-track" aria-hidden="true"><span /></div>
         <span className="mile-loader-caption">EVERY STEP HAS A PURPOSE</span>

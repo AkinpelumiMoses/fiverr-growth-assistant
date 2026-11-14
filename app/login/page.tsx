@@ -14,7 +14,7 @@ export default function LoginPage({ searchParams }: Props) {
   return (
     <main className="mile-auth-page">
       <section className="mile-auth-aside">
-        <Link href="/" className="mile-auth-logo"><img src="/mile-logo.svg" alt="MILE" /></Link>
+        <Link href="/" className="mile-auth-logo"><img src="/mile-logo.png" alt="MILE" /></Link>
         <div className="mile-auth-story">
           <span className="mile-auth-kicker">GOOD TO HAVE YOU BACK</span>
           <h1>Your next step<br /><em>starts here.</em></h1>
@@ -28,7 +28,7 @@ export default function LoginPage({ searchParams }: Props) {
       <section className="mile-auth-main">
         <Link href="/" className="mile-auth-back"><ArrowLeft size={15}/> Back to homepage</Link>
         <div className="mile-auth-form-wrap">
-          <span className="mile-auth-mobile-logo"><img src="/mile-logo.svg" alt="MILE" /></span>
+          <span className="mile-auth-mobile-logo"><img src="/mile-logo.png" alt="MILE" /></span>
           <p className="mile-auth-eyebrow">YOUR COMMUNITY IS WAITING</p>
           <h2>Welcome back.</h2>
           <p className="mile-auth-subtitle">Sign in to continue your journey with MILE.</p>

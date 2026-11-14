@@ -238,7 +238,7 @@ button{-webkit-tap-highlight-color:transparent}
 .mile-home *{box-sizing:border-box}
 .mile-header{position:sticky;top:0;z-index:50;background:rgba(246,245,240,.97);border-bottom:1px solid rgba(32,39,32,.1)}
 .mile-header-inner{height:82px;max-width:1360px;margin:auto;padding:0 48px;display:flex;align-items:center;justify-content:space-between}
-.mile-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--mile-ink)}
+.mile-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--mile-ink);background:#000080;border-radius:10px;padding:7px 10px}
 .mile-brand-mark{width:39px;height:39px;display:grid;place-items:center;background:var(--mile-ink);color:#fff;font-size:18px;font-weight:700;letter-spacing:-.08em}
 .mile-brand-copy{display:flex;flex-direction:column;gap:4px}
 .mile-brand-copy strong{font-size:14px;letter-spacing:.08em}
@@ -329,8 +329,8 @@ button{-webkit-tap-highlight-color:transparent}
 .mile-final-cta h2{font-size:clamp(43px,5.3vw,70px);margin-top:19px}
 .mile-final-cta>.mile-button{margin-right:max(0px,calc((100vw - 1260px)/2 - 48px));flex-shrink:0}
 .mile-footer{min-height:100px;padding:26px 48px;display:flex;align-items:center;justify-content:space-between;gap:25px;background:#f6f5f0}
-.mile-footer-brand{font-family:Georgia,'Times New Roman',serif;font-size:25px;letter-spacing:-.08em;text-decoration:none;color:#202720}
-.mile-footer-brand span{color:#638a68}
+.mile-footer-brand{display:inline-flex;align-items:center;justify-content:center;width:150px;min-height:74px;padding:10px 12px;background:#000080;border-radius:12px;text-decoration:none}
+.mile-footer-brand img{display:block;width:100%;height:auto;object-fit:contain}
 .mile-footer p,.mile-footer>span{font-size:9px;color:#778178}
 @media(max-width:1000px){
  .mile-header-inner{padding:0 28px}.mile-desktop-nav{gap:18px}
@@ -478,7 +478,7 @@ button{-webkit-tap-highlight-color:transparent}
   align-items:center;
   width:100px;
   height:38px;
-  background:url("/mile-logo.svg") left center/contain no-repeat;
+  background:#000080; padding:8px 12px; border-radius:10px;
   font-size:0!important;
   letter-spacing:0!important;
 }
@@ -643,16 +643,16 @@ main.min-h-screen input{font-family:var(--font-montserrat),Montserrat,sans-serif
 
 
 /* MILE signature loader — an animated path that leads into the brand */
-.mile-loader-premium{background:#00A525;overflow:hidden}
-.mile-loader-premium:before,.mile-loader-premium:after{content:"";position:absolute;border:1px solid rgba(255,255,255,.13);border-radius:50%;width:min(78vw,720px);aspect-ratio:1;animation:mile-loader-ring 8s ease-in-out infinite}
+.mile-loader-premium{background:#000080;overflow:hidden}
+.mile-loader-premium:before,.mile-loader-premium:after{content:none}
 .mile-loader-premium:after{width:min(58vw,520px);animation-delay:-4s}
-.mile-loader-premium .mile-loader-inner{position:relative;z-index:1;gap:17px}
+.mile-loader-premium .mile-loader-inner{position:relative;z-index:1;gap:17px;padding:18px 22px;background:#000080;border-radius:18px}
 .mile-loader-symbol-stage{position:relative;display:grid;place-items:center;width:142px;height:142px;margin-bottom:5px}
 .mile-loader-mark{position:relative;z-index:2;width:72px;height:72px;object-fit:contain;filter:none;animation:mile-mark-arrive .8s cubic-bezier(.2,.8,.2,1) both,mile-mark-breathe 2.4s ease-in-out .8s infinite}
 .mile-loader-orbit{position:absolute;inset:9px;border:1px solid rgba(255,255,255,.36);border-radius:50%;transform:rotate(-28deg) scaleX(.72);animation:mile-orbit 4.5s linear infinite}
 .mile-loader-orbit-two{inset:0;border-color:rgba(198,195,4,.72);transform:rotate(62deg) scaleX(.72);animation-direction:reverse;animation-duration:6.5s}
 .mile-loader-dot{position:absolute;z-index:3;top:13px;right:20px;width:9px;height:9px;border-radius:50%;background:#C6C304;box-shadow:0 0 0 6px rgba(198,195,4,.12);animation:mile-dot-pulse 1.8s ease-in-out infinite}
-.mile-loader-premium .mile-loader-wordmark{width:146px;opacity:0;filter:brightness(0) invert(1);animation:mile-word-arrive .75s ease .45s forwards}
+.mile-loader-premium .mile-loader-wordmark{width:min(240px,68vw);height:auto;opacity:1;filter:none;animation:none}
 .mile-loader-message{margin:4px 0 7px;color:rgba(255,255,255,.9);font-size:13px;font-weight:500;letter-spacing:.015em;animation:editorialFade .7s ease .65s both}
 .mile-loader-track{width:190px;height:2px;background:rgba(255,255,255,.25);overflow:hidden}
 .mile-loader-track span{display:block;width:36%;height:100%;background:#C6C304;animation:mile-track-run 2.2s cubic-bezier(.45,0,.55,1) infinite}
@@ -667,9 +667,9 @@ main.min-h-screen input{font-family:var(--font-montserrat),Montserrat,sans-serif
 
 /* Premium MILE authentication pages */
 .mile-auth-page{min-height:100svh;display:grid;grid-template-columns:minmax(380px,.92fr) minmax(500px,1.08fr);background:#fff;color:#111311;font-family:var(--font-montserrat),Montserrat,sans-serif}
-.mile-auth-aside{position:relative;isolation:isolate;display:flex;min-height:100svh;flex-direction:column;justify-content:space-between;overflow:hidden;padding:clamp(34px,5vw,76px);background:#00A525;color:#fff}
+.mile-auth-aside{position:relative;isolation:isolate;display:flex;min-height:100svh;flex-direction:column;justify-content:space-between;overflow:hidden;padding:clamp(34px,5vw,76px);background:#000080;color:#fff}
 .mile-auth-logo{position:relative;z-index:2;display:inline-flex;width:140px;height:48px}
-.mile-auth-logo img{width:100%;height:100%;object-fit:contain;object-position:left center;filter:brightness(0) invert(1)}
+.mile-auth-logo{padding:5px 8px;background:#000080;border-radius:8px}.mile-auth-logo img{width:100%;height:100%;object-fit:contain;object-position:left center;filter:none}
 .mile-auth-story{position:relative;z-index:2;max-width:540px;margin:70px 0}
 .mile-auth-kicker{font-size:9px;font-weight:700;letter-spacing:.24em;color:rgba(255,255,255,.76)}
 .mile-auth-story h1{margin:25px 0 22px;font-size:clamp(48px,5.2vw,76px);font-weight:600;line-height:1.02;letter-spacing:-.075em}
@@ -721,7 +721,7 @@ main.min-h-screen input{font-family:var(--font-montserrat),Montserrat,sans-serif
 .mile-auth-signup .mile-auth-form>label{margin-top:6px}
 .mile-auth-signup .mile-auth-switch{margin-top:20px}
 @media(max-width:900px){.mile-auth-page{grid-template-columns: minmax(300px,.8fr) minmax(430px,1.2fr)}.mile-auth-aside{padding:38px}.mile-auth-main{padding:70px 42px}.mile-auth-back{left:42px}}
-@media(max-width:700px){.mile-auth-page{display:block;min-height:100svh;background:#fff}.mile-auth-aside{display:none}.mile-auth-main{min-height:100svh;padding:70px 25px 42px}.mile-auth-back{top:25px;left:25px}.mile-auth-form-wrap{max-width:460px;padding:25px 0}.mile-auth-mobile-logo{display:inline-flex;width:116px;height:40px;margin-bottom:42px}.mile-auth-mobile-logo img{width:100%;height:100%;object-fit:contain;object-position:left center}.mile-auth-form-wrap h2{font-size:37px}.mile-auth-subtitle{margin-bottom:27px}}
+@media(max-width:700px){.mile-auth-page{display:block;min-height:100svh;background:#fff}.mile-auth-aside{display:none}.mile-auth-main{min-height:100svh;padding:70px 25px 42px}.mile-auth-back{top:25px;left:25px}.mile-auth-form-wrap{max-width:460px;padding:25px 0}.mile-auth-mobile-logo{display:inline-flex;width:116px;height:40px;margin-bottom:42px}.mile-auth-mobile-logo{padding:5px 8px;background:#000080;border-radius:8px}.mile-auth-mobile-logo img{width:100%;height:100%;object-fit:contain;object-position:left center}.mile-auth-form-wrap h2{font-size:37px}.mile-auth-subtitle{margin-bottom:27px}}
 
 /* MILE workspace art direction: layered canvas, stronger contrast and signature colour. */
 .workspace-shell{--ws-bg:#eef3ee!important;--ws-surface:#ffffff;--ws-border:#dfe8df;--ws-ink:#17231b;--ws-accent:#168b56;background:radial-gradient(ellipse at 78% 0%,rgba(199,211,79,.13),transparent 34%),#eef3ee!important;color:#17231b}

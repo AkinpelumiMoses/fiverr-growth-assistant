@@ -12,6 +12,7 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title:"MILE — Every step has a purpose.",
   description:"MILE connects freelancers to opportunities, collaborators and practical tools that move their work forward.",
+  icons: { icon: "/mile-icon.png", shortcut: "/mile-icon.png", apple: "/mile-icon.png" },
 };
 export default function RootLayout({children}:{children:React.ReactNode}){
   return <html lang="en" suppressHydrationWarning><body className={montserrat.variable}><BrandLoader />{children}</body></html>;

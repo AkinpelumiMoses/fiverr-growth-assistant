@@ -68,7 +68,7 @@ export default function Home() {
       <header className="mile-header">
         <div className="mile-header-inner">
           <Link href="/" className="mile-brand" aria-label="MILE home">
-            <img src="/mile-logo.svg" alt="MILE — Every step has a purpose" className="mile-brand-logo" />
+            <img src="/mile-logo.png" alt="MILE — Every step has a purpose" className="mile-brand-logo" />
           </Link>
 
           <nav className="mile-desktop-nav" aria-label="Main navigation">
@@ -282,7 +282,7 @@ export default function Home() {
       </section>
 
       <footer className="mile-footer">
-        <Link href="/" className="mile-footer-brand">MILE<span>.</span></Link>
+        <Link href="/" className="mile-footer-brand" aria-label="MILE home"><img src="/mile-logo.png" alt="MILE — Every step has a purpose" /></Link>
         <p>A place for freelancers to connect, collaborate and move forward.</p>
         <span>© {new Date().getFullYear()} MILE</span>
       </footer>
