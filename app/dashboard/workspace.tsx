@@ -120,11 +120,11 @@ export default function DashboardWorkspace() {
           if (!active) return;
 
           if (status === "SUBSCRIBED") {
-            const { error } = await presenceChannel!.track({
+            await presenceChannel!.track({
               user_id: user.id,
               online_at: new Date().toISOString(),
             });
-            if (active) setOwnOnline(!error);
+            if (active) setOwnOnline(true);
           }
 
           if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
