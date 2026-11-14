@@ -38,6 +38,7 @@ export default function DashboardWorkspace() {
   const [section, setSection] = useState<Section>("Overview");
   const [headerSearch, setHeaderSearch] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -678,7 +679,7 @@ export default function DashboardWorkspace() {
       <div className="mt-4 space-y-2 border-t border-[#303B33] pt-4">
         <div className="rounded-xl border border-[#39472F] bg-[#202C21] p-3.5"><div className="flex items-center gap-2"><span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#D7F36A] text-[#17231A]"><Lightbulb size={15}/></span><p className="text-[11px] font-bold text-white">Grow with clarity</p></div><p className="mt-2 text-[10px] leading-[1.6] text-[#C0CDC2]">Understand your numbers. Improve your offer. Make deliberate moves.</p></div>
         <button onClick={()=>go("Profile")} title="Profile & settings" className={`flex min-h-[42px] w-full items-center ${sidebarCollapsed?"justify-center":"gap-3 px-3"} rounded-lg text-[12px] font-semibold text-[#C1CCC3] transition hover:bg-[#202A23] hover:text-white`}><UserRound size={17}/>Profile & settings</button>
-        <form action={signOut}><button type="submit" title="Log out" className={`flex min-h-[42px] w-full items-center ${sidebarCollapsed?"justify-center":"gap-3 px-3"} rounded-lg text-[12px] font-semibold text-[#AEB9B0] transition hover:bg-[#342322] hover:text-white`}><LogOut size={17}/>Log out</button></form>
+        <button type="button" onClick={()=>setLogoutConfirmOpen(true)} title="Log out" className={`flex min-h-[42px] w-full items-center ${sidebarCollapsed?"justify-center":"gap-3 px-3"} rounded-lg text-[12px] font-semibold text-red-300 transition hover:bg-red-500/10 hover:text-red-200`}><LogOut size={17}/>Log out</button>
       </div>
     </aside>
     <section className="workspace-main min-h-screen lg:pl-[68px]">
@@ -689,10 +690,10 @@ export default function DashboardWorkspace() {
             <div className="group relative flex h-12 w-full items-center overflow-hidden rounded-full border border-[#d9e2da] bg-[#f7f9f7] shadow-[0_2px_8px_rgba(22,48,30,.04)] transition-all duration-200 focus-within:border-[#168B56] focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(22,139,86,.09)] hover:border-[#b8cdbb]">
               <div className="flex h-full shrink-0 items-center gap-2 border-r border-[#e3e9e3] px-4 text-[12px] font-semibold text-[#3e4b41]"><Search size={16} className="text-[#25215C]"/> <span>Search MILE</span></div>
               <input value={headerSearch} onChange={event=>setHeaderSearch(event.target.value)} onKeyDown={event=>{if(event.key==="Enter"){event.preventDefault();go("Community");}}} aria-label="Search freelancers, skills and opportunities" placeholder="Freelancers, skills, services, opportunities..." className="h-full min-w-0 flex-1 bg-transparent py-0 pl-4 pr-3 text-[13px] text-[#263329] outline-none placeholder:text-[#89948b]"/>
-              <button type="submit" aria-label="Search MILE" className="flex h-full w-14 shrink-0 items-center justify-center rounded-none rounded-r-full border-l border-[#076c3b] bg-[#087A43] text-white transition hover:bg-[#075f35] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-white"><Search size={18}/></button>
+              <button type="submit" aria-label="Search MILE" className="flex h-full w-14 shrink-0 items-center justify-center rounded-none rounded-r-full border-l border-[#000066] bg-[#000080] text-white transition hover:bg-[#000066] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-white"><Search size={18}/></button>
             </div>
           </form>
-          <div className="flex shrink-0 items-center gap-1.5"><button onClick={()=>go("Community")} title="Find freelancers" aria-label="Find freelancers" className="flex h-10 w-10 items-center justify-center rounded-lg text-[#555d56] hover:bg-[#f4f7f4] hover:text-[#087a35] md:hidden"><Search size={18}/></button><a href="/messages" title="Messages" aria-label="Messages" className="relative flex h-10 w-10 items-center justify-center rounded-lg text-[#555d56] hover:bg-[#f4f7f4] hover:text-[#087a35]"><Inbox size={18}/></a><a href="/community/notifications" title="Notifications" aria-label="Notifications" className="flex h-10 w-10 items-center justify-center rounded-lg text-[#555d56] hover:bg-[#f4f7f4] hover:text-[#087a35]"><Bell size={18}/></a><span className="mx-1 hidden h-7 border-l border-[#e8ece8] sm:block"/><button onClick={()=>go("Profile")} className="flex items-center gap-2 rounded-lg p-1.5 text-left hover:bg-[#f4f7f4]"><span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#202820] text-[11px] font-bold text-white">{profile?.avatar_url?<img src={profile.avatar_url} alt="Your profile" className="h-full w-full object-cover"/>:initials}</span><span className="hidden max-w-[130px] lg:block"><span className="block truncate text-xs font-semibold text-[#303a32]">{profileForm.display_name||"Your profile"}</span><span className="block truncate text-[10px] text-[#929992]">{userEmail}</span></span></button><form action={signOut} className="hidden xl:block"><button type="submit" title="Log out" className="ml-1 flex h-9 items-center gap-2 rounded-lg border border-[#e5e9e5] px-3 text-[11px] font-semibold text-[#555d56] hover:bg-[#f5f7f5]"><LogOut size={14}/>Log out</button></form></div>
+          <div className="flex shrink-0 items-center gap-1.5"><button onClick={()=>go("Community")} title="Find freelancers" aria-label="Find freelancers" className="flex h-10 w-10 items-center justify-center rounded-lg text-[#555d56] hover:bg-[#f4f7f4] hover:text-[#087a35] md:hidden"><Search size={18}/></button><a href="/messages" title="Messages" aria-label="Messages" className="relative flex h-10 w-10 items-center justify-center rounded-lg text-[#555d56] hover:bg-[#f4f7f4] hover:text-[#087a35]"><Inbox size={18}/></a><a href="/community/notifications" title="Notifications" aria-label="Notifications" className="flex h-10 w-10 items-center justify-center rounded-lg text-[#555d56] hover:bg-[#f4f7f4] hover:text-[#087a35]"><Bell size={18}/></a><span className="mx-1 hidden h-7 border-l border-[#e8ece8] sm:block"/><button onClick={()=>go("Profile")} className="flex items-center gap-2 rounded-lg p-1.5 text-left hover:bg-[#f4f7f4]"><span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#202820] text-[11px] font-bold text-white">{profile?.avatar_url?<img src={profile.avatar_url} alt="Your profile" className="h-full w-full object-cover"/>:initials}</span><span className="hidden max-w-[130px] lg:block"><span className="block truncate text-xs font-semibold text-[#303a32]">{profileForm.display_name||"Your profile"}</span><span className="block truncate text-[10px] text-[#929992]">{userEmail}</span></span></button><button type="button" onClick={()=>setLogoutConfirmOpen(true)} title="Log out" className="ml-1 flex h-9 items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 text-[11px] font-semibold text-red-600 transition hover:bg-red-100"><LogOut size={14}/>Log out</button></div>
         </div>
         <div className="px-4 pb-3 md:hidden"><button onClick={()=>go("Community")} className="flex h-10 w-full items-center gap-2 rounded-lg border border-[#e5e9e5] bg-[#f8faf8] px-3 text-xs text-[#929992]"><Search size={15}/>Find freelancers, skills and collaborators</button></div>
       </header>
@@ -869,6 +870,21 @@ export default function DashboardWorkspace() {
         </>}
         <footer className="mt-10 flex flex-col justify-between gap-2 border-t border-[#e9ece9] py-5 text-[10px] text-[#929992] sm:flex-row"><span>MILE · Freelancer workspace</span><span>Guidance, not guarantees of rankings or orders.</span></footer>
       </div>
+      {logoutConfirmOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#090B0F]/55 p-4 backdrop-blur-sm" role="presentation" onMouseDown={(event)=>{if(event.target===event.currentTarget)setLogoutConfirmOpen(false);}}>
+          <div role="dialog" aria-modal="true" aria-labelledby="logout-dialog-title" className="w-full max-w-[420px] rounded-2xl border border-[#e5e7eb] bg-white p-6 shadow-2xl">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600"><LogOut size={19}/></div>
+            <h2 id="logout-dialog-title" className="mt-5 text-lg font-extrabold tracking-tight text-[#15171B]">Log out of MILE?</h2>
+            <p className="mt-2 text-sm leading-6 text-[#666B76]">Are you sure you want to log out of your MILE workspace? Your saved work will remain on your account, but you will need to sign in again to continue.</p>
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button type="button" onClick={()=>setLogoutConfirmOpen(false)} className="rounded-lg border border-[#dfe2e7] px-4 py-2.5 text-xs font-bold text-[#4B5058] transition hover:bg-[#f6f7f8]">Cancel</button>
+              <form action={signOut}>
+                <button type="submit" className="w-full rounded-lg bg-red-600 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-red-700">Yes, log me out</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   </main>;
 }
