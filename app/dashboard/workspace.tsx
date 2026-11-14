@@ -642,7 +642,7 @@ export default function DashboardWorkspace() {
   return <main className="workspace-shell min-h-screen bg-[#f7f8f7] text-[#222325]">
     <aside aria-label="Quick navigation rail" className="workspace-quick-rail fixed inset-y-0 left-0 z-30 hidden w-[68px] flex-col items-center border-r border-[#29322C] bg-[#111512] py-4 lg:flex">
       <button onClick={()=>setSidebarCollapsed(false)} aria-label="Open navigation" title="Open navigation" className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#354139] bg-[#1B241E] text-[#E7EFE9] transition hover:border-[#D7F36A] hover:bg-[#26342A]"><Menu size={19}/></button>
-      <button onClick={()=>go("Overview")} title="MILE overview" aria-label="MILE overview" className="mt-5 flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white"><img src="/mile-icon.png" alt="" className="h-full w-full object-contain"/></button>
+      <button onClick={()=>go("Overview")} title="MILE overview" aria-label="MILE overview" className="mt-5 flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-transparent"><img src="/mile-icon.png" alt="" className="h-8 w-8 object-contain"/></button>
       <div className="mt-5 flex flex-1 flex-col items-center gap-2">
         {navigationGroups.flatMap(group=>group.items).slice(0,6).map(item=>{const Icon=item.icon;return <button key={item.label} onClick={()=>go(item.label)} title={item.label} aria-label={item.label} className={`flex h-10 w-10 items-center justify-center rounded-xl transition ${section===item.label?"bg-[#D7F36A] text-[#111512]":"text-[#B8C3BA] hover:bg-[#202A23] hover:text-white"}`}><Icon size={18}/></button>})}
       </div>
@@ -654,7 +654,7 @@ export default function DashboardWorkspace() {
 <aside style={{ width: 280 }} className={`workspace-sidebar fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[#29322C] bg-[#111512] px-3 py-5 transition-transform duration-200 ease-out ${(!sidebarCollapsed || mobileOpen) ? "translate-x-0" : "-translate-x-full"}`}>
       <div className="mb-7 flex min-h-11 items-center justify-between px-1">
         <button onClick={()=>go("Overview")} className="flex min-w-0 items-center gap-3 rounded-lg text-left" aria-label="MILE home">
-          <span className="flex h-12 w-[100px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#000080] px-2"><img src="/mile-logo.png" alt="MILE — Every step has a purpose" className="h-full w-full object-contain"/></span>
+          <span className="flex h-12 w-[132px] shrink-0 items-center justify-start overflow-hidden rounded-lg bg-transparent"><img src="/mile-logo.png" alt="MILE — Every step has a purpose" className="h-full w-full object-contain object-left"/></span>
         </button>
         <div className="ml-2 flex items-center">
           <button onClick={()=>setSidebarCollapsed(true)} className="hidden h-8 w-8 items-center justify-center rounded-lg border border-[#354139] bg-[#1B241E] text-[#C5D0C8] transition hover:border-[#73866F] hover:bg-[#26342A] lg:flex" aria-label="Close navigation panel" title="Close navigation panel"><Menu size={15}/></button>
