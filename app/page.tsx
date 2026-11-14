@@ -65,6 +65,7 @@ export default function Home() {
 
   return (
     <main className="mile-home">
+      <svg aria-hidden="true" width="0" height="0" style={{position:"absolute"}}><filter id="mile-home-logo-colors" colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values="-1.8022 0 0 0 1.8022 0 0 -1 0 1 0 0 0.502 0 0 0 0 1 0" /></filter></svg>
       <header className="mile-header">
         <div className="mile-header-inner">
           <Link href="/" className="mile-brand" aria-label="MILE home">
