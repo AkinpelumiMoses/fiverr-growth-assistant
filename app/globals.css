@@ -1532,3 +1532,158 @@ body{background:var(--page);color:var(--ink)}
 .community-jobs-page button[class*="bg-[#D7F36A]"] svg{color:#111512!important}
 .community-jobs-page a{color:#25215C}
 .community-jobs-page a:hover{color:#1C1948}
+
+
+/* MILE public homepage — official navy and electric-lime application */
+.mile-home{
+  --mile-public-navy:#000080;
+  --mile-public-lime:#A6FF00;
+  --mile-public-ink:#15162B;
+  --mile-public-muted:#626477;
+  background:#fff;
+  color:var(--mile-public-ink);
+}
+.mile-home .mile-header{
+  background:#000080!important;
+  border-bottom:1px solid rgba(255,255,255,.13)!important;
+  box-shadow:0 8px 28px rgba(0,0,70,.12);
+}
+.mile-home .mile-header-inner{min-height:82px}
+.mile-home .mile-brand{background:transparent!important;padding:0!important;border:0!important}
+.mile-home .mile-brand-logo{
+  display:block;width:166px;height:76px;max-height:none;
+  object-fit:cover;object-position:center 47%;
+  filter:none!important;border:0!important;box-shadow:none!important;
+}
+.mile-home .mile-desktop-nav a,
+.mile-home .mile-login{color:rgba(255,255,255,.82)!important}
+.mile-home .mile-desktop-nav a:hover,
+.mile-home .mile-login:hover{color:#A6FF00!important}
+.mile-home .mile-button-dark{
+  background:#A6FF00!important;color:#000080!important;
+  border:1px solid #A6FF00!important;border-radius:7px;
+}
+.mile-home .mile-button-dark:hover{background:#c1ff50!important;color:#000080!important}
+.mile-home .mile-menu-toggle{
+  color:#A6FF00!important;border:1px solid rgba(255,255,255,.35)!important;
+  background:transparent!important;border-radius:8px;
+}
+.mile-home .mile-mobile-menu{
+  background:#000080!important;border-top:1px solid rgba(255,255,255,.15)!important;
+}
+.mile-home .mile-mobile-menu a{color:#fff!important}
+.mile-home .mile-mobile-menu .mile-mobile-join{
+  color:#000080!important;background:#A6FF00!important;border-radius:7px;
+}
+.mile-home .mile-hero-shade{
+  background:linear-gradient(90deg,rgba(0,0,65,.92) 0%,rgba(0,0,90,.72) 48%,rgba(0,0,70,.30) 100%),
+             linear-gradient(0deg,rgba(0,0,60,.55),transparent 48%)!important;
+}
+.mile-home .mile-eyebrow{color:#000080!important}
+.mile-home .mile-eyebrow>span{background:#A6FF00!important}
+.mile-home .mile-eyebrow-light{color:#D9FF9A!important}
+.mile-home .mile-hero h1 em,
+.mile-home .mile-network-intro h2 em,
+.mile-home .mile-final-cta h2 em{color:#A6FF00!important}
+.mile-home .mile-button-green{
+  background:#A6FF00!important;color:#000080!important;border-radius:7px;
+}
+.mile-home .mile-button-green:hover{background:#c1ff50!important;color:#000080!important}
+.mile-home .mile-text-link-light{color:#fff!important}
+.mile-home .mile-hero-note-number{color:#D9FF9A!important}
+.mile-home .mile-hero-note-rule{background:#A6FF00!important}
+.mile-home .mile-hero-footer{color:rgba(255,255,255,.78)!important}
+.mile-home .mile-founder-section,
+.mile-home .mile-steps-section{background:#fff!important}
+.mile-home .mile-purpose-section{background:#F4F5FB!important}
+.mile-home .mile-founder-copy h2,
+.mile-home .mile-section-heading h2,
+.mile-home .mile-belief-copy h2,
+.mile-home .mile-purpose-item h3,
+.mile-home .mile-step h3{color:#000080!important}
+.mile-home .mile-founder-copy h2 em,
+.mile-home .mile-section-heading h2 em,
+.mile-home .mile-belief-copy h2 em{color:#000080!important}
+.mile-home .mile-founder-lead{color:#27284B!important}
+.mile-home .mile-founder-copy>p:not(.mile-eyebrow),
+.mile-home .mile-section-heading>p:last-child,
+.mile-home .mile-purpose-item p,
+.mile-home .mile-step p,
+.mile-home .mile-belief-copy>p:not(.mile-eyebrow){color:#626477!important}
+.mile-home .mile-founder-image-caption,
+.mile-home .mile-founder-signature span,
+.mile-home .mile-footer p{color:#74758A!important}
+.mile-home .mile-founder-signature strong{color:#000080!important}
+.mile-home .mile-purpose-list,
+.mile-home .mile-purpose-item,
+.mile-home .mile-steps-list,
+.mile-home .mile-step{border-color:#DCDDED!important}
+.mile-home .mile-purpose-number,
+.mile-home .mile-purpose-arrow,
+.mile-home .mile-step>span,
+.mile-home .mile-step>svg{color:#000080!important}
+.mile-home .mile-purpose-item:hover{background:#EAF3D8!important}
+.mile-home .mile-network-section,
+.mile-home .mile-final-cta{background:#000080!important;color:#fff!important}
+.mile-home .mile-network-details article{border-color:rgba(255,255,255,.2)!important}
+.mile-home .mile-network-details article>span{color:#A6FF00!important}
+.mile-home .mile-network-intro>p:last-child,
+.mile-home .mile-network-details p{color:rgba(255,255,255,.76)!important}
+.mile-home .mile-belief-section{background:#F1F2FA!important}
+.mile-home .mile-inline-link{color:#000080!important;border-color:#A6FF00!important}
+.mile-home .mile-inline-link svg{color:#000080!important}
+.mile-home .mile-footer{
+  display:block!important;min-height:0!important;
+  padding:58px max(28px,calc((100vw - 1260px)/2)) 22px!important;
+  background:#08085F!important;color:#fff!important;border-top:0!important;
+}
+.mile-home .mile-footer-main{
+  display:grid;grid-template-columns:minmax(240px,1.5fr) 1fr 1fr;
+  gap:70px;max-width:1260px;margin:0 auto 46px;
+}
+.mile-home .mile-footer-identity{max-width:310px}
+.mile-home .mile-footer-brand{
+  display:inline-flex!important;width:170px!important;height:82px!important;
+  min-height:0!important;padding:0!important;overflow:hidden;
+  background:transparent!important;border-radius:0!important;
+}
+.mile-home .mile-footer-brand img{
+  display:block;width:100%;height:100%;object-fit:cover;
+  object-position:center 47%;filter:none!important;
+}
+.mile-home .mile-footer-identity p{
+  margin:16px 0 0!important;color:rgba(255,255,255,.72)!important;
+  font-size:12px!important;line-height:1.8;
+}
+.mile-home .mile-footer-belief{
+  display:inline-block;margin-top:19px;color:#A6FF00;
+  font-size:9px;font-weight:800;letter-spacing:.17em;
+}
+.mile-home .mile-footer-column{display:flex;flex-direction:column;align-items:flex-start;gap:13px;padding-top:13px}
+.mile-home .mile-footer-column h3{
+  margin:0 0 7px;color:#A6FF00;font-size:10px;
+  font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+}
+.mile-home .mile-footer-column a{
+  color:rgba(255,255,255,.78);font-size:12px;text-decoration:none;transition:color .2s;
+}
+.mile-home .mile-footer-column a:hover{color:#A6FF00}
+.mile-home .mile-footer-bottom{
+  display:flex;justify-content:space-between;gap:18px;max-width:1260px;
+  margin:0 auto;padding-top:20px;border-top:1px solid rgba(255,255,255,.16);
+}
+.mile-home .mile-footer-bottom span{
+  color:rgba(255,255,255,.56);font-size:9px;letter-spacing:.08em;
+}
+@media(max-width:700px){
+ .mile-home .mile-header-inner{height:70px;min-height:70px;padding:0 20px}
+ .mile-home .mile-brand-logo{width:140px;height:66px}
+ .mile-home .mile-footer{padding:42px 24px 20px!important}
+ .mile-home .mile-footer-main{grid-template-columns:1fr 1fr;gap:30px 22px;margin-bottom:34px}
+ .mile-home .mile-footer-identity{grid-column:1/-1}
+ .mile-home .mile-footer-bottom{flex-direction:column;gap:10px}
+}
+@media(max-width:390px){
+ .mile-home .mile-footer-main{grid-template-columns:1fr}
+ .mile-home .mile-footer-identity{grid-column:auto}
+}
