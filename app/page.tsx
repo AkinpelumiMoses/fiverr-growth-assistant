@@ -283,9 +283,31 @@ export default function Home() {
       </section>
 
       <footer className="mile-footer">
-        <Link href="/" className="mile-footer-brand" aria-label="MILE home"><img src="/mile-logo.png" alt="MILE — Every step has a purpose" /></Link>
-        <p>A place for freelancers to connect, collaborate and move forward.</p>
-        <span>© {new Date().getFullYear()} MILE</span>
+        <div className="mile-footer-main">
+          <div className="mile-footer-identity">
+            <Link href="/" className="mile-footer-brand" aria-label="MILE home">
+              <img src="/mile-logo.png" alt="MILE — Every step has a purpose" />
+            </Link>
+            <p>A place for freelancers to connect, collaborate and move forward.</p>
+            <span className="mile-footer-belief">EVERY STEP HAS A PURPOSE.</span>
+          </div>
+          <div className="mile-footer-column">
+            <h3>Explore</h3>
+            <a href="#the-idea">The idea</a>
+            <a href="#what-mile-does">What MILE does</a>
+            <a href="#how-it-works">How it works</a>
+            <a href="#our-approach">Our approach</a>
+          </div>
+          <div className="mile-footer-column">
+            <h3>Get started</h3>
+            <Link href="/signup">Join the community</Link>
+            <Link href="/login">Log in</Link>
+          </div>
+        </div>
+        <div className="mile-footer-bottom">
+          <span>© {new Date().getFullYear()} MILE. All rights reserved.</span>
+          <span>PEOPLE · OPPORTUNITY · PROGRESS</span>
+        </div>
       </footer>
     </main>
   );
