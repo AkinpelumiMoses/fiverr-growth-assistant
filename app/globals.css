@@ -1551,8 +1551,8 @@ body{background:var(--page);color:var(--ink)}
 .mile-home .mile-header-inner{min-height:82px}
 .mile-home .mile-brand{background:transparent!important;padding:0!important;border:0!important}
 .mile-home .mile-brand-logo{
-  display:block;width:166px;height:76px;max-height:none;
-  object-fit:cover;object-position:center 47%;
+  display:block;width:126px;height:auto;max-height:52px;
+  object-fit:contain;object-position:center;
   filter:none!important;border:0!important;box-shadow:none!important;
 }
 .mile-home .mile-desktop-nav a,
@@ -1600,7 +1600,7 @@ body{background:var(--page);color:var(--ink)}
 .mile-home .mile-section-heading h2,
 .mile-home .mile-belief-copy h2,
 .mile-home .mile-purpose-item h3,
-.mile-home .mile-step h3{color:#000080!important}
+.mile-home .mile-step h3{color:#15162B!important}
 .mile-home .mile-founder-copy h2 em,
 .mile-home .mile-section-heading h2 em,
 .mile-home .mile-belief-copy h2 em{color:#000080!important}
@@ -1623,8 +1623,8 @@ body{background:var(--page);color:var(--ink)}
 .mile-home .mile-step>span,
 .mile-home .mile-step>svg{color:#000080!important}
 .mile-home .mile-purpose-item:hover{background:#EAF3D8!important}
-.mile-home .mile-network-section,
-.mile-home .mile-final-cta{background:#000080!important;color:#fff!important}
+.mile-home .mile-network-section{background:#000080!important;color:#fff!important}
+.mile-home .mile-final-cta{background:#15162B!important;color:#fff!important}
 .mile-home .mile-network-details article{border-color:rgba(255,255,255,.2)!important}
 .mile-home .mile-network-details article>span{color:#A6FF00!important}
 .mile-home .mile-network-intro>p:last-child,
@@ -1677,7 +1677,7 @@ body{background:var(--page);color:var(--ink)}
 }
 @media(max-width:700px){
  .mile-home .mile-header-inner{height:70px;min-height:70px;padding:0 20px}
- .mile-home .mile-brand-logo{width:140px;height:66px}
+ .mile-home .mile-brand-logo{width:108px;max-height:46px}
  .mile-home .mile-footer{padding:42px 24px 20px!important}
  .mile-home .mile-footer-main{grid-template-columns:1fr 1fr;gap:30px 22px;margin-bottom:34px}
  .mile-home .mile-footer-identity{grid-column:1/-1}
