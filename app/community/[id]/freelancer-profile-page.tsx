@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 
 type Profile = {
   id:string; display_name:string|null; fiverr_username:string|null; seller_level:string|null; primary_niche:string|null;
-  avatar_url:string|null; bio:string|null; fiverr_profile_url:string|null; skills:string|null; experience_years:number|null;
+  avatar_url:string|null; cover_image_url:string|null; bio:string|null; fiverr_profile_url:string|null; skills:string|null; experience_years:number|null;
   website_url:string|null; work_platforms:string[]|null; upwork_profile_url:string|null; linkedin_url:string|null; other_work_url:string|null;
 };
 
@@ -25,7 +25,7 @@ export default function FreelancerProfilePage() {
       const {data:{user}}=await supabase.auth.getUser();
       if(!user){if(active){setError("Please sign in to view freelancer profiles.");setLoading(false);}return;}
       const {data,error:queryError}=await supabase.from("profiles")
-        .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url")
+        .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,cover_image_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url")
         .eq("id",params.id).eq("community_discoverable",true).maybeSingle();
       if(!active)return;
       if(queryError)setError(queryError.message);else if(!data)setError("This profile is unavailable or is no longer public.");else setProfile(data as Profile);
@@ -57,10 +57,10 @@ export default function FreelancerProfilePage() {
   return <main className="freelancer-profile-page min-h-screen bg-[#f3f5f1] px-4 py-7 text-[#17231b] md:px-8 md:py-10"><div className="mx-auto max-w-5xl">
     <Link href="/community" className="mb-6 inline-flex items-center gap-2 text-xs font-semibold text-[#69736c] hover:text-[#168B56]"><ArrowLeft size={15}/> Back to community</Link>
     {loading?<div className="h-96 animate-pulse rounded-3xl border border-[#e5eae6] bg-white"/>:error?<div role="alert" className="rounded-2xl border border-[#e5eae6] bg-white p-8 text-sm text-[#69736c]">{error}</div>:profile&&<div className="profile-surface overflow-hidden rounded-3xl border border-[#e1e7e0] bg-white shadow-[0_12px_40px_rgba(27,42,32,.04)]">
-      <div className="h-2 bg-[#168B56]"/>
+      <div className="relative h-[130px] overflow-hidden bg-[#111318] sm:h-[180px]">{profile.cover_image_url?<img src={profile.cover_image_url} alt="" className="h-full w-full object-cover"/>:<div className="relative flex h-full items-center px-6 sm:px-10"><div><p className="text-[9px] font-bold tracking-[.2em] text-[#D7F36A]">MILE MEMBER PROFILE</p><p className="mt-3 text-sm font-extrabold tracking-[.12em] text-white sm:text-base">EVERY STEP HAS A PURPOSE</p></div><div className="absolute -right-8 -top-20 h-64 w-64 rounded-full border-[28px] border-white/[.06]"/></div>}</div>
       <div className="p-6 md:p-10">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-          <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-visible rounded-full bg-[#eaf8ef] text-3xl font-extrabold text-[#168B56]"><div className="h-full w-full overflow-hidden rounded-full">{profile.avatar_url?<img src={profile.avatar_url} alt="" className="h-full w-full object-cover"/>:initials}</div><span className={`absolute bottom-1 right-1 h-4 w-4 rounded-full border-[3px] border-white ${online?"bg-[#18a957]":"bg-[#b9c0bb]"}`}/></div>
+        <div className="-mt-16 relative z-10 flex flex-col gap-6 sm:flex-row sm:items-end">
+          <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-visible rounded-full border-4 border-white bg-[#eaf8ef] text-3xl font-extrabold text-[#168B56] shadow-lg"><div className="h-full w-full overflow-hidden rounded-full">{profile.avatar_url?<img src={profile.avatar_url} alt="" className="h-full w-full object-cover"/>:initials}</div><span className={`absolute bottom-1 right-1 h-4 w-4 rounded-full border-[3px] border-white ${online?"bg-[#18a957]":"bg-[#b9c0bb]"}`}/></div>
           <div className="min-w-0 flex-1"><p className="text-[11px] font-bold tracking-[.16em] text-[#168B56]">MILE FREELANCER PROFILE</p><h1 className="mt-2 text-3xl font-extrabold tracking-tight md:text-4xl">{profile.display_name||profile.fiverr_username||"Freelancer"}</h1><p className="mt-2 text-sm text-[#68736b]">{profile.primary_niche||"Independent freelancer"}{profile.experience_years!=null? ` · ${profile.experience_years} years experience`:""}</p><p className={`mt-3 inline-flex items-center gap-2 text-xs font-semibold ${online?"text-[#168B56]":"text-[#929992]"}`}><span className={`h-2 w-2 rounded-full ${online?"bg-[#18a957]":"bg-[#b9c0bb]"}`}/>{online?"Online now":"Currently offline"}</p></div>
           <Link href={`/messages?user=${profile.id}`} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#168B56] px-5 py-3 text-sm font-bold text-white hover:bg-[#117447]"><MessageCircle size={16}/> Message freelancer</Link>
         </div>
