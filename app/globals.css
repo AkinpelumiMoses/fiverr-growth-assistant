@@ -1406,8 +1406,8 @@ body{font-family:Arial,Helvetica,sans-serif!important;background:#f7f7f7!importa
 /* MILE official brand system — Deep Indigo, Electric Lime, White and Dark */
 :root{
   color-scheme:light;
-  --mile-indigo:#25215C;
-  --mile-lime:#B8E94E;
+  --mile-indigo:#000080;
+  --mile-lime:#D7F36A;
   --mile-white:#FFFFFF;
   --mile-dark:#111318;
   --page:#F7F7FA;
@@ -1417,16 +1417,16 @@ body{font-family:Arial,Helvetica,sans-serif!important;background:#f7f7f7!importa
   --ink:#111318;
   --muted:#626274;
   --subtle:#77778A;
-  --accent:#25215C;
-  --accent-strong:#1C1948;
-  --accent-soft:#F0EFF8;
+  --accent:#000080;
+  --accent-strong:#000066;
+  --accent-soft:#F3F4F8;
   --shadow:0 5px 24px rgba(37,33,92,.06);
-  --ws-bg:#F7F7FA;
+  --ws-bg:#F7F8FA;
   --ws-surface:#FFFFFF;
-  --ws-border:#E4E3ED;
-  --ws-ink:#111318;
-  --ws-muted:#626274;
-  --ws-accent:#25215C;
+  --ws-border:#E4E6EC;
+  --ws-ink:#15171B;
+  --ws-muted:#666B76;
+  --ws-accent:#000080;
 }
 :root[data-theme="dark"]{
   color-scheme:dark;
@@ -1468,7 +1468,7 @@ body{background:var(--page);color:var(--ink)}
 .problem-card>span,.founder-kicker{color:var(--mile-indigo)}
 .founder-caption-line,.founder-rule,.founder-kicker span{background:var(--mile-lime)}
 .founder-heading em{color:var(--mile-indigo)}
-.workspace-shell{--ws-bg:#F7F7FA;--ws-surface:#fff;--ws-border:#E4E3ED;--ws-ink:#111318;--ws-muted:#626274;--ws-accent:#25215C;background:var(--ws-bg)!important;color:var(--ws-ink)!important}
+.workspace-shell{--ws-bg:#F7F8FA;--ws-surface:#fff;--ws-border:#E4E6EC;--ws-ink:#15171B;--ws-muted:#666B76;--ws-accent:#000080;background:var(--ws-bg)!important;color:var(--ws-ink)!important}
 .workspace-sidebar,.workspace-quick-rail{background:var(--mile-indigo)!important;border-color:#39356E!important}
 .workspace-sidebar>div:nth-child(2){background:#302C70!important;border-color:#49458A!important}
 .workspace-sidebar nav>div>p{color:#C4C2E1!important}
@@ -1687,3 +1687,75 @@ body{background:var(--page);color:var(--ink)}
  .mile-home .mile-footer-main{grid-template-columns:1fr}
  .mile-home .mile-footer-identity{grid-column:auto}
 }
+
+/* Dashboard brand refinement: use navy as structure, lime as action, and neutral surfaces for breathing room. */
+.workspace-shell{background:#F7F8FA!important;color:#15171B!important}
+.workspace-sidebar{
+  background:#000080!important;
+  border-right:1px solid rgba(255,255,255,.12)!important;
+}
+.workspace-quick-rail{
+  background:#000080!important;
+  border-right:1px solid rgba(255,255,255,.12)!important;
+}
+.workspace-sidebar .mile-sidebar-link{color:rgba(255,255,255,.76)!important}
+.workspace-sidebar .mile-sidebar-link:hover{
+  background:rgba(215,243,106,.12)!important;color:#fff!important;
+}
+.workspace-sidebar .mile-sidebar-link.mile-sidebar-active{
+  background:#D7F36A!important;color:#111512!important;border-color:#D7F36A!important;
+  box-shadow:none!important;
+}
+.workspace-sidebar .mile-sidebar-link.mile-sidebar-active svg{color:#111512!important}
+.workspace-sidebar>div:nth-child(2){
+  background:rgba(255,255,255,.08)!important;
+  border-color:rgba(255,255,255,.14)!important;
+}
+.workspace-sidebar nav>div>p{color:rgba(255,255,255,.55)!important}
+.workspace-sidebar>div:last-child{border-color:rgba(255,255,255,.12)!important}
+.workspace-sidebar button:hover{border-color:rgba(215,243,106,.65)!important}
+.workspace-quick-rail button:not([class*="D7F36A"]):hover{
+  background:rgba(215,243,106,.12)!important;color:#fff!important;
+}
+.workspace-content{background:#F7F8FA!important}
+.workspace-topbar{background:rgba(255,255,255,.96)!important;border-color:#E4E6EC!important}
+.workspace-content .rounded-2xl,
+.workspace-content .rounded-xl{box-shadow:none}
+.workspace-content button[class*="bg-[#222325]"]{
+  background:#000080!important;color:#fff!important;
+}
+.workspace-content button[class*="bg-[#222325]"]:hover{background:#000066!important}
+.workspace-content a[class*="bg-[#222325]"]{
+  background:#000080!important;color:#fff!important;
+}
+.workspace-content a[class*="bg-[#222325]"]:hover{background:#000066!important}
+.workspace-content button[class*="bg-[#D7F36A]"],
+.workspace-content a[class*="bg-[#D7F36A]"]{
+  background:#D7F36A!important;color:#111512!important;
+}
+.workspace-content button[class*="bg-[#D7F36A]"]:hover,
+.workspace-content a[class*="bg-[#D7F36A]"]:hover{background:#C9EB58!important}
+.workspace-content input:focus,
+.workspace-content textarea:focus,
+.workspace-content select:focus{
+  border-color:#000080!important;box-shadow:0 0 0 4px rgba(0,0,128,.10)!important;
+}
+.workspace-content .mile-overview .mile-welcome{
+  background:#000080!important;
+  box-shadow:0 18px 42px rgba(0,0,128,.12)!important;
+}
+.workspace-content .mile-overview .mile-welcome .rounded-2xl{
+  background:#10108F!important;border-color:rgba(255,255,255,.14)!important;
+}
+.workspace-content .mile-overview .mile-stat-ink{
+  background:#000080!important;border-color:#000080!important;
+}
+.workspace-content .mile-overview .mile-stat-ink .rounded-xl{
+  background:rgba(215,243,106,.16)!important;color:#D7F36A!important;
+}
+.workspace-content .mile-overview .mile-action-card>span:last-child{color:#000080!important}
+.workspace-content h1,.workspace-content h2{color:#15171B}
+.workspace-content .text-[#000080]{color:#000080!important}
+:root[data-theme="dark"] .workspace-shell{background:#111318!important}
+:root[data-theme="dark"] .workspace-content{background:#111318!important}
+:root[data-theme="dark"] .workspace-topbar{background:#191A24!important}
