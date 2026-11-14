@@ -1512,3 +1512,20 @@ body{background:var(--page);color:var(--ink)}
 [class*="border-[#1DBF73"],[class*="border-[#15965A"],[class*="border-[#168B56"],[class*="border-[#087a43"]{border-color:var(--mile-indigo)!important}
 :root[data-theme="dark"] [class*="text-[#1DBF73"],:root[data-theme="dark"] [class*="text-[#15965A"],:root[data-theme="dark"] [class*="text-[#168B56"],:root[data-theme="dark"] [class*="text-[#087a43"]{color:var(--mile-lime)!important}
 :root[data-theme="dark"] [class*="bg-[#1DBF73"],:root[data-theme="dark"] [class*="bg-[#15965A"],:root[data-theme="dark"] [class*="bg-[#168B56"],:root[data-theme="dark"] [class*="bg-[#087a43"]{background-color:var(--mile-indigo)!important;color:#fff!important}
+
+
+/* MILE contrast rule: electric lime always carries dark foreground content. */
+.workspace-sidebar .mile-sidebar-active,
+.workspace-sidebar .mile-sidebar-active svg,
+.workspace-sidebar .mile-sidebar-active span,
+.workspace-sidebar [class*="bg-[#D7F36A]"],
+.workspace-quick-rail [class*="bg-[#D7F36A]"]{color:#111512!important}
+.workspace-sidebar .mile-sidebar-active{background:#D7F36A!important;border-color:#D7F36A!important}
+.workspace-sidebar .mile-sidebar-active svg{color:#111512!important}
+.workspace-sidebar .mile-sidebar-link:not(.mile-sidebar-active) svg{color:inherit}
+.workspace-topbar form button{background:#D7F36A!important;color:#111512!important;border-color:#D7F36A!important}
+.workspace-topbar form button svg{color:#111512!important}
+.community-jobs-page button[class*="bg-[#D7F36A]"]{background:#D7F36A!important;color:#111512!important}
+.community-jobs-page button[class*="bg-[#D7F36A]"] svg{color:#111512!important}
+.community-jobs-page a{color:#25215C}
+.community-jobs-page a:hover{color:#1C1948}
