@@ -670,6 +670,21 @@ export default function DashboardWorkspace() {
   const clickThroughRate = totals.impressions ? (totals.clicks / totals.impressions) * 100 : 0;
   const orderConversionRate = totals.clicks ? (totals.orders / totals.clicks) * 100 : 0;
   const latestPerformance = performance[0] ?? null;
+  const previousComparablePerformance = latestPerformance
+    ? performance.slice(1).find((entry) => entry.gig_id === latestPerformance.gig_id && entry.currency === latestPerformance.currency)
+    : null;
+  const performanceInsight = !latestPerformance
+    ? "Add your first snapshot to start understanding how your services are performing."
+    : latestPerformance.orders > 0
+      ? `You recorded ${latestPerformance.orders} order${latestPerformance.orders === 1 ? "" : "s"} in this snapshot. Keep tracking the same service to see whether that result is consistent.`
+      : latestPerformance.clicks > 0
+        ? "People are clicking, but this snapshot has no orders. Review your offer, pricing and description to make the next step clearer."
+        : latestPerformance.impressions > 0
+          ? "Your service is being seen but not clicked. Consider testing a clearer title or a stronger thumbnail."
+          : "No impressions were recorded in this snapshot. Check that the service is active and visible on its platform.";
+  const formatMetricChange = (current: number, previous: number) => previous === 0
+    ? current === 0 ? "No change" : "New activity"
+    : `${current > previous ? "+" : ""}${(((current - previous) / previous) * 100).toFixed(1)}%`;
   const gigName = (id: string | null) => id ? gigs.find((gig) => gig.id === id)?.title ?? "Deleted gig" : "All gigs / not specified";
   const revenueByCurrency = performance.reduce((groups, entry) => { groups[entry.currency] = (groups[entry.currency] || 0) + Number(entry.revenue || 0); return groups; }, {} as Record<string, number>);
   const revenueDisplay = Object.entries(revenueByCurrency).length ? Object.entries(revenueByCurrency).map(([currency, amount]) => `${currency} ${amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}`).join(" · ") : "—";
@@ -882,6 +897,22 @@ export default function DashboardWorkspace() {
               <div className="rounded-xl border border-[#e9ece9] bg-white p-4"><p className="text-[11px] font-semibold text-[#929992]">REVENUE BY CURRENCY</p><p className="mt-2 text-lg font-extrabold leading-7">{revenueDisplay}</p><p className="mt-1 text-[10px] text-[#929992]">Currencies are kept separate</p></div>
             </div>
             {latestPerformance && <div className="mb-5 rounded-xl border border-[#e9ece9] bg-[#f8faf8] p-4 md:p-5"><div className="flex flex-wrap items-center justify-between gap-2"><div><p className="text-[10px] font-bold tracking-wide text-[#777d77]">LATEST SNAPSHOT</p><p className="mt-1 text-sm font-bold">{new Date(latestPerformance.period_start+"T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"})} · {gigName(latestPerformance.gig_id)}</p></div><span className="rounded-full bg-white px-3 py-1 text-[10px] font-semibold text-[#62646A]">{performance.length} saved {performance.length===1?"snapshot":"snapshots"}</span></div><div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4"><div><p className="text-[10px] text-[#929992]">Impressions</p><p className="mt-1 text-lg font-bold">{latestPerformance.impressions.toLocaleString()}</p></div><div><p className="text-[10px] text-[#929992]">Clicks</p><p className="mt-1 text-lg font-bold">{latestPerformance.clicks.toLocaleString()}</p></div><div><p className="text-[10px] text-[#929992]">Orders</p><p className="mt-1 text-lg font-bold">{latestPerformance.orders.toLocaleString()}</p></div><div><p className="text-[10px] text-[#929992]">Revenue</p><p className="mt-1 text-lg font-bold">{latestPerformance.currency} {Number(latestPerformance.revenue).toLocaleString()}</p></div></div></div>}
+            <div className="mb-5 grid gap-4 xl:grid-cols-[1.1fr_.9fr]">
+              <div className="rounded-xl border border-[#e9ece9] bg-white p-5 md:p-6">
+                <p className="text-[10px] font-bold tracking-wide text-[#777d77]">WHAT YOUR LATEST SNAPSHOT SUGGESTS</p>
+                <p className="mt-3 text-sm leading-6 text-[#4b514c]">{performanceInsight}</p>
+                <p className="mt-3 text-[10px] leading-5 text-[#929992]">A practical prompt based on the figures you entered, not a platform ranking prediction.</p>
+              </div>
+              <div className="rounded-xl border border-[#e9ece9] bg-white p-5 md:p-6">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div><p className="text-[10px] font-bold tracking-wide text-[#777d77]">SNAPSHOT COMPARISON</p><p className="mt-1 text-xs text-[#929992]">Same service and currency</p></div>
+                  {previousComparablePerformance && <span className="text-[10px] text-[#929992]">vs. {new Date(previousComparablePerformance.period_start+"T00:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short"})}</span>}
+                </div>
+                {latestPerformance && previousComparablePerformance ? <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[{label:"Impressions",current:latestPerformance.impressions,previous:previousComparablePerformance.impressions},{label:"Clicks",current:latestPerformance.clicks,previous:previousComparablePerformance.clicks},{label:"Orders",current:latestPerformance.orders,previous:previousComparablePerformance.orders},{label:"Revenue",current:Number(latestPerformance.revenue),previous:Number(previousComparablePerformance.revenue)}].map((metric)=> <div key={metric.label} className="rounded-lg bg-[#f7f8f7] p-3"><p className="text-[10px] text-[#929992]">{metric.label}</p><p className="mt-1 text-sm font-bold tabular-nums">{formatMetricChange(metric.current,metric.previous)}</p></div>)}
+                </div> : <p className="mt-4 text-xs leading-5 text-[#777d77]">{latestPerformance ? "Add another snapshot for this same service and currency to see how the figures have changed." : "Your comparison will appear after you save performance snapshots."}</p>}
+              </div>
+            </div>
             <div className="grid items-start gap-5 xl:grid-cols-[.8fr_1.2fr]">
               <form onSubmit={saveMetrics} className="space-y-3 rounded-xl border border-[#e9ece9] bg-white p-5 md:p-6">
                 <div className="flex items-start justify-between gap-3"><div><h3 className="text-sm font-bold">{editingPerformanceId?"Edit performance snapshot":"Add performance snapshot"}</h3><p className="mt-1 text-xs leading-5 text-[#929992]">{editingPerformanceId?"Correct or update a saved record.":"Enter figures from one day of your platform analytics."}</p></div>{editingPerformanceId&&<button type="button" onClick={resetMetricForm} className="text-xs font-semibold text-[#62646A]">Cancel</button>}</div>
