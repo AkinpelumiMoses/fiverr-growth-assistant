@@ -52,19 +52,26 @@ export async function POST(request: Request) {
     };
 
     let taskPrompt = "";
+    let analysisReportGigId: string | null = null;
     let multimodalInput: { type: string; text?: string; data?: string; mime_type?: string }[] | null = null;
     if (body.mode === "gig-analysis") {
       const gigId = typeof body.gigId === "string" ? body.gigId : "";
-      const gig = (gigs ?? []).find((item) => item.id === gigId);
-      if (!gig) {
-        return NextResponse.json({ error: "Select one of your saved gigs before requesting an AI review." }, { status: 400 });
-      }
+      const savedGig = (gigs ?? []).find((item) => item.id === gigId);
       const submitted = body.gig && typeof body.gig === "object" ? body.gig : {};
+      const title = typeof submitted.title === "string" ? submitted.title.trim().slice(0, 180) : savedGig?.title ?? "";
+      const description = typeof submitted.description === "string" ? submitted.description.trim().slice(0, 6000) : savedGig?.description ?? "";
+      const tags = typeof submitted.tags === "string" ? submitted.tags.slice(0, 600) : (savedGig?.tags ?? []).join(", ");
+      if (!title || !description) {
+        return NextResponse.json({ error: "Add a gig title and description before requesting an AI review." }, { status: 400 });
+      }
+      if (gigId && !savedGig) {
+        return NextResponse.json({ error: "That saved gig could not be found in your account. Choose it again or clear the selection to review manually." }, { status: 404 });
+      }
+      analysisReportGigId = savedGig?.id ?? null;
       const reviewGig = {
-        title: typeof submitted.title === "string" ? submitted.title.slice(0, 180) : gig.title,
-        description: typeof submitted.description === "string" ? submitted.description.slice(0, 6000) : gig.description,
-        tags: typeof submitted.tags === "string" ? submitted.tags.slice(0, 600) : (gig.tags ?? []).join(", "),
-        category: gig.category, starting_price: gig.starting_price, currency: gig.currency, status: gig.status,
+        title, description, tags,
+        category: savedGig?.category ?? null, starting_price: savedGig?.starting_price ?? null,
+        currency: savedGig?.currency ?? null, status: savedGig?.status ?? "manual review",
       };
       taskPrompt = `Review this seller's Fiverr gig. Analyse buyer clarity, offer positioning, specificity, description structure, trust signals, deliverables, tags relevance and likely buyer objections. Do not infer ranking or search-volume data. Give: (1) concise overall diagnosis, (2) strengths, (3) priority issues with reasons, (4) a suggested improved title, (5) a rewritten description only if the existing description gives enough information—do not invent credentials or deliverables, (6) tag ideas labelled as hypotheses to validate, (7) three practical next actions. If information is missing, say exactly what is missing.\n\nGig data:\n${JSON.stringify(reviewGig)}`;
     } else {
@@ -164,11 +171,10 @@ ${message}`
       console.error("Gemini returned no text output:", payload);
       return NextResponse.json({ error: "The AI returned an empty response. Please try sending your message again." }, { status: 502 });
     }
-    if (body.mode === "gig-analysis") {
-      const gigId = body.gigId as string;
+    if (body.mode === "gig-analysis" && analysisReportGigId) {
       const { error: saveError } = await supabase.from("analysis_reports").insert({
         user_id: user.id,
-        gig_id: gigId,
+        gig_id: analysisReportGigId,
         report_type: "gig_audit",
         findings: { text: answer },
         recommendations: [],
