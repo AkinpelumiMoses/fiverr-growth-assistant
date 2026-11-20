@@ -19,6 +19,7 @@ export default function DirectMessages() {
   const [loading,setLoading] = useState(true);
   const [sending,setSending] = useState(false);
   const [error,setError] = useState("");
+  const [conversationSearch,setConversationSearch] = useState("");
   const [recording,setRecording]=useState(false);
   const [recordedBlob,setRecordedBlob]=useState<Blob|null>(null);
   const [recordedDuration,setRecordedDuration]=useState(0);
