@@ -21,9 +21,9 @@ type Performance = { id: string; period_start: string; period_end: string; impre
 type Task = { id: string; title: string; description: string; category: string; priority: "low" | "medium" | "high"; status: "pending" | "in_progress" | "completed" };
 
 const navigationGroups: { title: string; items: { label: Section; icon: typeof LayoutDashboard }[] }[] = [
-  { title: "Workspace", items: [{ label: "Overview", icon: LayoutDashboard }, { label: "My Gigs", icon: BriefcaseBusiness }, { label: "Performance", icon: ChartNoAxesCombined }, { label: "Profile", icon: UserRound }] },
-  { title: "Discover & connect", items: [{ label: "Community", icon: Users }] },
-  { title: "Grow your business", items: [{ label: "Growth Plan", icon: Target }, { label: "AI Growth Coach", icon: Bot }, { label: "Gig Analyzer", icon: FileSearch }, { label: "Keyword Research", icon: Search }, { label: "Competitor Research", icon: Activity }] },
+  { title: "Workspace", items: [{ label: "Overview", icon: LayoutDashboard }, { label: "My Gigs", icon: BriefcaseBusiness }, { label: "Performance", icon: ChartNoAxesCombined }] },
+  { title: "Discover", items: [{ label: "Community", icon: Users }] },
+  { title: "Grow", items: [{ label: "Growth Plan", icon: Target }, { label: "AI Growth Coach", icon: Bot }, { label: "Gig Analyzer", icon: FileSearch }, { label: "Keyword Research", icon: Search }, { label: "Competitor Research", icon: Activity }] },
 ];
 
 const starterTasks = [
@@ -681,8 +681,8 @@ export default function DashboardWorkspace() {
           <div className="space-y-1">{group.items.map(item=>{const Icon=item.icon;const active=section===item.label;return <button key={item.label} title={undefined} aria-label={item.label} aria-current={active?"page":undefined} onClick={()=>go(item.label)} className={`mile-sidebar-link group relative flex min-h-[43px] w-full items-center gap-3 px-3 rounded-lg text-left text-[12px] font-semibold transition-colors duration-150 ${active?"mile-sidebar-active text-[#111512]":"text-[#C1CCC3] hover:bg-[#202A23] hover:text-white"}`}><Icon size={17} strokeWidth={1.9} className={active?"text-[#111512]":"text-[#B8C3BA] group-hover:text-white"}/><><span className="min-w-0 flex-1">{item.label}</span>{item.label==="AI Growth Coach"&&<span className="rounded-md border border-[#D7F36A] bg-[#D7F36A] px-1.5 py-0.5 text-[9px] font-extrabold text-[#111512]">AI</span>}</></button>})}</div>
         </div>)}
         <div className="border-t border-[#303B33] pt-4">
-          <p className="mb-2.5 px-3 text-[9px] font-extrabold uppercase tracking-[.16em] text-[#87958A]">Your network</p>
-          {[{label:"Messages",href:"/messages",icon:MessageCircle},{label:"Opportunities",href:"/community/jobs",icon:Handshake},{label:"Notifications",href:"/community/notifications",icon:Bell}].map(item=>{const Icon=item.icon;return <a key={item.label} href={item.href} title={sidebarCollapsed?item.label:undefined} className={`mile-sidebar-link flex min-h-[43px] items-center gap-3 px-3 rounded-lg text-[12px] font-semibold text-[#C1CCC3] transition-colors hover:bg-[#202A23] hover:text-white`}><Icon size={17} strokeWidth={1.9} className="text-[#B8C3BA]"/>{item.label}</a>})}
+          <p className="mb-2.5 px-3 text-[9px] font-extrabold uppercase tracking-[.16em] text-[#87958A]">Connect</p>
+          {[{label:"Opportunities",href:"/community/jobs",icon:Handshake},{label:"Messages",href:"/messages",icon:MessageCircle},{label:"Notifications",href:"/community/notifications",icon:Bell}].map(item=>{const Icon=item.icon;return <a key={item.label} href={item.href} title={sidebarCollapsed?item.label:undefined} className={`mile-sidebar-link flex min-h-[43px] items-center gap-3 px-3 rounded-lg text-[12px] font-semibold text-[#C1CCC3] transition-colors hover:bg-[#202A23] hover:text-white`}><Icon size={17} strokeWidth={1.9} className="text-[#B8C3BA]"/>{item.label}</a>})}
         </div>
       </nav>
 
