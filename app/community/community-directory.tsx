@@ -18,6 +18,8 @@ export default function CommunityDirectory() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [onlineIds, setOnlineIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [niche, setNiche] = useState("All niches");
@@ -32,10 +34,10 @@ export default function CommunityDirectory() {
       if (active) setCurrentUserId(user.id);
       const { data, error: queryError } = await supabase.from("profiles")
         .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url")
-        .eq("community_discoverable", true).order("display_name", { ascending: true }).limit(100);
+        .eq("community_discoverable", true).order("display_name", { ascending: true }).range(0, 23);
       if (!active) return;
       if (queryError) setError("We couldn't load the community right now. " + queryError.message);
-      else setProfiles((data ?? []) as PublicProfile[]);
+      else { setProfiles((data ?? []) as PublicProfile[]); setHasMore((data ?? []).length === 24); }
       setLoading(false);
     }
     loadProfiles();
@@ -65,6 +67,22 @@ export default function CommunityDirectory() {
     void joinPresence();
     return () => { alive = false; if (channel) void supabase.removeChannel(channel); };
   }, [supabase]);
+
+  async function loadMoreProfiles() {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const start = profiles.length;
+    const { data, error: queryError } = await supabase.from("profiles")
+      .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url")
+      .eq("community_discoverable", true).order("display_name", { ascending: true }).range(start, start + 23);
+    if (queryError) setError("We couldn't load more members. " + queryError.message);
+    else {
+      const next = (data ?? []) as PublicProfile[];
+      setProfiles(current => [...current, ...next]);
+      setHasMore(next.length === 24);
+    }
+    setLoadingMore(false);
+  }
 
   const niches = useMemo(() => ["All niches", ...Array.from(new Set(profiles.map(p => p.primary_niche?.trim()).filter((v): v is string => Boolean(v))))].sort((a,b) => a === "All niches" ? -1 : a.localeCompare(b)), [profiles]);
   const platforms = useMemo(() => ["All platforms", ...Array.from(new Set(profiles.flatMap(p => p.work_platforms ?? []))).sort()], [profiles]);
@@ -153,6 +171,7 @@ export default function CommunityDirectory() {
         </div>
       </article>;
     })}</div>}
+    {!loading && !error && hasMore && <div className="mt-7 flex justify-center"><button type="button" onClick={loadMoreProfiles} disabled={loadingMore} className="rounded-xl border border-[#dce5dd] bg-white px-6 py-3 text-xs font-bold text-[#354239] transition hover:border-[#168B56] hover:text-[#168B56] disabled:cursor-wait disabled:opacity-60">{loadingMore ? "Loading members…" : "Load more freelancers"}</button></div>}
     <p className="mt-7 text-[10px] leading-5 text-[#929992]">Only signed-in members can browse this directory. Each freelancer controls whether their profile appears here. Private contact details and account email addresses are not displayed.</p>
   </div>;
 }
