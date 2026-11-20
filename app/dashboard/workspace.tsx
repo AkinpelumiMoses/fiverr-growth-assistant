@@ -638,6 +638,16 @@ export default function DashboardWorkspace() {
   const revenueDisplay = Object.entries(revenueByCurrency).length ? Object.entries(revenueByCurrency).map(([currency, amount]) => `${currency} ${amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}`).join(" · ") : "—";
   const initials = (profileForm.display_name || userEmail || "FG").split(/[\s@._-]+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "FG";
 
+  const nextMove = useMemo(() => {
+    if (profileCompletion < 70) return { title: "Complete your profile", description: "Give MILE enough context to understand your work, skills and the opportunities that fit you.", action: "Finish profile", icon: UserRound, run: () => go("Profile") };
+    if (!gigs.length) return { title: "Add your first service", description: "Save the service you sell so MILE can help you review it, track performance and improve it.", action: "Add a service", icon: BriefcaseBusiness, run: () => go("My Gigs") };
+    const pendingHighPriority = tasks.find((task) => task.status !== "completed" && task.priority === "high");
+    if (pendingHighPriority) return { title: pendingHighPriority.title, description: pendingHighPriority.description, action: "Work on this", icon: Target, run: () => go("Growth Plan") };
+    if (!performance.length) return { title: "Record your first performance snapshot", description: "Add your latest impressions, clicks, orders and revenue so MILE can help you understand what is changing.", action: "Add performance", icon: ChartNoAxesCombined, run: () => go("Performance") };
+    return { title: "Find your next opportunity", description: "Your workspace is set up. Now use the MILE network to discover projects, referrals and collaborators.", action: "Explore opportunities", icon: Compass, run: () => { window.location.href = "/community/jobs"; } };
+  }, [profileCompletion, gigs.length, tasks, performance.length]);
+  const NextMoveIcon = nextMove.icon;
+
   function go(next: Section) { setSection(next); setMobileOpen(false); setNotice(""); }
 
   return <main className="workspace-shell min-h-screen bg-[#f7f8f7] text-[#222325]">
@@ -711,8 +721,8 @@ export default function DashboardWorkspace() {
                   <h2 className="mt-5 text-3xl font-bold leading-[1.08] tracking-[-.045em] text-white sm:text-4xl lg:text-[46px]">Make your next move count{profileForm.display_name ? `, ${profileForm.display_name.split(" ")[0]}` : ""}.</h2>
                   <p className="mt-4 max-w-xl text-sm leading-7 text-[#D3E2D8] sm:text-[15px]">Your work, your network and your next opportunity come together here. Pick up where you left off and keep moving forward.</p>
                   <div className="mt-7 flex flex-wrap gap-3">
-                    <button onClick={()=>go("Community")} className="inline-flex items-center gap-2 rounded-lg bg-[#D7F36A] px-4 py-3 text-xs font-extrabold text-[#183522] transition hover:bg-[#E5FA91]"><Search size={15}/> Discover people</button>
-                    <a href="/community/jobs" className="inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/[.06] px-4 py-3 text-xs font-bold text-white transition hover:bg-white/[.12]"><Compass size={15}/> Explore opportunities</a>
+                    <button onClick={nextMove.run} className="inline-flex items-center gap-2 rounded-lg bg-[#D7F36A] px-4 py-3 text-xs font-extrabold text-[#183522] transition hover:bg-[#E5FA91]"><NextMoveIcon size={15}/> {nextMove.action}</button>
+                    <button onClick={()=>go("Community")} className="inline-flex items-center gap-2 rounded-lg border border-white/25 bg-white/[.06] px-4 py-3 text-xs font-bold text-white transition hover:bg-white/[.12]"><Users size={15}/> Meet the community</button>
                   </div>
                 </div>
                 <div className="rounded-2xl border border-white/15 bg-[#204D39] p-5 sm:p-6">
@@ -743,9 +753,9 @@ export default function DashboardWorkspace() {
             </section>
 
             <section>
-              <div className="mb-3"><p className="text-[10px] font-extrabold uppercase tracking-[.14em] text-[#68756B]">Your next move</p><h3 className="mt-1 text-lg font-bold text-[#202722]">Make something happen</h3></div>
+              <div className="mb-3"><p className="text-[10px] font-extrabold uppercase tracking-[.14em] text-[#68756B]">Your next move</p><h3 className="mt-1 text-lg font-bold text-[#202722]">{nextMove.title}</h3><p className="mt-1 max-w-2xl text-xs leading-5 text-[#59665D]">{nextMove.description}</p></div>
               <div className="grid gap-3 md:grid-cols-3">
-                <button onClick={()=>go("Community")} className="mile-action-card group rounded-2xl p-5 text-left transition hover:-translate-y-0.5"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#DDF1E2] text-[#25215C]"><Users size={20}/></span><h3 className="mt-4 text-sm font-extrabold text-[#202722]">Meet your next collaborator</h3><p className="mt-2 text-xs leading-6 text-[#59665D]">Find freelancers with complementary skills and different perspectives.</p><span className="mt-4 inline-flex items-center gap-2 text-xs font-extrabold text-[#25215C]">Explore the community <ArrowUpRight size={14}/></span></button>
+                <button onClick={nextMove.run} className="mile-action-card group rounded-2xl border-[#D5E6D8] bg-[#F5FAF5] p-5 text-left transition hover:-translate-y-0.5"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#D7F36A] text-[#183522]"><NextMoveIcon size={20}/></span><h3 className="mt-4 text-sm font-extrabold text-[#202722]">{nextMove.title}</h3><p className="mt-2 text-xs leading-6 text-[#59665D]">{nextMove.description}</p><span className="mt-4 inline-flex items-center gap-2 text-xs font-extrabold text-[#25215C]">{nextMove.action} <ArrowUpRight size={14}/></span></button>
                 <a href="/community/jobs" className="mile-action-card group rounded-2xl p-5 transition hover:-translate-y-0.5"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#FFF0C7] text-[#79500B]"><Compass size={20}/></span><h3 className="mt-4 text-sm font-extrabold text-[#202722]">Find an opportunity</h3><p className="mt-2 text-xs leading-6 text-[#59665D]">Explore projects, referrals and collaboration opportunities shared by the network.</p><span className="mt-4 inline-flex items-center gap-2 text-xs font-extrabold text-[#25215C]">Browse opportunities <ArrowUpRight size={14}/></span></a>
                 <a href="/messages" className="mile-action-card group rounded-2xl p-5 transition hover:-translate-y-0.5"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#E8EAF8] text-[#454B87]"><MessageCircle size={20}/></span><h3 className="mt-4 text-sm font-extrabold text-[#202722]">Continue a conversation</h3><p className="mt-2 text-xs leading-6 text-[#59665D]">Keep your connections moving with direct conversations.</p><span className="mt-4 inline-flex items-center gap-2 text-xs font-extrabold text-[#25215C]">Open messages <ArrowUpRight size={14}/></span></a>
               </div>
