@@ -14,10 +14,12 @@ type Job = {
 const niches = ["Graphic Design","Branding & Brand Identity","Web Development","WordPress","UI/UX Design","Video Editing","Digital Marketing","Writing & Translation","Other"];
 const currencies = ["USD","NGN","GBP","EUR","CAD","AUD"];
 type CommunityNotification = { id: string; title: string; body: string; job_id: string; read_at: string | null; created_at: string };
+type OpportunityPoster = { id: string; display_name: string | null; avatar_url: string | null; primary_niche: string | null };
 
 export default function CommunityJobs() {
   const supabase = useMemo(() => createClient(), []);
   const [jobs,setJobs] = useState<Job[]>([]);
+  const [posters,setPosters] = useState<Record<string, OpportunityPoster>>({});
   const [userId,setUserId] = useState("");
   const [loading,setLoading] = useState(true);
   const [error,setError] = useState("");
@@ -48,7 +50,23 @@ export default function CommunityJobs() {
     let query=supabase.from("community_jobs").select("id,poster_id,title,description,niche,required_skills,budget_type,budget_min,budget_max,currency,deadline,status,created_at").order("created_at",{ascending:false}).limit(100);
     if(mine) query=query.eq("poster_id",user.id);
     const {data,error:queryError}=await query;
-    if(queryError)setError(queryError.message); else setJobs((data??[]) as Job[]);
+    if(queryError) setError(queryError.message);
+    else {
+      const rows = (data ?? []) as Job[];
+      setJobs(rows);
+      const posterIds = [...new Set(rows.map((job) => job.poster_id).filter((id) => id !== user.id))];
+      if (posterIds.length) {
+        const { data: posterRows, error: posterError } = await supabase
+          .from("profiles")
+          .select("id,display_name,avatar_url,primary_niche")
+          .in("id", posterIds)
+          .eq("community_discoverable", true);
+        if (posterError) setError(posterError.message);
+        else setPosters(Object.fromEntries(((posterRows ?? []) as OpportunityPoster[]).map((poster) => [poster.id, poster])));
+      } else {
+        setPosters({});
+      }
+    }
     setLoading(false);
   }
   useEffect(()=>{load();},[mine]);
@@ -79,14 +97,21 @@ export default function CommunityJobs() {
   async function submit(event:React.FormEvent<HTMLFormElement>){
     event.preventDefault(); if(saving)return;
     setSaving(true);setError("");
+    const minimum = form.budget_min ? Number(form.budget_min) : null;
+    const maximum = form.budget_max ? Number(form.budget_max) : null;
+    if (minimum !== null && maximum !== null && minimum > maximum) {
+      setError("The minimum budget cannot be higher than the maximum budget.");
+      setSaving(false);
+      return;
+    }
     const {data:{user}}=await supabase.auth.getUser();
     if(!user){setError("Please sign in again.");setSaving(false);return;}
     const payload={
       poster_id:user.id,title:form.title.trim(),description:form.description.trim(),niche:form.niche,
       required_skills:form.skills.split(",").map(s=>s.trim()).filter(Boolean).slice(0,12),
       budget_type:form.budget_type,
-      budget_min:form.budget_min?Number(form.budget_min):null,
-      budget_max:form.budget_max?Number(form.budget_max):null,
+      budget_min:minimum,
+      budget_max:maximum,
       currency:form.currency,deadline:form.deadline||null
     };
     const result = editingJobId
@@ -106,7 +131,9 @@ export default function CommunityJobs() {
     setShowForm(true);
     window.scrollTo({top:0,behavior:"smooth"});
   }
-  const filtered=jobs.filter(j=>(filter==="All niches"||j.niche===filter)&&(!search.trim()||[j.title,j.description,j.niche,...j.required_skills].join(" ").toLowerCase().includes(search.trim().toLowerCase())));
+  const filtered=jobs
+    .filter(j=>(mine || j.status==="open")&&(filter==="All niches"||j.niche===filter)&&(!search.trim()||[j.title,j.description,j.niche,...j.required_skills].join(" ").toLowerCase().includes(search.trim().toLowerCase())))
+    .sort((a,b)=>Number(selectedNiches.includes(b.niche))-Number(selectedNiches.includes(a.niche))||new Date(b.created_at).getTime()-new Date(a.created_at).getTime());
   function budget(j:Job){if(j.budget_type==="not_specified")return "Budget not specified";if(j.budget_type==="volunteer")return "Volunteer / collaboration";const range=[j.budget_min!=null?Number(j.budget_min).toLocaleString():"",j.budget_max!=null?Number(j.budget_max).toLocaleString():""].filter(Boolean).join(" – ");return `${j.currency} ${range||"To be discussed"} · ${j.budget_type}`;}
   return <div className="community-jobs-page mx-auto max-w-[1200px]">
     <div className="mb-7 flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-bold text-[#25215C]">COMMUNITY OPPORTUNITIES</p><h1 className="mt-2 text-3xl font-extrabold tracking-tight md:text-4xl">Find opportunities. Share the load.</h1><p className="mt-2 max-w-xl text-sm leading-6 text-[#777d77]">Post work you need help with, or find opportunities shared by freelancers in your niche.</p></div><button onClick={()=>setShowForm(v=>!v)} className="inline-flex items-center gap-2 rounded-xl bg-[#D7F36A] px-4 py-3 text-sm font-bold text-[#111512]">{showForm?<X size={16}/>:<Plus size={16}/>} {showForm?"Close form":"Post an opportunity"}</button></div>
@@ -152,7 +179,16 @@ export default function CommunityJobs() {
     </form>}
     {error&&<p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
     <div className="mb-5 flex flex-col gap-3 sm:flex-row"><label className="relative flex-1"><Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#929992]"/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search opportunities or skills" className="w-full rounded-xl border bg-white py-3 pl-10 pr-3 text-sm"/></label><select value={filter} onChange={e=>setFilter(e.target.value)} className="rounded-xl border bg-white px-3 py-3 text-sm"><option>All niches</option>{niches.map(n=><option key={n}>{n}</option>)}</select></div>
-    {loading?<p className="py-16 text-center text-sm text-[#777]">Loading opportunities…</p>:filtered.length===0?<div className="rounded-2xl border border-dashed bg-white p-12 text-center"><BriefcaseBusiness className="mx-auto mb-3 text-[#25215C]"/><h2 className="font-bold">No opportunities here yet</h2><p className="mt-2 text-sm text-[#888]">When a freelancer shares a project, it will appear here.</p></div>:<div className="grid gap-4 md:grid-cols-2">{filtered.map(job=><article key={job.id} className="rounded-2xl border border-[#e8ece8] bg-white p-5"><div className="mb-3 flex items-center justify-between gap-3"><span className="rounded-full bg-[#F1F8D8] px-3 py-1.5 text-[10px] font-bold text-[#25215C]">{job.niche}</span><span className="text-[10px] text-[#888]">{new Date(job.created_at).toLocaleDateString()}</span></div><h2 className="text-lg font-extrabold">{job.title}</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#68736b]">{job.description}</p>{job.required_skills.length>0&&<div className="mt-3 flex flex-wrap gap-2">{job.required_skills.map(s=><span key={s} className="rounded-full bg-[#f3f5f3] px-2.5 py-1 text-[10px] text-[#59645c]">{s}</span>)}</div>}<div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4"><div className="text-xs font-semibold">{budget(job)}{job.deadline&&<p className="mt-1 flex items-center gap-1 text-[10px] font-normal text-[#888]"><Clock3 size={11}/> Due {new Date(job.deadline+"T00:00:00").toLocaleDateString()}</p>}</div>{job.poster_id===userId?<div className="flex flex-wrap items-center justify-end gap-2"><span className="self-center text-[10px] text-[#888]">Your post · {job.status}</span>{job.status==="open"&&<><button onClick={()=>editJob(job)} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Edit</button><button onClick={()=>changeStatus(job,"filled")} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Mark filled</button><button onClick={()=>changeStatus(job,"closed")} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Close</button></>}{job.status!=="open"&&<button onClick={()=>changeStatus(job,"open")} className="rounded-lg border border-[#25215C] px-3 py-2 text-[10px] font-bold text-[#25215C]">Reopen</button>}{job.status!=="open"&&<button onClick={()=>editJob(job)} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Edit</button>}</div>:<span className="inline-flex items-center gap-1 text-[10px] text-[#888]"><UserRound size={12}/> Member opportunity</span>}</div></article>)}</div>}
+    {loading?<p className="py-16 text-center text-sm text-[#777]">Loading opportunities…</p>:filtered.length===0?<div className="rounded-2xl border border-dashed bg-white p-12 text-center"><BriefcaseBusiness className="mx-auto mb-3 text-[#25215C]"/><h2 className="font-bold">No opportunities here yet</h2><p className="mt-2 text-sm text-[#888]">When a freelancer shares a project, it will appear here.</p></div>:<div className="grid gap-4 md:grid-cols-2">{filtered.map(job=><article key={job.id} className="rounded-2xl border border-[#e8ece8] bg-white p-5"><div className="mb-3 flex items-center justify-between gap-3"><div className="flex flex-wrap items-center gap-2"><span className="rounded-full bg-[#F1F8D8] px-3 py-1.5 text-[10px] font-bold text-[#25215C]">{job.niche}</span>{selectedNiches.includes(job.niche)&&job.status==="open"&&<span className="rounded-full bg-[#eaf8ef] px-2.5 py-1.5 text-[10px] font-bold text-[#167044]">Matches your interests</span>}</div><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${job.status==="open"?"bg-[#eaf8ef] text-[#167044]":job.status==="filled"?"bg-[#edf0fa] text-[#454B87]":"bg-[#f1f2f1] text-[#68736b]"}`}>{job.status==="open"?"Open":job.status==="filled"?"Filled":"Closed"} · {new Date(job.created_at).toLocaleDateString()}</span></div><div id={`job-${job.id}`} className="scroll-mt-6"><h2 className="text-lg font-extrabold">{job.title}</h2></div><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#68736b]">{job.description}</p>{job.required_skills.length>0&&<div className="mt-3 flex flex-wrap gap-2">{job.required_skills.map(s=><span key={s} className="rounded-full bg-[#f3f5f3] px-2.5 py-1 text-[10px] text-[#59645c]">{s}</span>)}</div>}<div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4"><div className="text-xs font-semibold">{budget(job)}{job.deadline&&<p className="mt-1 flex items-center gap-1 text-[10px] font-normal text-[#888]"><Clock3 size={11}/> Due {new Date(job.deadline+"T00:00:00").toLocaleDateString()}</p>}</div>{job.poster_id===userId?<div className="flex flex-wrap items-center justify-end gap-2"><span className="self-center text-[10px] text-[#888]">Your post · {job.status}</span>{job.status==="open"&&<><button onClick={()=>editJob(job)} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Edit</button><button onClick={()=>changeStatus(job,"filled")} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Mark filled</button><button onClick={()=>changeStatus(job,"closed")} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Close</button></>}{job.status!=="open"&&<button onClick={()=>changeStatus(job,"open")} className="rounded-lg border border-[#25215C] px-3 py-2 text-[10px] font-bold text-[#25215C]">Reopen</button>}{job.status!=="open"&&<button onClick={()=>editJob(job)} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Edit</button>}</div>: (() => {
+              const poster = posters[job.poster_id];
+              return <div className="flex flex-wrap items-center justify-end gap-2">
+                {poster ? <div className="mr-auto flex min-w-0 items-center gap-2">
+                  {poster.avatar_url ? <img src={poster.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover"/> : <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#eef3ee] text-[#58645b]"><UserRound size={14}/></span>}
+                  <span className="min-w-0"><span className="block truncate text-[11px] font-bold text-[#303a32]">{poster.display_name || "MILE member"}</span><span className="block truncate text-[10px] text-[#929992]">{poster.primary_niche || "Community member"}</span></span>
+                </div> : <span className="mr-auto inline-flex items-center gap-1 text-[10px] text-[#888]"><UserRound size={12}/> MILE member</span>}
+                {poster && <><Link href={`/community/${poster.id}`} className="rounded-lg border px-3 py-2 text-[10px] font-bold text-[#354239] hover:bg-[#f5f8f5]">View profile</Link><Link href={`/messages?user=${poster.id}`} className="rounded-lg bg-[#168B56] px-3 py-2 text-[10px] font-bold text-white hover:bg-[#117447]">Message poster</Link></>}
+              </div>;
+            })()}</div></article>)}</div>}
     <p className="mt-7 text-[10px] leading-5 text-[#929992]">Please agree on scope, payment and delivery terms directly before starting work. Never share passwords or account access.</p>
   </div>;
 }
