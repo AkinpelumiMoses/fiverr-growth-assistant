@@ -39,16 +39,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Choose a valid AI action." }, { status: 400 });
     }
 
-    const [{ data: profile }, { data: gigs }, { data: performance }] = await Promise.all([
-      supabase.from("profiles").select("display_name,fiverr_username,seller_level,primary_niche,website_url").eq("id", user.id).maybeSingle(),
+    const [{ data: profile }, { data: gigs }, { data: performance }, { data: growthTasks }] = await Promise.all([
+      supabase.from("profiles").select("display_name,fiverr_username,seller_level,primary_niche,website_url,bio,skills,experience_years,work_platforms,upwork_profile_url,linkedin_url,other_work_url,services_offered,looking_for,preferred_project_types,collaboration_interests,availability_status,onboarding_completed").eq("id", user.id).maybeSingle(),
       supabase.from("gigs").select("id,title,description,tags,category,starting_price,currency,status").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
       supabase.from("performance_entries").select("period_start,impressions,clicks,orders,revenue,currency,gig_id").eq("user_id", user.id).order("period_start", { ascending: false }).limit(30),
+      supabase.from("growth_tasks").select("title,description,category,priority,status,due_date").eq("user_id", user.id).order("created_at", { ascending: false }).limit(30),
     ]);
 
     const sellerContext = {
       profile: profile ?? {},
       savedGigs: gigs ?? [],
       recentPerformanceSnapshots: performance ?? [],
+      growthPlanTasks: growthTasks ?? [],
     };
 
     let taskPrompt = "";
@@ -77,15 +79,30 @@ export async function POST(request: Request) {
     } else {
       const message = typeof body.message === "string" ? body.message.trim().slice(0, 2000) : "";
       if (!message && (!Array.isArray(body.attachments) || body.attachments.length === 0)) return NextResponse.json({ error: "Write a message or attach a file for your growth coach to review." }, { status: 400 });
-      const history = Array.isArray(body.history) ? body.history.slice(-8).map((item) => ({
+      const attachmentItems = Array.isArray(body.attachments) ? body.attachments.slice(0, 5) : [];
+      const { data: conversation, error: conversationError } = await supabase
+        .from("ai_conversations")
+        .select("id,title")
+        .eq("id", body.conversationId!)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (conversationError || !conversation) return NextResponse.json({ error: "This conversation could not be found." }, { status: 404 });
+      const { data: savedMessages, error: savedMessagesError } = await supabase
+        .from("ai_messages")
+        .select("role,content")
+        .eq("conversation_id", conversation.id)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(12);
+      if (savedMessagesError) return NextResponse.json({ error: "Could not load the saved conversation context. Please try again." }, { status: 500 });
+      const history = (savedMessages ?? []).reverse().map((item) => ({
         role: item.role === "assistant" ? "assistant" : "user",
         content: typeof item.content === "string" ? item.content.slice(0, 1500) : "",
-      })).filter((item) => item.content) : [];
-      const attachmentItems = Array.isArray(body.attachments) ? body.attachments.slice(0, 5) : [];
+      })).filter((item) => item.content);
       const allowedMime = new Set(["application/pdf","text/plain","text/markdown","text/csv","application/json","image/jpeg","image/png","image/webp","image/gif","audio/webm","audio/mp4","audio/ogg","audio/mpeg","audio/wav"]);
       const inputParts: { type: string; text?: string; data?: string; mime_type?: string }[] = [{
         type: "text",
-        text: `Use the seller context below to answer the seller's latest question. If there is not enough data, ask one focused follow-up question. Diagnose performance carefully: low impressions may relate to relevance, demand, competition or indexing; impressions without clicks may suggest title/thumbnail/positioning issues; clicks without orders may suggest offer, price, trust or conversion friction. Treat these as hypotheses, not facts about Fiverr's algorithm.
+        text: `You are coaching this specific freelancer, not giving generic advice. Use their profile, services, work platforms, saved gigs, actual performance snapshots and Growth Plan tasks when relevant. Make it clear which observations come from their supplied data and which are hypotheses. If their profile or data is incomplete, do not fill gaps with assumptions; ask one focused question when the missing information changes the advice. Diagnose performance carefully: low impressions may relate to relevance, demand, competition or indexing; impressions without clicks may suggest title/thumbnail/positioning issues; clicks without orders may suggest offer, price, trust or conversion friction. Treat these as hypotheses, not facts about Fiverr's algorithm. When useful, end with no more than three prioritised actions, each with a concrete first step. Avoid recommending tasks they have already completed. Do not claim to have changed their Growth Plan or saved a task unless an explicit action has done so.
 
 Seller context:
 ${JSON.stringify(sellerContext)}
@@ -114,8 +131,6 @@ ${message}`
       }
       multimodalInput = inputParts;
       taskPrompt = inputParts[0].text ?? "";
-      const { data: conversation, error: conversationError } = await supabase.from("ai_conversations").select("id,title").eq("id", body.conversationId!).eq("user_id", user.id).maybeSingle();
-      if (conversationError || !conversation) return NextResponse.json({ error: "This conversation could not be found." }, { status: 404 });
       const userMessage = message || "Please review the attached files.";
     }
 
