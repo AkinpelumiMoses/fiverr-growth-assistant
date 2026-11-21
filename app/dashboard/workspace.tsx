@@ -900,20 +900,53 @@ export default function DashboardWorkspace() {
             <section className="mile-welcome relative overflow-hidden rounded-[22px] bg-[#123D2B] text-white">
               <div className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full border-[42px] border-white/[.045]"/>
               <div className="pointer-events-none absolute right-28 top-24 h-40 w-40 rounded-full bg-[#D7F36A]/10 blur-3xl"/>
-              <div className="relative grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_290px] lg:items-end lg:p-10">
+              <div className="relative grid gap-7 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_330px] lg:items-center lg:gap-10 lg:p-10">
                 <div className="max-w-2xl">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[.08] px-3 py-1.5 text-[11px] font-semibold tracking-wide text-[#E5F2E9]"><span className="h-2 w-2 rounded-full bg-[#D7F36A]"/> YOUR FREELANCE HQ</div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[.08] px-3 py-1.5 text-[11px] font-semibold tracking-wide text-[#E5E9FF]"><span className="h-2 w-2 rounded-full bg-[#D7F36A]"/> YOUR FREELANCE HQ</div>
                   <h2 className="mt-5 text-3xl font-bold leading-[1.08] tracking-[-.045em] text-white sm:text-4xl lg:text-[46px]">Make your next move count{profileForm.display_name ? `, ${profileForm.display_name.split(" ")[0]}` : ""}.</h2>
-                  <p className="mt-4 max-w-xl text-sm leading-7 text-[#D3E2D8] sm:text-[15px]">Your work, your network and your next opportunity come together here. Pick up where you left off and keep moving forward.</p>
+                  <p className="mt-4 max-w-xl text-sm leading-7 text-[#DCE0F5] sm:text-[15px]">Your work, your network and your next opportunity come together here. Pick up where you left off and keep moving forward.</p>
                   <div className="mt-7 flex flex-wrap gap-3">
                     <button onClick={nextMove.run} className="inline-flex items-center gap-2 rounded-lg bg-[#D7F36A] px-4 py-3 text-xs font-extrabold text-[#183522] transition hover:bg-[#E5FA91]"><NextMoveIcon size={15}/> {nextMove.action}</button>
-                    <button onClick={()=>go("Community")} className="inline-flex items-center gap-2 rounded-full border border-[#D7F36A]/50 bg-[#102F21] px-4 py-3 text-xs font-bold !text-[#D7F36A] transition hover:bg-[#183522]"><Users size={15} className="!text-[#D7F36A]"/> <span className="!text-[#D7F36A]" style={{color:"#D7F36A"}}>Meet the community</span></button>
+                    <button onClick={()=>go("Community")} className="inline-flex items-center gap-2 rounded-full border border-[#D7F36A]/50 bg-[#10154F] px-4 py-3 text-xs font-bold !text-[#D7F36A] transition hover:bg-[#20266D]"><Users size={15} className="!text-[#D7F36A]"/> <span className="!text-[#D7F36A]" style={{color:"#D7F36A"}}>Meet the community</span></button>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-white/15 bg-[#204D39] p-5 sm:p-6">
-                  <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold text-white">Your profile strength</p><p className="mt-1 text-[11px] leading-5 text-[#C6D9CC]">A stronger profile makes better introductions possible.</p></div><span className="rounded-lg bg-[#D7F36A] px-2.5 py-1.5 text-sm font-extrabold text-[#183522]">{profileCompletion}%</span></div>
-                  <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#102F21]"><div className="h-full rounded-full bg-[#D7F36A] transition-all" style={{width:profileCompletion+"%"}}/></div>
-                  <button onClick={()=>go("Profile")} className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#D7F36A]/50 bg-[#102F21] px-5 py-3 text-xs font-extrabold !text-[#D7F36A] shadow-sm transition hover:bg-[#183522]"><span className="!text-[#D7F36A]" style={{color:"#D7F36A"}}>Complete your profile</span> <ArrowUpRight size={14} className="!text-[#D7F36A]"/></button>
+                <div className="flex flex-col items-center gap-3">
+                  <div className="relative w-full max-w-[300px]" aria-label="3D illustration of a path moving upward through milestones" role="img">
+                    <svg viewBox="0 0 320 218" className="h-auto w-full overflow-visible" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <linearGradient id="mile-step-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#F4F7FF"/><stop offset="1" stopColor="#AEB9F5"/></linearGradient>
+                        <linearGradient id="mile-step-side" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#6675D8"/><stop offset="1" stopColor="#29347F"/></linearGradient>
+                        <linearGradient id="mile-lime-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#F0FFB2"/><stop offset="1" stopColor="#B9E84F"/></linearGradient>
+                        <linearGradient id="mile-lime-side" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#A5D83E"/><stop offset="1" stopColor="#668C24"/></linearGradient>
+                        <radialGradient id="mile-orb"><stop offset="0" stopColor="#FFFFFF" stopOpacity=".9"/><stop offset="1" stopColor="#AAB6FF" stopOpacity=".08"/></radialGradient>
+                        <filter id="mile-shadow" x="-40%" y="-40%" width="180%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>
+                      </defs>
+                      <ellipse cx="164" cy="194" rx="112" ry="13" fill="#05083B" opacity=".35" filter="url(#mile-shadow)"/>
+                      <circle cx="248" cy="48" r="35" fill="url(#mile-orb)" opacity=".55"/>
+                      <circle cx="61" cy="62" r="4" fill="#D7F36A"/><circle cx="273" cy="105" r="3" fill="#FFFFFF" opacity=".8"/>
+                      <path d="M65 154 C105 140 130 125 156 106 S214 72 252 48" fill="none" stroke="#D7F36A" strokeWidth="2" strokeDasharray="4 7" opacity=".8"/>
+                      <g transform="translate(28 125)">
+                        <path d="M0 22 45 0 90 22 45 45Z" fill="url(#mile-step-top)"/><path d="M0 22 45 45V62L0 39Z" fill="#6875C6"/><path d="M45 45 90 22V39L45 62Z" fill="url(#mile-step-side)"/>
+                      </g>
+                      <g transform="translate(103 92)">
+                        <path d="M0 22 45 0 90 22 45 45Z" fill="url(#mile-step-top)"/><path d="M0 22 45 45V62L0 39Z" fill="#6875C6"/><path d="M45 45 90 22V39L45 62Z" fill="url(#mile-step-side)"/>
+                      </g>
+                      <g transform="translate(180 59)">
+                        <path d="M0 22 45 0 90 22 45 45Z" fill="url(#mile-lime-top)"/><path d="M0 22 45 45V62L0 39Z" fill="#8EBB35"/><path d="M45 45 90 22V39L45 62Z" fill="url(#mile-lime-side)"/>
+                        <path d="M45 2V-26" stroke="#F5F7FF" strokeWidth="3" strokeLinecap="round"/><path d="M47 -26 76 -19 47 -10Z" fill="#D7F36A"/>
+                        <circle cx="45" cy="1" r="4" fill="#FFFFFF"/>
+                      </g>
+                      <path d="M62 118 62 103" stroke="#D7F36A" strokeWidth="2" strokeLinecap="round"/><circle cx="62" cy="99" r="5" fill="#D7F36A"/>
+                      <path d="M137 84 137 69" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" opacity=".9"/><circle cx="137" cy="65" r="4" fill="#FFFFFF"/>
+                      <path d="m224 24 4 8 8 1-6 5 2 8-8-4-7 4 1-8-6-5 8-1Z" fill="#D7F36A" opacity=".9"/>
+                    </svg>
+                    <div className="absolute bottom-2 right-2 rounded-full border border-white/15 bg-[#10154F]/80 px-3 py-1.5 text-[9px] font-bold tracking-[.12em] text-[#E7EBFF] backdrop-blur">EVERY STEP HAS A PURPOSE</div>
+                  </div>
+                  <div className="w-full rounded-2xl border border-white/15 bg-white/[.08] p-4 backdrop-blur-sm sm:p-5">
+                    <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold text-white">Your profile strength</p><p className="mt-1 text-[11px] leading-5 text-[#DCE0F5]">A stronger profile makes better introductions possible.</p></div><span className="rounded-lg bg-[#D7F36A] px-2.5 py-1.5 text-sm font-extrabold text-[#183522]">{profileCompletion}%</span></div>
+                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#090D4B]"><div className="h-full rounded-full bg-[#D7F36A] transition-all" style={{width:profileCompletion+"%"}}/></div>
+                    <button onClick={()=>go("Profile")} className="mt-4 inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-[#D7F36A]/50 bg-[#10154F] px-4 py-2.5 text-xs font-extrabold !text-[#D7F36A] shadow-sm transition hover:bg-[#20266D]"><span className="!text-[#D7F36A]" style={{color:"#D7F36A"}}>Complete your profile</span> <ArrowUpRight size={14} className="!text-[#D7F36A]"/></button>
+                  </div>
                 </div>
               </div>
             </section>
