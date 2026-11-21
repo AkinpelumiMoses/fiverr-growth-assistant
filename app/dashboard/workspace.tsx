@@ -925,11 +925,11 @@ export default function DashboardWorkspace() {
                       .mile-symbol:nth-of-type(2) { animation-delay:4s; }
                       .mile-symbol:nth-of-type(3) { animation-delay:8s; }
                       .mile-symbol:nth-of-type(4) { animation-delay:12s; }
-                      @media (prefers-reduced-motion: reduce) { .mile-symbol { animation:none; opacity:0; } .mile-symbol:first-of-type { opacity:1; transform:none; } }
+                      @media (prefers-reduced-motion: reduce) { .mile-symbol { animation:none; opacity:0; } .mile-symbol-primary { opacity:1; transform:none; } }
                     `}</style>
                     <div className="absolute h-52 w-52 rounded-full border border-white/10" />
                     <div className="absolute h-64 w-64 rounded-full border border-[#D7F36A]/15" />
-                    <div className="mile-symbol" style={{animationDelay:"0s"}}><span className="mile-orbit"/><span className="mile-glow"/><Compass className="relative z-10 !text-[#D7F36A]"/></div>
+                    <div className="mile-symbol mile-symbol-primary" style={{animationDelay:"0s"}}><span className="mile-orbit"/><span className="mile-glow"/><Compass className="relative z-10 !text-[#D7F36A]"/></div>
                     <div className="mile-symbol" style={{animationDelay:"4s"}}><span className="mile-orbit"/><span className="mile-glow"/><TrendingUp className="relative z-10 !text-[#D7F36A]"/></div>
                     <div className="mile-symbol" style={{animationDelay:"8s"}}><span className="mile-orbit"/><span className="mile-glow"/><BriefcaseBusiness className="relative z-10 !text-[#D7F36A]"/></div>
                     <div className="mile-symbol" style={{animationDelay:"12s"}}><span className="mile-orbit"/><span className="mile-glow"/><Target className="relative z-10 !text-[#D7F36A]"/></div>
