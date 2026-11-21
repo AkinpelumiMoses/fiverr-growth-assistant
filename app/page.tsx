@@ -63,12 +63,18 @@ export default function Home() {
     return () => window.clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setMenuOpen(false); };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, []);
+
   return (
     <main className="mile-home">
       <svg aria-hidden="true" width="0" height="0" style={{position:"absolute"}}><filter id="mile-home-logo-colors" colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values="-1.8022 0 0 0 1.8022 0 0 -1 0 1 0 0 0.502 0 0 0 0 1 0" /></filter></svg>
       <header className="mile-header">
         <div className="mile-header-inner">
-          <Link href="/" className="mile-brand" aria-label="MILE home">
+          <Link href="/" className="mile-brand" aria-label="MILE home" onClick={() => setMenuOpen(false)}>
             <img src="/mile-logo.png" alt="MILE — Every step has a purpose" className="mile-brand-logo" />
           </Link>
 
@@ -96,7 +102,7 @@ export default function Home() {
         </div>
 
         {menuOpen && (
-          <div className="mile-mobile-menu">
+          <div className="mile-mobile-menu" role="dialog" aria-label="Mobile navigation">
             {navigation.map(([label, href]) => (
               <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>
             ))}
