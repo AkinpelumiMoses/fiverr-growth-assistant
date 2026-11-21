@@ -685,11 +685,14 @@ export default function DashboardWorkspace() {
     setSaving(false);
   }
 
-  async function toggleTask(task: Task) {
-    const nextStatus = task.status === "completed" ? "pending" : "completed";
+  async function setTaskStatus(task: Task, nextStatus: Task["status"]) {
     const { data, error } = await supabase.from("growth_tasks").update({ status: nextStatus, completed_at: nextStatus === "completed" ? new Date().toISOString() : null, updated_at: new Date().toISOString() }).eq("id", task.id).select("id,title,description,category,priority,status").single();
     if (error) setNotice(error.message);
     else setTasks((old) => old.map((item) => item.id === task.id ? data as Task : item));
+  }
+
+  async function toggleTask(task: Task) {
+    await setTaskStatus(task, task.status === "completed" ? "pending" : "completed");
   }
 
   const completedTasks = tasks.filter((task) => task.status === "completed").length;
@@ -974,7 +977,7 @@ export default function DashboardWorkspace() {
               {tasks.length ? <div className="mt-3 divide-y divide-[var(--border)]">{prioritizedTasks.map((task,index)=><div key={task.id}>{(index===0 || taskGroupKey(task)!==taskGroupKey(prioritizedTasks[index-1])) && <div className="px-2 pb-2 pt-4"><p className="text-[11px] font-bold uppercase tracking-wide text-[var(--ink)]">{task.status==="completed"?"Completed":task.priority==="high"?"Do first":task.priority==="medium"?"Next steps":"When ready"}</p><p className="mt-1 text-[10px] text-[var(--muted)]">{task.status==="completed"?"Actions you have finished":task.priority==="high"?"Important actions to focus on now":task.priority==="medium"?"Useful improvements to work through next":"Lower-priority actions for when you have capacity"}</p></div>}<div className={`flex items-start gap-3 rounded-xl px-2 py-4 transition-colors ${task.status==="completed"?"opacity-70":""}`}>
                 <input type="checkbox" aria-label={`Mark ${task.title} ${task.status==="completed"?"as pending":"as complete"}`} checked={task.status==="completed"} onChange={()=>toggleTask(task)} className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-[var(--accent)]"/>
                 <div className="min-w-0 flex-1"><p className={task.status==="completed"?"text-sm font-semibold text-[var(--muted)] line-through":"text-sm font-semibold text-[var(--ink)]"}>{task.title}</p><p className="mt-1 text-xs leading-5 text-[var(--muted)]">{task.description}</p><div className="mt-2 flex flex-wrap items-center gap-2"><span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold capitalize ${task.priority==="high"?"bg-[var(--accent-soft)] text-[var(--accent)]": "bg-[var(--surface-soft)] text-[var(--muted)]"}`}>{task.priority} priority</span><span className="text-[10px] capitalize text-[var(--muted)]">{task.status.replace("_"," ")}</span>{task.category && <span className="text-[10px] text-[var(--subtle)]">· {task.category}</span>}</div></div>
-                <span className={task.status==="completed"?"rounded-full bg-[var(--surface-soft)] px-2 py-1 text-[10px] font-semibold text-[var(--muted)]":"rounded-full border border-[var(--border)] px-2 py-1 text-[10px] font-semibold text-[var(--muted)]"}>{task.status==="completed"?"Done":"Open"}</span>
+                <div className="flex shrink-0 flex-col items-end gap-2"><span className={task.status==="completed"?"rounded-full bg-[var(--surface-soft)] px-2 py-1 text-[10px] font-semibold text-[var(--muted)]":task.status==="in_progress"?"rounded-full bg-[var(--accent-soft)] px-2 py-1 text-[10px] font-semibold text-[var(--accent)]":"rounded-full border border-[var(--border)] px-2 py-1 text-[10px] font-semibold text-[var(--muted)]"}>{task.status==="completed"?"Done":task.status==="in_progress"?"In progress":"Not started"}</span>{task.status==="pending" && <button type="button" onClick={()=>setTaskStatus(task,"in_progress")} className="rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-[10px] font-semibold text-[var(--accent)] transition hover:bg-[var(--surface-soft)]">Start action</button>}</div>
               </div></div>)}</div> : <div className="flex min-h-[190px] flex-col items-center justify-center text-center"><p className="text-sm font-semibold text-[var(--ink)]">Your action plan is clear.</p><p className="mt-2 max-w-sm text-xs leading-5 text-[var(--muted)]">There are no actions here yet. New steps will appear when there is something useful to work on.</p></div>}
             </div>
           </div>}
