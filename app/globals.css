@@ -1843,3 +1843,43 @@ body{background:var(--page);color:var(--ink)}
   .workspace-content .mile-overview .mile-stat p{font-size:25px!important}
 }
 
+
+
+/* MILE dashboard contrast pass — explicit readable foregrounds on both themes. */
+.workspace-shell {
+  background: var(--ws-bg, #f6f8f5) !important;
+  color: var(--ws-ink, #202722);
+}
+.workspace-topbar h1,
+.workspace-topbar > div:first-child > div p {
+  color: #202722;
+}
+.workspace-sidebar nav button[class*="bg-[#eaf8ef]"] {
+  background: #00A525 !important;
+  color: #102016 !important;
+  border-color: #00A525 !important;
+}
+.workspace-sidebar nav button[class*="bg-[#eaf8ef]"] svg {
+  color: #102016 !important;
+}
+.primary,
+.hero-primary {
+  background: #087A2B !important;
+  color: #FFFFFF !important;
+}
+.primary:hover,
+.hero-primary:hover {
+  background: #066321 !important;
+}
+:root[data-theme="dark"] .workspace-shell {
+  background: #141916 !important;
+  color: #F1F5F1 !important;
+}
+:root[data-theme="dark"] .workspace-topbar h1,
+:root[data-theme="dark"] .workspace-topbar > div:first-child > div p {
+  color: #F1F5F1 !important;
+}
+:root[data-theme="dark"] .workspace-sidebar nav button[class*="bg-[#eaf8ef]"],
+:root[data-theme="dark"] .workspace-sidebar nav button[class*="bg-[#eaf8ef]"] svg {
+  color: #102016 !important;
+}
