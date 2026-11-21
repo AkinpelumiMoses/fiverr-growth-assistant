@@ -41,6 +41,17 @@ export default function DashboardWorkspace() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [section]);
+
+  // Keep the page underneath the mobile navigation from scrolling while the drawer is open.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileOpen]);
+
   const [headerSearch, setHeaderSearch] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
@@ -719,7 +730,7 @@ export default function DashboardWorkspace() {
 
   function go(next: Section) { setSection(next); setMobileOpen(false); setNotice(""); }
 
-  return <main className="workspace-shell min-h-screen bg-[#f7f8f7] text-[#222325]">
+  return <main className="workspace-shell min-h-screen overflow-x-hidden bg-[#f7f8f7] text-[#222325]">
     <aside aria-label="Quick navigation rail" className="workspace-quick-rail fixed inset-y-0 left-0 z-30 hidden w-[68px] flex-col items-center border-r border-[#29322C] bg-[#111512] py-4 lg:flex">
       <button onClick={()=>setSidebarCollapsed(false)} aria-label="Open navigation" title="Open navigation" className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#354139] bg-[#1B241E] text-[#E7EFE9] transition hover:border-[#D7F36A] hover:bg-[#26342A]"><Menu size={19}/></button>
       <button onClick={()=>go("Overview")} title="MILE overview" aria-label="MILE overview" className="mt-5 flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-transparent"><img src="/mile-icon.png" alt="" className="h-8 w-8 object-contain"/></button>
@@ -761,7 +772,7 @@ export default function DashboardWorkspace() {
         <button type="button" onClick={()=>setLogoutConfirmOpen(true)} title="Log out" className={`flex min-h-[42px] w-full items-center ${sidebarCollapsed?"justify-center":"gap-3 px-3"} rounded-lg text-[12px] font-semibold text-red-300 transition hover:bg-red-500/10 hover:text-red-200`}><LogOut size={17}/>Log out</button>
       </div>
     </aside>
-    <section className="workspace-main min-h-screen lg:pl-[68px]">
+    <section className="workspace-main min-h-screen min-w-0 lg:pl-[68px]">
       <header className="workspace-topbar sticky top-0 z-20 border-b border-[#e9ece9] bg-white/95 backdrop-blur">
         <div className="flex min-h-[76px] items-center justify-between gap-3 px-4 md:px-8">
           <div className="flex min-w-0 items-center gap-3"><button onClick={() => setMobileOpen(true)} className="rounded-lg p-2 hover:bg-[#f3f5f3] lg:hidden" aria-label="Open navigation"><Menu size={20}/></button><div className="min-w-0"><p className="hidden text-[10px] font-semibold uppercase tracking-[.12em] text-[#929992] sm:block">MILE workspace</p><h1 className="truncate text-lg font-bold tracking-tight text-[#202820]">{section}</h1></div></div>
