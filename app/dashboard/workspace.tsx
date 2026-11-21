@@ -912,33 +912,62 @@ export default function DashboardWorkspace() {
                 </div>
                 <div className="flex flex-col items-center gap-3">
                   <div className="relative w-full max-w-[300px]" aria-label="3D illustration of a path moving upward through milestones" role="img">
-                    <svg viewBox="0 0 320 218" className="h-auto w-full overflow-visible" xmlns="http://www.w3.org/2000/svg">
+                    <svg viewBox="0 0 420 300" className="h-auto w-full overflow-visible" xmlns="http://www.w3.org/2000/svg">
                       <defs>
-                        <linearGradient id="mile-step-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#F4F7FF"/><stop offset="1" stopColor="#AEB9F5"/></linearGradient>
-                        <linearGradient id="mile-step-side" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#6675D8"/><stop offset="1" stopColor="#29347F"/></linearGradient>
-                        <linearGradient id="mile-lime-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#F0FFB2"/><stop offset="1" stopColor="#B9E84F"/></linearGradient>
-                        <linearGradient id="mile-lime-side" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#A5D83E"/><stop offset="1" stopColor="#668C24"/></linearGradient>
-                        <radialGradient id="mile-orb"><stop offset="0" stopColor="#FFFFFF" stopOpacity=".9"/><stop offset="1" stopColor="#AAB6FF" stopOpacity=".08"/></radialGradient>
-                        <filter id="mile-shadow" x="-40%" y="-40%" width="180%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>
+                        <linearGradient id="mile3d-step-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#FFFFFF"/><stop offset=".48" stopColor="#DDE3FF"/><stop offset="1" stopColor="#929FEA"/></linearGradient>
+                        <linearGradient id="mile3d-step-left" x1="0" y1="0" x2="0.9" y2="1"><stop offset="0" stopColor="#6575D9"/><stop offset="1" stopColor="#27317C"/></linearGradient>
+                        <linearGradient id="mile3d-step-right" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#3948A5"/><stop offset="1" stopColor="#141B59"/></linearGradient>
+                        <linearGradient id="mile3d-lime-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#FFFFFF"/><stop offset=".38" stopColor="#E9FF9A"/><stop offset="1" stopColor="#A9DC38"/></linearGradient>
+                        <linearGradient id="mile3d-lime-side" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#B7EA4B"/><stop offset="1" stopColor="#557D19"/></linearGradient>
+                        <linearGradient id="mile3d-person" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#FFFFFF"/><stop offset=".45" stopColor="#D9DEFF"/><stop offset="1" stopColor="#7888E8"/></linearGradient>
+                        <radialGradient id="mile3d-aura"><stop offset="0" stopColor="#D7F36A" stopOpacity=".55"/><stop offset="1" stopColor="#D7F36A" stopOpacity="0"/></radialGradient>
+                        <filter id="mile3d-shadow" x="-50%" y="-50%" width="200%" height="220%"><feGaussianBlur stdDeviation="10"/></filter>
+                        <filter id="mile3d-glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="7" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
                       </defs>
-                      <ellipse cx="164" cy="194" rx="112" ry="13" fill="#05083B" opacity=".35" filter="url(#mile-shadow)"/>
-                      <circle cx="248" cy="48" r="35" fill="url(#mile-orb)" opacity=".55"/>
-                      <circle cx="61" cy="62" r="4" fill="#D7F36A"/><circle cx="273" cy="105" r="3" fill="#FFFFFF" opacity=".8"/>
-                      <path d="M65 154 C105 140 130 125 156 106 S214 72 252 48" fill="none" stroke="#D7F36A" strokeWidth="2" strokeDasharray="4 7" opacity=".8"/>
-                      <g transform="translate(28 125)">
-                        <path d="M0 22 45 0 90 22 45 45Z" fill="url(#mile-step-top)"/><path d="M0 22 45 45V62L0 39Z" fill="#6875C6"/><path d="M45 45 90 22V39L45 62Z" fill="url(#mile-step-side)"/>
+                      <ellipse cx="211" cy="267" rx="153" ry="18" fill="#05083B" opacity=".55" filter="url(#mile3d-shadow)"/>
+                      <circle cx="300" cy="78" r="91" fill="url(#mile3d-aura)"/>
+                      <circle cx="300" cy="78" r="48" fill="none" stroke="#D7F36A" strokeOpacity=".22" strokeWidth="1.5"/>
+                      <circle cx="300" cy="78" r="34" fill="none" stroke="#FFFFFF" strokeOpacity=".16" strokeWidth="1"/>
+                      <path d="M52 220 C112 204 148 176 188 145 S267 96 316 61" fill="none" stroke="#D7F36A" strokeWidth="3" strokeDasharray="3 10" strokeLinecap="round" opacity=".8"/>
+                      <g transform="translate(28 181)">
+                        <path d="M0 27 55 0 110 27 55 55Z" fill="url(#mile3d-step-top)"/>
+                        <path d="M0 27 55 55V91L0 63Z" fill="url(#mile3d-step-left)"/>
+                        <path d="M55 55 110 27V63L55 91Z" fill="url(#mile3d-step-right)"/>
+                        <path d="M9 29 55 7 101 29" fill="none" stroke="#FFFFFF" strokeOpacity=".75" strokeWidth="2"/>
                       </g>
-                      <g transform="translate(103 92)">
-                        <path d="M0 22 45 0 90 22 45 45Z" fill="url(#mile-step-top)"/><path d="M0 22 45 45V62L0 39Z" fill="#6875C6"/><path d="M45 45 90 22V39L45 62Z" fill="url(#mile-step-side)"/>
+                      <g transform="translate(116 137)">
+                        <path d="M0 27 55 0 110 27 55 55Z" fill="url(#mile3d-step-top)"/>
+                        <path d="M0 27 55 55V91L0 63Z" fill="url(#mile3d-step-left)"/>
+                        <path d="M55 55 110 27V63L55 91Z" fill="url(#mile3d-step-right)"/>
+                        <path d="M9 29 55 7 101 29" fill="none" stroke="#FFFFFF" strokeOpacity=".75" strokeWidth="2"/>
                       </g>
-                      <g transform="translate(180 59)">
-                        <path d="M0 22 45 0 90 22 45 45Z" fill="url(#mile-lime-top)"/><path d="M0 22 45 45V62L0 39Z" fill="#8EBB35"/><path d="M45 45 90 22V39L45 62Z" fill="url(#mile-lime-side)"/>
-                        <path d="M45 2V-26" stroke="#F5F7FF" strokeWidth="3" strokeLinecap="round"/><path d="M47 -26 76 -19 47 -10Z" fill="#D7F36A"/>
-                        <circle cx="45" cy="1" r="4" fill="#FFFFFF"/>
+                      <g transform="translate(204 93)">
+                        <path d="M0 27 55 0 110 27 55 55Z" fill="url(#mile3d-lime-top)"/>
+                        <path d="M0 27 55 55V91L0 63Z" fill="#8DBB32"/>
+                        <path d="M55 55 110 27V63L55 91Z" fill="url(#mile3d-lime-side)"/>
+                        <path d="M9 29 55 7 101 29" fill="none" stroke="#FFFFFF" strokeOpacity=".95" strokeWidth="2.5"/>
+                        <path d="M55 3V-43" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round"/>
+                        <path d="M58 -42 105 -30 58 -14Z" fill="#D7F36A" stroke="#F4FFCE" strokeWidth="1.5"/>
+                        <circle cx="55" cy="3" r="6" fill="#FFFFFF" filter="url(#mile3d-glow)"/>
                       </g>
-                      <path d="M62 118 62 103" stroke="#D7F36A" strokeWidth="2" strokeLinecap="round"/><circle cx="62" cy="99" r="5" fill="#D7F36A"/>
-                      <path d="M137 84 137 69" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" opacity=".9"/><circle cx="137" cy="65" r="4" fill="#FFFFFF"/>
-                      <path d="m224 24 4 8 8 1-6 5 2 8-8-4-7 4 1-8-6-5 8-1Z" fill="#D7F36A" opacity=".9"/>
+                      <g transform="translate(155 81)">
+                        <ellipse cx="28" cy="111" rx="31" ry="8" fill="#080D48" opacity=".42" filter="url(#mile3d-shadow)"/>
+                        <path d="M24 48 42 53 57 82 45 88 31 67 18 86 5 79 18 54Z" fill="#222C78"/>
+                        <path d="M27 72 43 77 34 108 20 106Z" fill="url(#mile3d-person)"/>
+                        <path d="M18 105 34 108 30 119 12 118Z" fill="#D7F36A"/>
+                        <path d="M42 77 55 82 69 105 57 112 42 94Z" fill="#B8C2FF"/>
+                        <path d="M55 109 69 105 78 114 60 121Z" fill="#D7F36A"/>
+                        <path d="M22 44 39 43 49 63 35 76 17 65Z" fill="url(#mile3d-person)"/>
+                        <path d="M18 51 5 67 14 74 29 59" fill="#AAB5F5"/>
+                        <path d="M43 50 58 60 53 69 38 61" fill="#E9EDFF"/>
+                        <circle cx="29" cy="27" r="13" fill="url(#mile3d-person)"/>
+                        <path d="M18 24Q27 7 42 20L41 29Q30 23 19 31Z" fill="#20296E"/>
+                        <path d="M13 64 5 72" stroke="#D7F36A" strokeWidth="5" strokeLinecap="round"/>
+                      </g>
+                      <circle cx="71" cy="139" r="5" fill="#D7F36A" filter="url(#mile3d-glow)"/>
+                      <circle cx="128" cy="107" r="4" fill="#FFFFFF" opacity=".95"/>
+                      <path d="m351 37 7 14 15 2-11 10 3 15-14-7-13 7 2-15-11-10 15-2Z" fill="#D7F36A" filter="url(#mile3d-glow)"/>
+                      <circle cx="356" cy="157" r="3.5" fill="#FFFFFF" opacity=".8"/>
                     </svg>
                     <div className="absolute bottom-2 right-2 rounded-full border border-white/15 bg-[#10154F]/80 px-3 py-1.5 text-[9px] font-bold tracking-[.12em] text-[#E7EBFF] backdrop-blur">EVERY STEP HAS A PURPOSE</div>
                   </div>
