@@ -946,15 +946,15 @@ export default function DashboardWorkspace() {
 </g>
 <g transform="translate(167 80)">
 <ellipse cx="48" cy="180" rx="42" ry="10" fill="#05092F" opacity=".52" filter="url(#mile3d-soft)"/>
-<!-- legs in a climbing stride -->
+
 <path d="M35 112 54 116 43 151 20 168 7 158 28 132Z" fill="#28347E"/><path d="M8 156 22 164 16 176 0 171Z" fill="#D7F36A"/>
 <path d="M53 113 70 119 87 146 74 158 52 140 42 130Z" fill="url(#mile3d-human)"/><path d="M73 151 88 143 99 153 82 164Z" fill="#D7F36A"/>
-<!-- torso and jacket -->
+
 <path d="M29 78C39 68 60 72 69 88L65 119 37 132 19 105Z" fill="url(#mile3d-human)"/><path d="M54 79 69 90 62 113 49 105Z" fill="#FFFFFF" opacity=".72"/><path d="M37 124 64 117 59 138 32 143Z" fill="#5264B9"/>
 <path d="M27 88 11 106 23 119 40 101Z" fill="url(#mile3d-human)"/><path d="M62 87 81 99 72 114 55 103Z" fill="url(#mile3d-human)"/><path d="M11 106 3 119" stroke="url(#mile3d-skin)" strokeWidth="9" strokeLinecap="round"/><path d="M80 100 91 109" stroke="url(#mile3d-skin)" strokeWidth="9" strokeLinecap="round"/>
-<!-- neck and head -->
+
 <path d="M39 69 57 67 61 85 47 96 34 82Z" fill="url(#mile3d-skin)"/><ellipse cx="49" cy="57" rx="17" ry="21" fill="url(#mile3d-skin)"/><path d="M32 57C29 39 42 27 58 33 70 37 72 49 65 62L59 51 54 44C47 54 40 58 32 60Z" fill="#20264F"/><path d="M36 63 42 65" stroke="#704332" strokeWidth="1.6" strokeLinecap="round"/><path d="M55 64 61 63" stroke="#704332" strokeWidth="1.6" strokeLinecap="round"/><path d="M42 76 56 78" stroke="#FFFFFF" strokeOpacity=".45" strokeWidth="2" strokeLinecap="round"/>
-<!-- jacket seams -->
+
 <path d="M42 91 53 104 48 122" fill="none" stroke="#FFFFFF" strokeOpacity=".72" strokeWidth="2"/><path d="M27 92 36 100" fill="none" stroke="#FFFFFF" strokeOpacity=".5" strokeWidth="2"/>
 </g>
 <circle cx="91" cy="191" r="5" fill="#D7F36A" filter="url(#mile3d-glow)"/><circle cx="182" cy="144" r="4" fill="#FFFFFF" filter="url(#mile3d-glow)"/><circle cx="447" cy="162" r="4" fill="#FFFFFF" opacity=".85"/>
