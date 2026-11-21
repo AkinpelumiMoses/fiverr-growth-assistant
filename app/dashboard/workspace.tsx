@@ -347,8 +347,7 @@ export default function DashboardWorkspace() {
 
   async function sendCoachMessage(event?: React.FormEvent<HTMLFormElement>, overrides?: { message?: string; attachments?: File[] }): Promise<boolean> {
     event?.preventDefault();
-    const message = (overrides?.message ?? coachInput).trim();
-    const queuedFiles = overrides?.attachments ?? [...coachAttachments];
+    const message = (overrides?.message ?? coachInput).trim();    const queuedFiles = overrides?.attachments ?? [...coachAttachments];
     if ((!message && queuedFiles.length === 0) || coachLoading) return false;
     setCoachLoading(true); setNotice(""); setUploadingAttachments(queuedFiles.length > 0);
     let conversationId = activeConversationId;
@@ -697,8 +696,7 @@ export default function DashboardWorkspace() {
     event.preventDefault();
     if (!gigForm.title.trim()) return;
     const startingPrice = gigForm.starting_price.trim() ? Number(gigForm.starting_price) : null;
-    if (startingPrice !== null && (!Number.isFinite(startingPrice) || startingPrice < 0)) return setNotice("Enter a valid starting price of zero or more.");
-    const { data: { user } } = await supabase.auth.getUser();
+    if (startingPrice !== null && (!Number.isFinite(startingPrice) || startingPrice < 0)) return setNotice("Enter a valid starting price of zero or more.");    const { data: { user } } = await supabase.auth.getUser();
     if (!user) return setNotice("Please log in again to save this gig.");
     setSaving(true); setNotice("");
     const payload = { title: gigForm.title.trim(), gig_url: gigForm.gig_url.trim() || null, description: gigForm.description.trim(), tags: gigForm.tags.split(",").map((tag) => tag.trim()).filter(Boolean), category: gigForm.category.trim() || null, starting_price: startingPrice, currency: "USD", status: gigForm.status };
@@ -911,94 +909,110 @@ export default function DashboardWorkspace() {
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-3">
-                  <div className="relative flex min-h-[300px] w-full max-w-[420px] items-center justify-center overflow-hidden" role="img" aria-label="Animated MILE character scenes showing direction, progress, opportunity and achievement">
-                    <style>{`
-                      @keyframes mile-character-cycle {
-                        0%, 20% { opacity:1; transform:translateY(0) scale(1) rotate(0deg); filter:blur(0); }
-                        24%, 100% { opacity:0; transform:translateY(18px) scale(.94) rotate(2deg); filter:blur(5px); }
-                      }
-                      @keyframes mile-character-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
-                      .mile-character-scene { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; animation:mile-character-cycle 16s ease-in-out infinite; }
-                      .mile-character-scene:nth-child(2) { animation-delay:4s; }
-                      .mile-character-scene:nth-child(3) { animation-delay:8s; }
-                      .mile-character-scene:nth-child(4) { animation-delay:12s; }
-                      .mile-character-art { width:100%; max-width:360px; height:270px; overflow:visible; animation:mile-character-float 4s ease-in-out infinite; }
-                      @media (prefers-reduced-motion: reduce) { .mile-character-scene { animation:none; opacity:0; } .mile-character-scene:first-child { opacity:1; } .mile-character-art { animation:none; } }
-                    `}</style>
-                    <div className="absolute h-64 w-64 rounded-full border border-white/10"/>
-                    <div className="absolute h-72 w-72 rounded-full border border-[#D7F36A]/15"/>
-                    <div className="absolute h-44 w-44 rounded-full bg-[#D7F36A]/10 blur-3xl"/>
-                    <div className="mile-character-scene">
-                      <svg className="mile-character-art" viewBox="0 0 360 270" fill="none" aria-hidden="true">
-                        <ellipse cx="180" cy="244" rx="112" ry="12" fill="#070B2C" opacity=".3"/>
-                        <path d="M92 224h176" stroke="#D7F36A" strokeWidth="3" strokeLinecap="round" opacity=".6"/>
-                        <path d="M126 202l-17 29m118-29 18 29" stroke="#E8EAF5" strokeWidth="17" strokeLinecap="round"/>
-                        <path d="M111 229l-17 3m151-3 17 3" stroke="#D7F36A" strokeWidth="8" strokeLinecap="round"/>
-                        <path d="M128 132c-2 29-4 48-2 75 20 14 67 15 91 0l-4-76z" fill="#D7F36A"/>
-                        <path d="M128 145l-26 37 12 8 34-31m66-14 24 33-11 9-30-28" stroke="#F1C7A5" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M127 131c8-17 24-24 45-24 25 0 41 10 47 27l-10 28c-23 13-53 13-76-1z" fill="#303C9B"/>
-                        <path d="M151 110c0-10 8-18 19-18s20 8 20 18v10h-39z" fill="#DCA987"/>
-                        <ellipse cx="170" cy="75" rx="43" ry="48" fill="#F1C7A5"/>
-                        <path d="M129 74c-3-32 16-54 43-54 28 0 47 20 44 53-7-11-15-17-24-21-18 13-38 18-63 17z" fill="#F1C7A5"/>
-                        <ellipse cx="155" cy="77" rx="3.5" ry="5" fill="#22233B"/><ellipse cx="186" cy="77" rx="3.5" ry="5" fill="#22233B"/>
-                        <path d="M161 96c6 5 13 5 19 0" stroke="#9A554D" strokeWidth="3" strokeLinecap="round"/>
-                        <path d="M119 182l-13 7 7 11 15-7m92-2 10 9 9-10-11-10" fill="#F1C7A5"/>
-                        <g transform="translate(245 58) rotate(12)"><circle cx="20" cy="20" r="22" fill="#D7F36A"/><path d="M20 5l5 12 13 3-13 5-5 13-5-13-13-5 13-3z" fill="#263078"/></g>
-                        <path d="M87 98l-10-9m16 31-14 2m34-53-3-13" stroke="#D7F36A" strokeWidth="3" strokeLinecap="round"/>
-                      </svg>
-                    </div>
-                    <div className="mile-character-scene">
-                      <svg className="mile-character-art" viewBox="0 0 360 270" fill="none" aria-hidden="true">
-                        <ellipse cx="180" cy="244" rx="112" ry="12" fill="#070B2C" opacity=".3"/>
-                        <path d="M84 228h190" stroke="#D7F36A" strokeWidth="4" strokeLinecap="round" opacity=".7"/>
-                        <path d="M120 222h48v-32h48v-32h48" stroke="#7E8AF0" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M120 222h48v-32h48v-32h48" stroke="#D7F36A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M140 204l-4 27m76-59 2 54" stroke="#F1C7A5" strokeWidth="15" strokeLinecap="round"/>
-                        <path d="M138 230l-17 2m96-1 16 1" stroke="#D7F36A" strokeWidth="8" strokeLinecap="round"/>
-                        <path d="M157 135c-5 26-9 45-7 68 19 12 49 13 69 0l-6-67z" fill="#D7F36A"/>
-                        <path d="M157 145l-26 25 13 11 30-24m45-14 25-22 10 12-26 31" stroke="#F1C7A5" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M155 133c7-17 22-23 43-22 20 1 34 10 39 25l-12 25c-20 11-48 10-68-2z" fill="#303C9B"/>
-                        <ellipse cx="187" cy="78" rx="40" ry="46" fill="#F1C7A5"/>
-                        <path d="M148 76c-2-30 14-50 39-50 27 0 42 20 40 51-12-10-24-15-39-17-13 9-26 14-40 16z" fill="#F1C7A5"/>
-                        <ellipse cx="173" cy="80" rx="3.5" ry="5" fill="#22233B"/><ellipse cx="201" cy="80" rx="3.5" ry="5" fill="#22233B"/>
-                        <path d="M179 97c6 5 12 5 18 0" stroke="#9A554D" strokeWidth="3" strokeLinecap="round"/>
-                        <path d="M246 93l19-17 17 17-17 17z" fill="#D7F36A"/><path d="M265 76v34" stroke="#303C9B" strokeWidth="3"/>
-                        <path d="M101 75l-8-9m10 30-13 2" stroke="#D7F36A" strokeWidth="3" strokeLinecap="round"/>
-                      </svg>
-                    </div>
-                    <div className="mile-character-scene">
-                      <svg className="mile-character-art" viewBox="0 0 360 270" fill="none" aria-hidden="true">
-                        <ellipse cx="180" cy="244" rx="112" ry="12" fill="#070B2C" opacity=".3"/>
-                        <path d="M139 205l-12 28m83-28 13 28" stroke="#F1C7A5" strokeWidth="16" strokeLinecap="round"/>
-                        <path d="M125 232l-16 2m105-2 15 2" stroke="#D7F36A" strokeWidth="8" strokeLinecap="round"/>
-                        <path d="M133 133c6-17 22-25 46-25s41 10 47 27l-7 69c-24 13-57 13-80-1z" fill="#303C9B"/>
-                        <path d="M132 145l-23 34 11 9 30-29m72-14 22 27-11 10-30-24" stroke="#F1C7A5" strokeWidth="14" strokeLinecap="round" strokeLinejoin="round"/>
-                        <ellipse cx="179" cy="78" rx="42" ry="47" fill="#F1C7A5"/>
-                        <path d="M138 75c-2-30 16-51 42-51 27 0 44 20 42 51-12-10-27-15-43-17-12 9-25 14-41 17z" fill="#F1C7A5"/>
-                        <ellipse cx="164" cy="79" rx="3.5" ry="5" fill="#22233B"/><ellipse cx="194" cy="79" rx="3.5" ry="5" fill="#22233B"/>
-                        <path d="M170 96c6 5 13 5 19 0" stroke="#9A554D" strokeWidth="3" strokeLinecap="round"/>
-                        <g transform="translate(225 123) rotate(-8)"><rect width="76" height="58" rx="7" fill="#D7F36A"/><rect x="7" y="7" width="62" height="42" rx="3" fill="#18205E"/><path d="M28 58h20l6 7H22z" fill="#F4F5FB"/><path d="M17 35l12-11 10 7 15-14" stroke="#D7F36A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></g>
-                        <path d="M99 100l-8-8m10 28-13 2m190-67 8-8" stroke="#D7F36A" strokeWidth="3" strokeLinecap="round"/>
-                      </svg>
-                    </div>
-                    <div className="mile-character-scene">
-                      <svg className="mile-character-art" viewBox="0 0 360 270" fill="none" aria-hidden="true">
-                        <ellipse cx="180" cy="244" rx="112" ry="12" fill="#070B2C" opacity=".3"/>
-                        <path d="M142 205l-12 28m69-28 14 28" stroke="#F1C7A5" strokeWidth="16" strokeLinecap="round"/>
-                        <path d="M130 232l-16 2m99-2 16 2" stroke="#D7F36A" strokeWidth="8" strokeLinecap="round"/>
-                        <path d="M135 133c7-17 22-25 45-25s39 10 45 27l-8 68c-23 13-54 13-76-1z" fill="#D7F36A"/>
-                        <path d="M137 146l-30-33m112 33 30-34" stroke="#F1C7A5" strokeWidth="15" strokeLinecap="round"/>
-                        <ellipse cx="107" cy="111" rx="8" ry="8" fill="#F1C7A5"/><ellipse cx="249" cy="110" rx="8" ry="8" fill="#F1C7A5"/>
-                        <path d="M130 132c7-17 22-24 48-24 25 0 40 10 47 26l-9 28c-23 13-54 13-77-1z" fill="#303C9B"/>
-                        <ellipse cx="178" cy="77" rx="42" ry="47" fill="#F1C7A5"/>
-                        <path d="M137 74c-2-30 16-50 42-50 28 0 44 20 42 51-13-10-27-15-43-17-12 9-25 14-41 16z" fill="#F1C7A5"/>
-                        <ellipse cx="163" cy="78" rx="3.5" ry="5" fill="#22233B"/><ellipse cx="193" cy="78" rx="3.5" ry="5" fill="#22233B"/>
-                        <path d="M167 95c7 7 15 7 22 0" stroke="#9A554D" strokeWidth="3" strokeLinecap="round"/>
-                        <path d="M178 14l7-13 7 13 14 2-10 10 2 14-13-7-13 7 2-14-10-10z" fill="#D7F36A"/>
-                        <path d="M91 72l-9-8m12 30-13 2m190-24 9-8" stroke="#D7F36A" strokeWidth="3" strokeLinecap="round"/>
-                      </svg>
-                    </div>
-                    <div className="absolute bottom-1 rounded-full border border-white/15 bg-[#10154F]/85 px-4 py-2 text-[9px] font-bold tracking-[.16em] text-[#E7EBFF] backdrop-blur">EVERY STEP HAS A PURPOSE</div>
+                  <div className="relative flex min-h-[330px] w-full max-w-[460px] items-center justify-center overflow-hidden" role="img" aria-label="A freelancer building their next opportunity at a desk, surrounded by signals of progress, skills and professional growth">
+                    <svg className="relative z-10 h-auto w-full max-w-[460px]" viewBox="0 0 520 390" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <defs>
+                        <linearGradient id="mileSceneFloor" x1="260" y1="270" x2="260" y2="360" gradientUnits="userSpaceOnUse"><stop stopColor="#263A76" stopOpacity=".05"/><stop offset="1" stopColor="#070D3D" stopOpacity=".52"/></linearGradient>
+                        <linearGradient id="mileDeskTop" x1="105" y1="248" x2="415" y2="289" gradientUnits="userSpaceOnUse"><stop stopColor="#F4F5FF"/><stop offset=".5" stopColor="#C9D0F4"/><stop offset="1" stopColor="#8D9AE2"/></linearGradient>
+                        <linearGradient id="mileDeskFront" x1="140" y1="277" x2="390" y2="335" gradientUnits="userSpaceOnUse"><stop stopColor="#34439B"/><stop offset="1" stopColor="#171F65"/></linearGradient>
+                        <linearGradient id="mileSkin" x1="210" y1="91" x2="300" y2="212" gradientUnits="userSpaceOnUse"><stop stopColor="#FFD9B8"/><stop offset=".55" stopColor="#E9AD88"/><stop offset="1" stopColor="#BD765F"/></linearGradient>
+                        <linearGradient id="mileJacket" x1="198" y1="174" x2="326" y2="280" gradientUnits="userSpaceOnUse"><stop stopColor="#6977D7"/><stop offset=".5" stopColor="#303F9D"/><stop offset="1" stopColor="#171F65"/></linearGradient>
+                        <linearGradient id="mileScreen" x1="218" y1="183" x2="323" y2="252" gradientUnits="userSpaceOnUse"><stop stopColor="#222C83"/><stop offset="1" stopColor="#0B124A"/></linearGradient>
+                        <radialGradient id="mileHalo" cx="0" cy="0" r="1" gradientTransform="matrix(0 155 -180 0 272 154)" gradientUnits="userSpaceOnUse"><stop stopColor="#D7F36A" stopOpacity=".22"/><stop offset="1" stopColor="#D7F36A" stopOpacity="0"/></radialGradient>
+                        <filter id="mileSceneShadow" x="40" y="15" width="450" height="365" filterUnits="userSpaceOnUse"><feGaussianBlur stdDeviation="12"/></filter>
+                        <filter id="mileCardShadow" x="0" y="0" width="1" height="1" filterUnits="objectBoundingBox"><feGaussianBlur stdDeviation="3"/></filter>
+                      </defs>
+                      <ellipse cx="270" cy="191" rx="205" ry="173" fill="url(#mileHalo)"/>
+                      <ellipse cx="265" cy="340" rx="178" ry="20" fill="#080E42" opacity=".4" filter="url(#mileSceneShadow)"/>
+                      <path d="M78 337c42-23 90-33 143-33 79 0 150 16 215 42" stroke="#D7F36A" strokeOpacity=".28" strokeWidth="1.5" strokeDasharray="4 8"/>
+                      <circle cx="92" cy="146" r="3" fill="#D7F36A"/><circle cx="426" cy="93" r="4" fill="#D7F36A"/><circle cx="447" cy="218" r="2.5" fill="#AAB5FF"/>
+                      <path d="M82 91c17-22 45-28 67-17" stroke="#D7F36A" strokeOpacity=".6" strokeWidth="2" strokeLinecap="round"/>
+                      <path d="M407 129c16-13 31-13 44-5" stroke="#D7F36A" strokeOpacity=".5" strokeWidth="2" strokeLinecap="round"/>
+                      {/* Floating progress card */}
+                      <g transform="translate(45 100) rotate(-8)">
+                        <rect x="3" y="6" width="112" height="78" rx="13" fill="#070D3D" opacity=".24"/>
+                        <rect width="112" height="78" rx="13" fill="#F8F9FF"/>
+                        <circle cx="17" cy="17" r="5" fill="#D7F36A"/>
+                        <rect x="29" y="14" width="49" height="5" rx="2.5" fill="#AAB2D9"/>
+                        <rect x="14" y="32" width="83" height="34" rx="7" fill="#EDF0FF"/>
+                        <path d="M23 57l14-10 12 5 15-15 12 7 12-12" stroke="#34439B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M80 32h8v8" stroke="#D7F36A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </g>
+                      {/* Opportunity card */}
+                      <g transform="translate(367 76) rotate(7)">
+                        <rect x="3" y="6" width="102" height="91" rx="14" fill="#070D3D" opacity=".25"/>
+                        <rect width="102" height="91" rx="14" fill="#F8F9FF"/>
+                        <rect x="13" y="13" width="25" height="25" rx="8" fill="#D7F36A"/>
+                        <path d="M20 26h11m-5.5-5.5v11" stroke="#202B78" strokeWidth="2" strokeLinecap="round"/>
+                        <rect x="46" y="17" width="42" height="5" rx="2.5" fill="#8994C8"/>
+                        <rect x="46" y="27" width="30" height="4" rx="2" fill="#C6CBE3"/>
+                        <rect x="13" y="49" width="76" height="5" rx="2.5" fill="#D8DDF1"/>
+                        <rect x="13" y="60" width="62" height="5" rx="2.5" fill="#D8DDF1"/>
+                        <rect x="13" y="73" width="45" height="9" rx="4.5" fill="#34439B"/>
+                      </g>
+                      {/* Plant and side table */}
+                      <path d="M82 278h55l-6 48H88z" fill="#D7F36A"/>
+                      <path d="M91 278h37l-4 8H95z" fill="#F4F7D5"/>
+                      <path d="M109 279c-4-29-25-36-30-56 18 3 30 14 33 33-2-26 9-42 28-49 1 23-8 42-27 54 17-10 31-9 43 1-15 17-29 21-47 17z" fill="#7E9A71"/>
+                      <path d="M108 277c-5-22-7-43-3-64" stroke="#DCEBA7" strokeWidth="2" strokeLinecap="round"/>
+                      {/* Desk shadow and legs */}
+                      <path d="M126 280h278l-12 65H140z" fill="url(#mileDeskFront)"/>
+                      <path d="M148 287h15v51h-15zm220 0h15v51h-15z" fill="#11194F"/>
+                      <path d="M112 267c0-5 4-9 9-9h292c5 0 9 4 9 9v16H112z" fill="url(#mileDeskTop)"/>
+                      <path d="M126 267h280" stroke="white" strokeOpacity=".7" strokeWidth="2"/>
+                      {/* Seated freelancer - legs and chair */}
+                      <path d="M191 238c-8 24-4 45 8 62h39l-5-17-14-41z" fill="#202B78"/>
+                      <path d="M224 278l-2 28 31 12c7 3 14-2 13-8-1-4-5-7-10-9l-14-8 3-17z" fill="#E9B08D"/>
+                      <path d="M222 309l-28 5c-8 1-11 10-5 15 3 2 7 3 11 2l54-7c8-1 9-10 2-13l-11-5z" fill="#D7F36A"/>
+                      <path d="M286 234c25 2 41 16 43 38l-4 33h-44l-5-38z" fill="#202B78"/>
+                      <path d="M316 293l16 20c4 5 1 13-6 14l-49 1c-8 0-11-9-5-14l17-14z" fill="#E9B08D"/>
+                      <path d="M282 319h50c8 0 11 9 4 13l-43 13c-8 2-15-5-11-12z" fill="#D7F36A"/>
+                      <path d="M179 197c-18 4-30 18-30 39v34h32l14-40z" fill="#27347F"/>
+                      <path d="M174 250c-8 18-5 34 3 45" stroke="#6472CA" strokeWidth="3" strokeLinecap="round"/>
+                      {/* Torso */}
+                      <path d="M202 157c-19 7-29 23-31 47l-5 55c30 18 98 22 137 0l-9-69c-4-22-20-34-42-38z" fill="url(#mileJacket)"/>
+                      <path d="M224 163l20 22 19-22 13 11-18 28-14 57-20-57-17-28z" fill="#D7F36A"/>
+                      <path d="M240 184l-4 49" stroke="#B8C2FF" strokeOpacity=".5" strokeWidth="2"/>
+                      <path d="M196 182c-12 13-18 28-21 49l-17 18c-5 5-3 14 4 16 4 1 8-1 11-4l27-26 17-40z" fill="url(#mileSkin)"/>
+                      <path d="M290 182c13 9 23 24 29 42l20 12c7 4 7 14 0 18-4 2-9 1-13-2l-31-22-22-32z" fill="url(#mileSkin)"/>
+                      {/* Neck and head */}
+                      <path d="M229 143h34v30c-9 12-25 12-34 0z" fill="#D99575"/>
+                      <ellipse cx="246" cy="104" rx="48" ry="57" fill="url(#mileSkin)"/>
+                      <path d="M200 104c-4-36 14-66 48-68 33-2 53 22 48 61-8-11-18-17-30-21-17 15-40 23-66 28z" fill="#E9B08D"/>
+                      <path d="M203 92c-3-29 13-54 42-59 29-5 49 13 52 39-12-14-26-19-41-18-19 1-36 13-53 38z" fill="#F8D3B5" opacity=".65"/>
+                      <ellipse cx="229" cy="110" rx="4" ry="5.5" fill="#20234D"/>
+                      <ellipse cx="265" cy="110" rx="4" ry="5.5" fill="#20234D"/>
+                      <path d="M239 130c5 4 11 4 16 0" stroke="#9E554F" strokeWidth="3" strokeLinecap="round"/>
+                      <path d="M216 98c5-4 11-5 17-2m24 0c6-3 12-2 17 2" stroke="#A96C59" strokeWidth="2.5" strokeLinecap="round"/>
+                      <ellipse cx="213" cy="124" rx="7" ry="4" fill="#E98F7F" opacity=".24"/><ellipse cx="278" cy="124" rx="7" ry="4" fill="#E98F7F" opacity=".24"/>
+                      {/* Hands and laptop */}
+                      <path d="M175 246c4-9 13-14 23-13l24 7c8 2 10 11 4 16-3 3-7 4-11 3l-21-4-8 7c-8 5-17-6-11-16z" fill="url(#mileSkin)"/>
+                      <path d="M306 240c8-8 18-9 27-3l13 11c7 6 3 17-6 18-3 0-6-1-9-3l-17-11-8 2c-9 1-11-9-4-14z" fill="url(#mileSkin)"/>
+                      <path d="M209 245l15-6m86 1 15 6" stroke="#B97861" strokeWidth="2" strokeLinecap="round"/>
+                      <path d="M211 192h111l-8 70H219z" fill="#11194F" stroke="#AAB5FF" strokeWidth="2"/>
+                      <path d="M219 199h95l-7 55h-82z" fill="url(#mileScreen)"/>
+                      <path d="M234 215h37m-37 9h53m-53 9h31" stroke="#AEB9FF" strokeOpacity=".65" strokeWidth="3" strokeLinecap="round"/>
+                      <path d="M207 262h124l15 9H192z" fill="#E4E8FF"/>
+                      <path d="M239 265h57" stroke="#8E9AE0" strokeWidth="2" strokeLinecap="round"/>
+                      {/* Coffee and notebook */}
+                      <g transform="translate(358 235)">
+                        <ellipse cx="24" cy="27" rx="23" ry="5" fill="#0A1046" opacity=".25"/>
+                        <rect x="4" y="0" width="38" height="28" rx="7" fill="#D7F36A"/>
+                        <path d="M42 7h5c9 0 9 14 0 14h-5" stroke="#D7F36A" strokeWidth="5"/>
+                        <path d="M13 8h20" stroke="#F8FFD8" strokeWidth="2" strokeLinecap="round"/>
+                      </g>
+                      <g transform="translate(91 239) rotate(-5)">
+                        <rect x="0" y="0" width="62" height="37" rx="5" fill="#F6F7FF"/>
+                        <path d="M10 10h38M10 18h30M10 26h21" stroke="#9AA5D6" strokeWidth="2" strokeLinecap="round"/>
+                        <path d="M0 0l8 5v32" stroke="#D7F36A" strokeWidth="3"/>
+                      </g>
+                      {/* Grounded caption label */}
+                      <g transform="translate(176 353)">
+                        <rect width="188" height="27" rx="13.5" fill="#10154F" stroke="#D7F36A" strokeOpacity=".55"/>
+                        <circle cx="15" cy="13.5" r="4" fill="#D7F36A"/>
+                        <text x="28" y="17.5" fill="#F1F3FF" fontSize="9" fontWeight="700" letterSpacing="1.4">EVERY STEP HAS A PURPOSE</text>
+                      </g>
+                    </svg>
                   </div>
                   <div className="w-full rounded-2xl border border-white/15 bg-white/[.08] p-4 backdrop-blur-sm sm:p-5">
                     <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold text-white">Your profile strength</p><p className="mt-1 text-[11px] leading-5 text-[#DCE0F5]">A stronger profile makes better introductions possible.</p></div><span className="rounded-lg bg-[#D7F36A] px-2.5 py-1.5 text-sm font-extrabold text-[#183522]">{profileCompletion}%</span></div>
