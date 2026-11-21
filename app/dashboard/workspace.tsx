@@ -911,9 +911,29 @@ export default function DashboardWorkspace() {
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-3">
-                  <div className="relative w-full max-w-[420px]" aria-label="3D illustration of a path moving upward through milestones" role="img">
-                    <img src="/images/mile-climbing.webp" alt="A freelancer climbing dimensional steps toward a glowing milestone" className="h-auto w-full scale-[1.06] object-contain mix-blend-screen drop-shadow-[0_18px_35px_rgba(0,0,0,.24)]" />
-                    <div className="absolute bottom-2 right-2 rounded-full border border-white/15 bg-[#10154F]/80 px-3 py-1.5 text-[9px] font-bold tracking-[.12em] text-[#E7EBFF] backdrop-blur">EVERY STEP HAS A PURPOSE</div>
+                  <div className="relative flex min-h-[280px] w-full max-w-[420px] items-center justify-center sm:min-h-[320px]" role="img" aria-label="Animated 3D symbols representing direction, progress, opportunity and achievement">
+                    <style>{`
+                      @keyframes mile-symbol-cycle {
+                        0%, 19% { opacity: 1; transform: perspective(900px) rotateY(-12deg) rotateX(7deg) scale(1); filter: blur(0); }
+                        23%, 100% { opacity: 0; transform: perspective(900px) rotateY(18deg) rotateX(-5deg) scale(.78); filter: blur(8px); }
+                      }
+                      .mile-symbol { position:absolute; display:flex; align-items:center; justify-content:center; width:190px; height:190px; border-radius:42px; color:#F8FAFF; background:linear-gradient(145deg,#4656C5 0%,#202B83 48%,#10164D 100%); border:1px solid rgba(255,255,255,.24); box-shadow:inset 0 3px 2px rgba(255,255,255,.34),inset 0 -12px 22px rgba(4,8,48,.55),0 24px 0 -9px #0B123F,0 38px 38px rgba(0,0,0,.3),0 0 48px rgba(215,243,106,.12); animation:mile-symbol-cycle 16s ease-in-out infinite; opacity:0; transform:perspective(900px) scale(.8); }
+                      .mile-symbol::before { content:""; position:absolute; inset:10px; border-radius:34px; border:1px solid rgba(255,255,255,.15); pointer-events:none; }
+                      .mile-symbol svg { width:92px; height:92px; stroke-width:1.7; filter:drop-shadow(0 7px 2px rgba(0,0,0,.28)); }
+                      .mile-symbol .mile-orbit { position:absolute; width:230px; height:230px; border:1px solid rgba(215,243,106,.34); border-radius:50%; transform:rotateX(68deg) rotateZ(-24deg); }
+                      .mile-symbol .mile-glow { position:absolute; width:105px; height:105px; border-radius:50%; background:#D7F36A; filter:blur(45px); opacity:.22; }
+                      .mile-symbol:nth-of-type(2) { animation-delay:4s; }
+                      .mile-symbol:nth-of-type(3) { animation-delay:8s; }
+                      .mile-symbol:nth-of-type(4) { animation-delay:12s; }
+                      @media (prefers-reduced-motion: reduce) { .mile-symbol { animation:none; opacity:0; } .mile-symbol:first-of-type { opacity:1; transform:none; } }
+                    `}</style>
+                    <div className="absolute h-52 w-52 rounded-full border border-white/10" />
+                    <div className="absolute h-64 w-64 rounded-full border border-[#D7F36A]/15" />
+                    <div className="mile-symbol" style={{animationDelay:"0s"}}><span className="mile-orbit"/><span className="mile-glow"/><Compass className="relative z-10 !text-[#D7F36A]"/></div>
+                    <div className="mile-symbol" style={{animationDelay:"4s"}}><span className="mile-orbit"/><span className="mile-glow"/><TrendingUp className="relative z-10 !text-[#D7F36A]"/></div>
+                    <div className="mile-symbol" style={{animationDelay:"8s"}}><span className="mile-orbit"/><span className="mile-glow"/><BriefcaseBusiness className="relative z-10 !text-[#D7F36A]"/></div>
+                    <div className="mile-symbol" style={{animationDelay:"12s"}}><span className="mile-orbit"/><span className="mile-glow"/><Target className="relative z-10 !text-[#D7F36A]"/></div>
+                    <div className="absolute bottom-0 rounded-full border border-white/15 bg-[#10154F]/80 px-4 py-2 text-[9px] font-bold tracking-[.16em] text-[#E7EBFF] backdrop-blur">EVERY STEP HAS A PURPOSE</div>
                   </div>
                   <div className="w-full rounded-2xl border border-white/15 bg-white/[.08] p-4 backdrop-blur-sm sm:p-5">
                     <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold text-white">Your profile strength</p><p className="mt-1 text-[11px] leading-5 text-[#DCE0F5]">A stronger profile makes better introductions possible.</p></div><span className="rounded-lg bg-[#D7F36A] px-2.5 py-1.5 text-sm font-extrabold text-[#183522]">{profileCompletion}%</span></div>
