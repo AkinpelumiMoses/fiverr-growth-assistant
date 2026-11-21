@@ -218,10 +218,96 @@ export default function DashboardWorkspace() {
       setGigs((gigsResult.data ?? []) as Gig[]);
       setPerformance((performanceResult.data ?? []) as Performance[]);
       let loadedTasks = (tasksResult.data ?? []) as Task[];
-      if (!loadedTasks.length && !tasksResult.error) {
-        const { data: inserted, error } = await supabase.from("growth_tasks").insert(starterTasks.map((task) => ({ ...task, user_id: user.id, status: "pending" }))).select("id,title,description,category,priority,status");
-        if (error) setNotice(error.message);
-        else loadedTasks = (inserted ?? []) as Task[];
+      if (!tasksResult.error) {
+        // Build recommendations from information the freelancer has actually saved.
+        // Existing tasks (including completed ones) are never rewritten or removed.
+        const contextualTasks: Omit<Task, "id" | "status">[] = [];
+        const savedGigs = (gigsResult.data ?? []) as Gig[];
+        const savedPerformance = (performanceResult.data ?? []) as Performance[];
+        const profileData = p;
+
+        if (!savedGigs.length) {
+          contextualTasks.push({
+            title: "Add your first service",
+            description: "You have not saved a service yet. Add one to organise your offers and review how each performs.",
+            category: "services",
+            priority: "high",
+          });
+        } else {
+          const incompleteGig = savedGigs.find((gig) => !gig.description?.trim() || !gig.tags?.length);
+          if (incompleteGig) {
+            contextualTasks.push({
+              title: "Strengthen a saved service",
+              description: `Review “${incompleteGig.title}”. Add a clear buyer-focused description and relevant search tags where they are missing.`,
+              category: "services",
+              priority: "high",
+            });
+          }
+          const draftGig = savedGigs.find((gig) => gig.status === "draft");
+          if (draftGig) {
+            contextualTasks.push({
+              title: "Review your draft service",
+              description: `Decide whether “${draftGig.title}” is ready to publish, needs more work, or should remain a draft.`,
+              category: "services",
+              priority: "medium",
+            });
+          }
+        }
+
+        if (!profileData?.primary_niche?.trim() || !profileData?.bio?.trim() || !profileData?.skills?.trim()) {
+          const missing = [
+            !profileData?.primary_niche?.trim() ? "your main niche" : "",
+            !profileData?.bio?.trim() ? "your profile introduction" : "",
+            !profileData?.skills?.trim() ? "your skills" : "",
+          ].filter(Boolean);
+          contextualTasks.push({
+            title: "Complete your professional positioning",
+            description: `Your profile is missing ${missing.join(", ")}. Add these details so visitors can understand what you do and who you help.`,
+            category: "profile",
+            priority: "high",
+          });
+        }
+
+        if (!savedPerformance.length) {
+          contextualTasks.push({
+            title: "Add your first performance record",
+            description: "There is no performance history saved yet. Record a recent period to establish a baseline for future comparisons.",
+            category: "analytics",
+            priority: savedGigs.length ? "medium" : "low",
+          });
+        } else {
+          const latest = savedPerformance[0];
+          if (latest.impressions > 0 && latest.clicks === 0) {
+            contextualTasks.push({
+              title: "Investigate service visibility without clicks",
+              description: "Your latest saved period has impressions but no clicks. Review the service title, thumbnail and how clearly the offer stands out.",
+              category: "performance",
+              priority: "high",
+            });
+          } else if (latest.clicks > 0 && latest.orders === 0) {
+            contextualTasks.push({
+              title: "Review the path from clicks to orders",
+              description: "Your latest saved period has clicks but no orders. Check whether the offer, pricing, proof and description answer buyer concerns.",
+              category: "performance",
+              priority: "medium",
+            });
+          }
+        }
+
+        if (!loadedTasks.length) {
+          const initialTasks = contextualTasks.length ? contextualTasks.slice(0, 4) : starterTasks;
+          const { data: inserted, error } = await supabase.from("growth_tasks").insert(initialTasks.map((task) => ({ ...task, user_id: user.id, status: "pending" }))).select("id,title,description,category,priority,status");
+          if (error) setNotice(error.message);
+          else loadedTasks = (inserted ?? []) as Task[];
+        } else if (contextualTasks.length) {
+          const existingTitles = new Set(loadedTasks.map((task) => task.title.trim().toLowerCase()));
+          const newTasks = contextualTasks.filter((task) => !existingTitles.has(task.title.trim().toLowerCase()));
+          if (newTasks.length) {
+            const { data: inserted, error } = await supabase.from("growth_tasks").insert(newTasks.slice(0, 4).map((task) => ({ ...task, user_id: user.id, status: "pending" }))).select("id,title,description,category,priority,status");
+            if (error) setNotice(error.message);
+            else loadedTasks = [...loadedTasks, ...((inserted ?? []) as Task[])];
+          }
+        }
       }
       setTasks(loadedTasks);
       setLoading(false);
