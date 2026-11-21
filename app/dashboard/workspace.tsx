@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import * as THREE from "three";
 import { createClient } from "@/lib/supabase/client";
 import CommunityDirectory from "@/app/community/community-directory";
 import CommunityFeed from "@/app/community/community-feed";
