@@ -900,7 +900,7 @@ export default function DashboardWorkspace() {
             <section className="mile-welcome relative overflow-hidden rounded-[22px] bg-[#123D2B] text-white">
               <div className="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full border-[42px] border-white/[.045]"/>
               <div className="pointer-events-none absolute right-28 top-24 h-40 w-40 rounded-full bg-[#D7F36A]/10 blur-3xl"/>
-              <div className="relative grid gap-7 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_330px] lg:items-center lg:gap-10 lg:p-10">
+              <div className="relative grid gap-7 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center lg:gap-10 lg:p-10">
                 <div className="max-w-2xl">
                   <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[.08] px-3 py-1.5 text-[11px] font-semibold tracking-wide text-[#E5E9FF]"><span className="h-2 w-2 rounded-full bg-[#D7F36A]"/> YOUR FREELANCE HQ</div>
                   <h2 className="mt-5 text-3xl font-bold leading-[1.08] tracking-[-.045em] text-white sm:text-4xl lg:text-[46px]">Make your next move count{profileForm.display_name ? `, ${profileForm.display_name.split(" ")[0]}` : ""}.</h2>
@@ -911,8 +911,8 @@ export default function DashboardWorkspace() {
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-3">
-                  <div className="relative w-full max-w-[300px]" aria-label="3D illustration of a path moving upward through milestones" role="img">
-                    <img src="/images/mile-climbing.webp" alt="A freelancer climbing dimensional steps toward a glowing milestone" className="h-auto w-full object-contain drop-shadow-[0_18px_35px_rgba(0,0,0,.24)]" />
+                  <div className="relative w-full max-w-[420px]" aria-label="3D illustration of a path moving upward through milestones" role="img">
+                    <img src="/images/mile-climbing.webp" alt="A freelancer climbing dimensional steps toward a glowing milestone" className="h-auto w-full scale-[1.06] object-contain mix-blend-screen drop-shadow-[0_18px_35px_rgba(0,0,0,.24)]" />
                     <div className="absolute bottom-2 right-2 rounded-full border border-white/15 bg-[#10154F]/80 px-3 py-1.5 text-[9px] font-bold tracking-[.12em] text-[#E7EBFF] backdrop-blur">EVERY STEP HAS A PURPOSE</div>
                   </div>
                   <div className="w-full rounded-2xl border border-white/15 bg-white/[.08] p-4 backdrop-blur-sm sm:p-5">
