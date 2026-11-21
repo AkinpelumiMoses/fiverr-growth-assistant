@@ -36,6 +36,7 @@ const starterTasks = [
 export default function DashboardWorkspace() {
   const supabase = useMemo(() => createClient(), []);
   const [section, setSection] = useState<Section>("Overview");
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // Start each workspace section at the top instead of carrying over the previous scroll position.
   useEffect(() => {
@@ -53,7 +54,6 @@ export default function DashboardWorkspace() {
   }, [mobileOpen]);
 
   const [headerSearch, setHeaderSearch] = useState("");
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [loading, setLoading] = useState(true);
