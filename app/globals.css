@@ -1768,3 +1768,78 @@ body{background:var(--page);color:var(--ink)}
 .mile-loader-premium.is-leaving .mile-loader-icon{animation:none;opacity:0;transition:opacity .45s ease}
 @keyframes mile-icon-breathe{0%,100%{opacity:1}50%{opacity:.38}}
 @media(prefers-reduced-motion:reduce){.mile-loader-premium .mile-loader-icon{animation:none}}
+
+/* MILE V1 interface pass — one consistent navy, lime and neutral dashboard system. */
+.workspace-shell{
+  --mile-navy:#10145f;
+  --mile-navy-deep:#090d4b;
+  --mile-lime:#d7f36a;
+  --mile-surface:#ffffff;
+  --mile-line:#e5e8ef;
+  --mile-muted:#687080;
+}
+.workspace-content .mile-overview{color:#171923!important}
+.workspace-content .mile-overview .mile-welcome{
+  background:linear-gradient(112deg,var(--mile-navy-deep),var(--mile-navy))!important;
+  box-shadow:0 18px 42px rgba(16,20,95,.12)!important;
+}
+.workspace-content .mile-overview .mile-welcome .rounded-2xl{
+  background:rgba(255,255,255,.075)!important;
+  border-color:rgba(255,255,255,.16)!important;
+}
+.workspace-content .mile-overview .mile-stat{
+  min-height:148px;
+  border:1px solid var(--mile-line)!important;
+  border-radius:16px!important;
+  background:var(--mile-surface)!important;
+  color:#202331!important;
+  box-shadow:0 3px 14px rgba(18,24,54,.035)!important;
+}
+.workspace-content .mile-overview .mile-stat-green,
+.workspace-content .mile-overview .mile-stat-yellow,
+.workspace-content .mile-overview .mile-stat-ink{
+  background:var(--mile-surface)!important;
+  border-color:var(--mile-line)!important;
+  color:#202331!important;
+}
+.workspace-content .mile-overview .mile-stat .rounded-xl{
+  background:#eef0fb!important;
+  color:var(--mile-navy)!important;
+}
+.workspace-content .mile-overview .mile-stat p,
+.workspace-content .mile-overview .mile-stat span{color:inherit!important}
+.workspace-content .mile-overview .mile-panel,
+.workspace-content .mile-overview .mile-action-card{
+  background:var(--mile-surface)!important;
+  border:1px solid var(--mile-line)!important;
+  border-radius:16px!important;
+  box-shadow:0 3px 14px rgba(18,24,54,.035)!important;
+}
+.workspace-content .mile-overview .mile-action-card:hover{
+  border-color:#b9c0e4!important;
+  box-shadow:0 12px 26px rgba(18,24,54,.075)!important;
+}
+.workspace-content .mile-overview .mile-action-card>span:last-child,
+.workspace-content .mile-overview button.text-xs.font-bold,
+.workspace-content .mile-overview button.text-xs.font-extrabold{color:var(--mile-navy)!important}
+.workspace-content .mile-overview .mile-action-card:focus-visible,
+.workspace-content .mile-overview button:focus-visible,
+.workspace-content .mile-overview a:focus-visible{
+  outline:3px solid var(--mile-lime)!important;outline-offset:3px!important;
+}
+.workspace-content .mile-overview .mile-welcome button:first-of-type{
+  background:var(--mile-lime)!important;color:#171923!important;
+}
+.workspace-content .mile-overview .mile-welcome button:first-of-type:hover{background:#e4f98d!important}
+:root[data-theme="dark"] .workspace-content .mile-overview .mile-stat,
+:root[data-theme="dark"] .workspace-content .mile-overview .mile-panel,
+:root[data-theme="dark"] .workspace-content .mile-overview .mile-action-card{
+  background:#191b28!important;border-color:#303347!important;color:#f4f5fa!important;
+}
+:root[data-theme="dark"] .workspace-content .mile-overview .mile-stat .rounded-xl{background:#292d50!important;color:#d7f36a!important}
+:root[data-theme="dark"] .workspace-content .mile-overview .mile-welcome{background:linear-gradient(112deg,#090d4b,#171b70)!important}
+@media(max-width:640px){
+  .workspace-content .mile-overview .mile-stat{min-height:126px;padding:15px!important}
+  .workspace-content .mile-overview .mile-stat p{font-size:25px!important}
+}
+
