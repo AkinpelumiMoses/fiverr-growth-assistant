@@ -661,6 +661,16 @@ export default function DashboardWorkspace() {
     if (!user) return setNotice("Please log in again to save performance.");
     setSaving(true); setNotice("");
     const payload = { gig_id: metricForm.gig_id || null, period_start: metricForm.date, period_end: metricForm.date, impressions, clicks, orders, revenue, currency: metricForm.currency };
+    const duplicateSnapshot = performance.find((entry) =>
+      entry.id !== editingPerformanceId &&
+      entry.period_start === metricForm.date &&
+      entry.gig_id === payload.gig_id &&
+      entry.currency === metricForm.currency
+    );
+    if (duplicateSnapshot) {
+      setNotice("A snapshot already exists for this date, service and currency. Edit the existing record instead.");
+      return;
+    }
     if (editingPerformanceId) {
       const { data, error } = await supabase.from("performance_entries").update(payload).eq("id", editingPerformanceId).eq("user_id", user.id)
         .select("id,period_start,period_end,impressions,clicks,orders,revenue,currency,gig_id").single();
