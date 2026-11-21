@@ -33,6 +33,218 @@ const starterTasks = [
   { title: "Choose one improvement to test", description: "Make one deliberate change and observe the result over time.", category: "growth", priority: "low" as const },
 ];
 
+
+function MileThreeScene() {
+  const hostRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const host = hostRef.current;
+    if (!host) return;
+    let frame = 0;
+    let disposed = false;
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color("#123D2B");
+    scene.fog = new THREE.Fog("#123D2B", 10, 22);
+    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+    camera.position.set(6.8, 5.2, 8.8);
+    camera.lookAt(0, 1.65, 0);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    host.appendChild(renderer.domElement);
+
+    const hemi = new THREE.HemisphereLight("#EAF0FF", "#283A34", 2.1);
+    scene.add(hemi);
+    const key = new THREE.DirectionalLight("#FFF0DA", 4.2);
+    key.position.set(-4, 8, 6); key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.left = -7; key.shadow.camera.right = 7;
+    key.shadow.camera.top = 7; key.shadow.camera.bottom = -7;
+    key.shadow.bias = -0.00015;
+    scene.add(key);
+    const rim = new THREE.PointLight("#D7F36A", 28, 12);
+    rim.position.set(3.5, 4.5, -3); scene.add(rim);
+    const fill = new THREE.PointLight("#8798FF", 15, 10);
+    fill.position.set(-4, 2.5, 2); scene.add(fill);
+
+    const mat = (color: string, roughness = .62, metalness = 0) =>
+      new THREE.MeshStandardMaterial({ color, roughness, metalness });
+    const navy = mat("#202B63", .48);
+    const deepNavy = mat("#101A43", .42);
+    const lime = mat("#D7F36A", .38);
+    const skin = mat("#B97859", .68);
+    const skinLight = mat("#D99A78", .62);
+    const shirt = mat("#F0F1E9", .7);
+    const deskMat = mat("#DCE2D8", .34, .12);
+    const darkMetal = mat("#263047", .3, .72);
+    const floorMat = mat("#183B31", .9);
+    const sphere = (parent: THREE.Object3D, position: [number,number,number], scale: [number,number,number], material: THREE.Material) => {
+      const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 32), material);
+      mesh.position.set(...position); mesh.scale.set(...scale); mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh); return mesh;
+    };
+    const box = (parent: THREE.Object3D, position: [number,number,number], size: [number,number,number], material: THREE.Material, radius = 0) => {
+      const geometry = radius ? new THREE.BoxGeometry(...size, 4, 4, 4) : new THREE.BoxGeometry(...size);
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(...position); mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh); return mesh;
+    };
+    const cylinder = (parent: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3, radius: number, material: THREE.Material, radial = 24) => {
+      const direction = new THREE.Vector3().subVectors(b, a);
+      const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius * .92, radius, direction.length(), radial), material);
+      mesh.position.copy(a).add(b).multiplyScalar(.5);
+      mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), direction.normalize());
+      mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh); return mesh;
+    };
+    const capsule = (parent: THREE.Object3D, position: [number,number,number], radius: number, length: number, material: THREE.Material, rotation?: [number,number,number]) => {
+      const mesh = new THREE.Mesh(new THREE.CapsuleGeometry(radius, length, 8, 24), material);
+      mesh.position.set(...position); if (rotation) mesh.rotation.set(...rotation);
+      mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh); return mesh;
+    };
+
+    // A softly lit studio floor and a quiet halo behind the character.
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(8, 80), floorMat);
+    floor.rotation.x = -Math.PI / 2; floor.position.y = -.04; floor.receiveShadow = true; scene.add(floor);
+    const halo = new THREE.Mesh(new THREE.TorusGeometry(2.35, .018, 12, 120), new THREE.MeshBasicMaterial({ color: "#D7F36A", transparent: true, opacity: .42 }));
+    halo.position.set(0, 2.4, -1.7); halo.rotation.x = .2; scene.add(halo);
+    const platform = new THREE.Mesh(new THREE.CylinderGeometry(2.9, 3.15, .16, 80), mat("#24483B", .72));
+    platform.position.set(0, .04, 0); platform.receiveShadow = true; platform.castShadow = true; scene.add(platform);
+
+    // Desk with substantial thickness, metal legs and a restrained edge highlight.
+    box(scene, [0, 1.78, -.15], [4.7, .16, 1.65], deskMat);
+    box(scene, [0, 1.68, -.15], [4.55, .055, 1.52], mat("#AEBDB1", .45));
+    for (const x of [-1.92, 1.92]) {
+      const leg = box(scene, [x, .88, -.15], [.12, 1.55, .12], darkMetal);
+      leg.rotation.z = x < 0 ? -.035 : .035;
+      box(scene, [x, .12, -.15], [.48, .08, .55], darkMetal);
+    }
+
+    // Chair and seated figure, modelled as intersecting smooth 3D forms.
+    const chair = new THREE.Group(); chair.position.set(-.35, 0, 1.02); scene.add(chair);
+    const chairBack = new THREE.Mesh(new THREE.BoxGeometry(1.05, 1.45, .2), navy);
+    chairBack.position.set(0, 1.65, -.08); chairBack.rotation.x = -.08; chairBack.castShadow = true; chair.add(chairBack);
+    sphere(chair, [0, 1.05, .12], [.62, .17, .58], deepNavy);
+    cylinder(chair, new THREE.Vector3(0,.1,.1), new THREE.Vector3(0,.98,.1), .075, darkMetal);
+    for (let i=0;i<5;i++) { const a=i*Math.PI*2/5; cylinder(chair,new THREE.Vector3(0,.12,.1),new THREE.Vector3(Math.cos(a)*.52,.07,.1+Math.sin(a)*.52),.035,darkMetal); }
+
+    const person = new THREE.Group(); person.position.set(-.2, 0, .62); scene.add(person);
+    // hips and legs: seated pose, with knees forward and feet tucked under the desk.
+    capsule(person, [0, 1.38, .12], .43, .44, navy, [Math.PI/2, 0, 0]);
+    capsule(person, [-.31, .88, .42], .22, .72, navy, [1.18, 0, -.2]);
+    capsule(person, [.31, .88, .42], .22, .72, navy, [1.18, 0, .2]);
+    capsule(person, [-.28, .43, -.05], .17, .58, deepNavy, [.18, 0, -.05]);
+    capsule(person, [.28, .43, -.05], .17, .58, deepNavy, [.18, 0, .05]);
+    sphere(person, [-.28, .15, .12], [.3,.13,.2], lime);
+    sphere(person, [.28, .15, .12], [.3,.13,.2], lime);
+
+    // Torso, collar and neck.
+    capsule(person, [0, 2.12, .02], .48, .78, navy, [-.12, 0, 0]);
+    capsule(person, [0, 2.62, .02], .16, .18, skinLight);
+    const collar = new THREE.Mesh(new THREE.ConeGeometry(.2,.28,4), shirt);
+    collar.position.set(0,2.48,.39); collar.rotation.y=Math.PI/4; collar.castShadow=true; person.add(collar);
+
+    // Head with ears, facial planes, nose and a calm focused expression.
+    sphere(person, [0, 3.05, .02], [.39,.49,.36], skinLight);
+    sphere(person, [-.39,3.06,.02], [.075,.12,.09], skin);
+    sphere(person, [.39,3.06,.02], [.075,.12,.09], skin);
+    sphere(person, [0,3.36,.015], [.39,.22,.36], skinLight);
+    sphere(person, [-.145,3.08,.337], [.045,.055,.025], deepNavy);
+    sphere(person, [.145,3.08,.337], [.045,.055,.025], deepNavy);
+    sphere(person, [0,2.99,.375], [.055,.085,.055], skin);
+    const smile = new THREE.Mesh(new THREE.TorusGeometry(.075,.012,8,24,Math.PI), mat("#854C43"));
+    smile.position.set(0,2.89,.353); smile.rotation.z=Math.PI; person.add(smile);
+    // Subtle brows and a smooth bald crown, with soft key-light highlights.
+    for (const x of [-.145,.145]) {
+      const brow = new THREE.Mesh(new THREE.CapsuleGeometry(.012,.09,4,10), mat("#754D42"));
+      brow.position.set(x,3.17,.34); brow.rotation.z=x<0?-.12:.12; person.add(brow);
+    }
+
+    // Arms reach forward naturally towards the keyboard.
+    const shoulderL = new THREE.Vector3(-.39,2.36,.02), elbowL = new THREE.Vector3(-.68,1.96,.48), handL = new THREE.Vector3(-.42,1.82,.76);
+    const shoulderR = new THREE.Vector3(.39,2.36,.02), elbowR = new THREE.Vector3(.67,1.98,.48), handR = new THREE.Vector3(.42,1.82,.76);
+    for (const [a,b,c] of [[shoulderL,elbowL,handL],[shoulderR,elbowR,handR]] as [THREE.Vector3,THREE.Vector3,THREE.Vector3][]) {
+      sphere(person, a.toArray() as [number,number,number], [.22,.23,.22], navy);
+      cylinder(person,a,b,.145,navy);
+      sphere(person,b.toArray() as [number,number,number],[.15,.15,.15],navy);
+      cylinder(person,b,c,.105,skinLight);
+      sphere(person,c.toArray() as [number,number,number],[.14,.09,.16],skinLight);
+    }
+
+    // Laptop with a real raised screen, metallic body and a luminous MILE mark.
+    const laptop = new THREE.Group(); laptop.position.set(.05,1.88,.1); scene.add(laptop);
+    const base = box(laptop,[0,.05,.2],[1.45,.075,.88],darkMetal);
+    box(laptop,[0,.092,.2],[1.34,.012,.77],mat("#AEB9B0",.32,.35));
+    const screen = box(laptop,[0,.62,-.2],[1.43,1.08,.075],deepNavy);
+    screen.rotation.x=-.12;
+    box(laptop,[0,.62,-.153],[1.29,.93,.012],mat("#293B78",.3));
+    sphere(laptop,[0,.64,-.14],[.16,.16,.012],lime);
+    box(laptop,[0,.34,.23],[.25,.012,.12],mat("#D7F36A",.3));
+
+    // A ceramic coffee cup, a closed notebook and a tiny desk plant.
+    const cup = new THREE.Mesh(new THREE.CylinderGeometry(.15,.13,.25,40), lime);
+    cup.position.set(1.72,1.98,.15); cup.castShadow=true; scene.add(cup);
+    const coffee = new THREE.Mesh(new THREE.CircleGeometry(.115,32), mat("#4B3428"));
+    coffee.rotation.x=-Math.PI/2; coffee.position.set(1.72,2.11,.15); scene.add(coffee);
+    const handle = new THREE.Mesh(new THREE.TorusGeometry(.09,.025,12,32), lime);
+    handle.position.set(1.86,2.02,.15); handle.rotation.y=Math.PI/2; scene.add(handle);
+    box(scene,[-1.72,1.91,.25],[.66,.08,.48],mat("#D7F36A",.55));
+    box(scene,[-1.72,1.96,.25],[.62,.025,.44],mat("#F3F0DF",.7));
+    const pot = new THREE.Mesh(new THREE.CylinderGeometry(.18,.14,.32,32), mat("#E7E9DD"));
+    pot.position.set(-2.0,1.98,-.48); pot.castShadow=true; scene.add(pot);
+    for (let i=0;i<5;i++) {
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(.12,20,16), mat("#8FB18A"));
+      leaf.scale.set(.55,1.8,.38); leaf.position.set(-2+Math.cos(i*1.25)*.16,2.3+Math.sin(i*1.25)*.08,-.48+Math.sin(i*1.25)*.12);
+      leaf.rotation.z=(i-2)*.28; leaf.castShadow=true; scene.add(leaf);
+    }
+
+    // Floating opportunity and momentum tiles are actual 3D objects, not flat overlays.
+    const tile = (x:number,y:number,z:number,w:number,h:number,accent:boolean) => {
+      const group = new THREE.Group(); group.position.set(x,y,z); group.rotation.y=x>0?-.2:.2; group.rotation.z=x>0?.06:-.07; scene.add(group);
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(w,h,.09), mat("#F6F7F0",.38));
+      panel.castShadow=true; panel.receiveShadow=true; group.add(panel);
+      const dot = new THREE.Mesh(new THREE.SphereGeometry(.075,20,16), accent?lime:mat("#A5B1E8"));
+      dot.position.set(-w*.34,h*.28,.07); group.add(dot);
+      for(let i=0;i<3;i++) {
+        const line = new THREE.Mesh(new THREE.BoxGeometry(w*(.46-i*.08),.035,.018), mat(i===2?"#B7C2B7":"#C7CEC8"));
+        line.position.set(.02,h*.25-i*.16,.065); group.add(line);
+      }
+      return group;
+    };
+    const leftTile = tile(-2.05,3.15,-.35,.95,.82,true);
+    const rightTile = tile(2.05,3.42,-.45,1.05,.9,false);
+    const badge = new THREE.Mesh(new THREE.TorusGeometry(.27,.07,14,48), lime);
+    badge.position.set(2.1,2.35,-.5); badge.rotation.x=.25; scene.add(badge);
+
+    const resize = () => {
+      if (!host || disposed) return;
+      const width = Math.max(1, host.clientWidth), height = Math.max(1, host.clientHeight);
+      renderer.setSize(width,height,false); camera.aspect=width/height; camera.updateProjectionMatrix();
+    };
+    const observer = new ResizeObserver(resize); observer.observe(host); resize();
+    const clock = new THREE.Clock();
+    const animate = () => {
+      if (disposed) return;
+      const t=clock.getElapsedTime();
+      person.position.y=Math.sin(t*.8)*.012;
+      leftTile.position.y=3.15+Math.sin(t*.7)*.045;
+      rightTile.position.y=3.42+Math.sin(t*.7+1.2)*.05;
+      badge.rotation.z=t*.18;
+      renderer.render(scene,camera);
+      frame=requestAnimationFrame(animate);
+    };
+    animate();
+    return () => {
+      disposed=true; cancelAnimationFrame(frame); observer.disconnect();
+      scene.traverse((object) => { if (object instanceof THREE.Mesh) { object.geometry.dispose(); const materials=Array.isArray(object.material)?object.material:[object.material]; materials.forEach(m=>m.dispose()); } });
+      renderer.dispose(); renderer.domElement.remove();
+    };
+  }, []);
+
+  return <div ref={hostRef} className="relative z-10 h-[330px] w-full max-w-[460px] overflow-hidden sm:h-[370px]" aria-label="A dimensional 3D scene of a freelancer working at a desk" role="img" />;
+}
+
 export default function DashboardWorkspace() {
   const supabase = useMemo(() => createClient(), []);
   const [section, setSection] = useState<Section>("Overview");
@@ -910,109 +1122,7 @@ export default function DashboardWorkspace() {
                 </div>
                 <div className="flex flex-col items-center gap-3">
                   <div className="relative flex min-h-[330px] w-full max-w-[460px] items-center justify-center overflow-hidden" role="img" aria-label="A freelancer building their next opportunity at a desk, surrounded by signals of progress, skills and professional growth">
-                    <svg className="relative z-10 h-auto w-full max-w-[460px]" viewBox="0 0 520 390" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <defs>
-                        <linearGradient id="mileSceneFloor" x1="260" y1="270" x2="260" y2="360" gradientUnits="userSpaceOnUse"><stop stopColor="#263A76" stopOpacity=".05"/><stop offset="1" stopColor="#070D3D" stopOpacity=".52"/></linearGradient>
-                        <linearGradient id="mileDeskTop" x1="105" y1="248" x2="415" y2="289" gradientUnits="userSpaceOnUse"><stop stopColor="#F4F5FF"/><stop offset=".5" stopColor="#C9D0F4"/><stop offset="1" stopColor="#8D9AE2"/></linearGradient>
-                        <linearGradient id="mileDeskFront" x1="140" y1="277" x2="390" y2="335" gradientUnits="userSpaceOnUse"><stop stopColor="#34439B"/><stop offset="1" stopColor="#171F65"/></linearGradient>
-                        <linearGradient id="mileSkin" x1="210" y1="91" x2="300" y2="212" gradientUnits="userSpaceOnUse"><stop stopColor="#FFD9B8"/><stop offset=".55" stopColor="#E9AD88"/><stop offset="1" stopColor="#BD765F"/></linearGradient>
-                        <linearGradient id="mileJacket" x1="198" y1="174" x2="326" y2="280" gradientUnits="userSpaceOnUse"><stop stopColor="#6977D7"/><stop offset=".5" stopColor="#303F9D"/><stop offset="1" stopColor="#171F65"/></linearGradient>
-                        <linearGradient id="mileScreen" x1="218" y1="183" x2="323" y2="252" gradientUnits="userSpaceOnUse"><stop stopColor="#222C83"/><stop offset="1" stopColor="#0B124A"/></linearGradient>
-                        <radialGradient id="mileHalo" cx="0" cy="0" r="1" gradientTransform="matrix(0 155 -180 0 272 154)" gradientUnits="userSpaceOnUse"><stop stopColor="#D7F36A" stopOpacity=".22"/><stop offset="1" stopColor="#D7F36A" stopOpacity="0"/></radialGradient>
-                        <filter id="mileSceneShadow" x="40" y="15" width="450" height="365" filterUnits="userSpaceOnUse"><feGaussianBlur stdDeviation="12"/></filter>
-                        <filter id="mileCardShadow" x="0" y="0" width="1" height="1" filterUnits="objectBoundingBox"><feGaussianBlur stdDeviation="3"/></filter>
-                      </defs>
-                      <ellipse cx="270" cy="191" rx="205" ry="173" fill="url(#mileHalo)"/>
-                      <ellipse cx="265" cy="340" rx="178" ry="20" fill="#080E42" opacity=".4" filter="url(#mileSceneShadow)"/>
-                      <path d="M78 337c42-23 90-33 143-33 79 0 150 16 215 42" stroke="#D7F36A" strokeOpacity=".28" strokeWidth="1.5" strokeDasharray="4 8"/>
-                      <circle cx="92" cy="146" r="3" fill="#D7F36A"/><circle cx="426" cy="93" r="4" fill="#D7F36A"/><circle cx="447" cy="218" r="2.5" fill="#AAB5FF"/>
-                      <path d="M82 91c17-22 45-28 67-17" stroke="#D7F36A" strokeOpacity=".6" strokeWidth="2" strokeLinecap="round"/>
-                      <path d="M407 129c16-13 31-13 44-5" stroke="#D7F36A" strokeOpacity=".5" strokeWidth="2" strokeLinecap="round"/>
-                      {/* Floating progress card */}
-                      <g transform="translate(45 100) rotate(-8)">
-                        <rect x="3" y="6" width="112" height="78" rx="13" fill="#070D3D" opacity=".24"/>
-                        <rect width="112" height="78" rx="13" fill="#F8F9FF"/>
-                        <circle cx="17" cy="17" r="5" fill="#D7F36A"/>
-                        <rect x="29" y="14" width="49" height="5" rx="2.5" fill="#AAB2D9"/>
-                        <rect x="14" y="32" width="83" height="34" rx="7" fill="#EDF0FF"/>
-                        <path d="M23 57l14-10 12 5 15-15 12 7 12-12" stroke="#34439B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M80 32h8v8" stroke="#D7F36A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </g>
-                      {/* Opportunity card */}
-                      <g transform="translate(367 76) rotate(7)">
-                        <rect x="3" y="6" width="102" height="91" rx="14" fill="#070D3D" opacity=".25"/>
-                        <rect width="102" height="91" rx="14" fill="#F8F9FF"/>
-                        <rect x="13" y="13" width="25" height="25" rx="8" fill="#D7F36A"/>
-                        <path d="M20 26h11m-5.5-5.5v11" stroke="#202B78" strokeWidth="2" strokeLinecap="round"/>
-                        <rect x="46" y="17" width="42" height="5" rx="2.5" fill="#8994C8"/>
-                        <rect x="46" y="27" width="30" height="4" rx="2" fill="#C6CBE3"/>
-                        <rect x="13" y="49" width="76" height="5" rx="2.5" fill="#D8DDF1"/>
-                        <rect x="13" y="60" width="62" height="5" rx="2.5" fill="#D8DDF1"/>
-                        <rect x="13" y="73" width="45" height="9" rx="4.5" fill="#34439B"/>
-                      </g>
-                      {/* Plant and side table */}
-                      <path d="M82 278h55l-6 48H88z" fill="#D7F36A"/>
-                      <path d="M91 278h37l-4 8H95z" fill="#F4F7D5"/>
-                      <path d="M109 279c-4-29-25-36-30-56 18 3 30 14 33 33-2-26 9-42 28-49 1 23-8 42-27 54 17-10 31-9 43 1-15 17-29 21-47 17z" fill="#7E9A71"/>
-                      <path d="M108 277c-5-22-7-43-3-64" stroke="#DCEBA7" strokeWidth="2" strokeLinecap="round"/>
-                      {/* Desk shadow and legs */}
-                      <path d="M126 280h278l-12 65H140z" fill="url(#mileDeskFront)"/>
-                      <path d="M148 287h15v51h-15zm220 0h15v51h-15z" fill="#11194F"/>
-                      <path d="M112 267c0-5 4-9 9-9h292c5 0 9 4 9 9v16H112z" fill="url(#mileDeskTop)"/>
-                      <path d="M126 267h280" stroke="white" strokeOpacity=".7" strokeWidth="2"/>
-                      {/* Seated freelancer - legs and chair */}
-                      <path d="M191 238c-8 24-4 45 8 62h39l-5-17-14-41z" fill="#202B78"/>
-                      <path d="M224 278l-2 28 31 12c7 3 14-2 13-8-1-4-5-7-10-9l-14-8 3-17z" fill="#E9B08D"/>
-                      <path d="M222 309l-28 5c-8 1-11 10-5 15 3 2 7 3 11 2l54-7c8-1 9-10 2-13l-11-5z" fill="#D7F36A"/>
-                      <path d="M286 234c25 2 41 16 43 38l-4 33h-44l-5-38z" fill="#202B78"/>
-                      <path d="M316 293l16 20c4 5 1 13-6 14l-49 1c-8 0-11-9-5-14l17-14z" fill="#E9B08D"/>
-                      <path d="M282 319h50c8 0 11 9 4 13l-43 13c-8 2-15-5-11-12z" fill="#D7F36A"/>
-                      <path d="M179 197c-18 4-30 18-30 39v34h32l14-40z" fill="#27347F"/>
-                      <path d="M174 250c-8 18-5 34 3 45" stroke="#6472CA" strokeWidth="3" strokeLinecap="round"/>
-                      {/* Torso */}
-                      <path d="M202 157c-19 7-29 23-31 47l-5 55c30 18 98 22 137 0l-9-69c-4-22-20-34-42-38z" fill="url(#mileJacket)"/>
-                      <path d="M224 163l20 22 19-22 13 11-18 28-14 57-20-57-17-28z" fill="#D7F36A"/>
-                      <path d="M240 184l-4 49" stroke="#B8C2FF" strokeOpacity=".5" strokeWidth="2"/>
-                      <path d="M196 182c-12 13-18 28-21 49l-17 18c-5 5-3 14 4 16 4 1 8-1 11-4l27-26 17-40z" fill="url(#mileSkin)"/>
-                      <path d="M290 182c13 9 23 24 29 42l20 12c7 4 7 14 0 18-4 2-9 1-13-2l-31-22-22-32z" fill="url(#mileSkin)"/>
-                      {/* Neck and head */}
-                      <path d="M229 143h34v30c-9 12-25 12-34 0z" fill="#D99575"/>
-                      <ellipse cx="246" cy="104" rx="48" ry="57" fill="url(#mileSkin)"/>
-                      <path d="M200 104c-4-36 14-66 48-68 33-2 53 22 48 61-8-11-18-17-30-21-17 15-40 23-66 28z" fill="#E9B08D"/>
-                      <path d="M203 92c-3-29 13-54 42-59 29-5 49 13 52 39-12-14-26-19-41-18-19 1-36 13-53 38z" fill="#F8D3B5" opacity=".65"/>
-                      <ellipse cx="229" cy="110" rx="4" ry="5.5" fill="#20234D"/>
-                      <ellipse cx="265" cy="110" rx="4" ry="5.5" fill="#20234D"/>
-                      <path d="M239 130c5 4 11 4 16 0" stroke="#9E554F" strokeWidth="3" strokeLinecap="round"/>
-                      <path d="M216 98c5-4 11-5 17-2m24 0c6-3 12-2 17 2" stroke="#A96C59" strokeWidth="2.5" strokeLinecap="round"/>
-                      <ellipse cx="213" cy="124" rx="7" ry="4" fill="#E98F7F" opacity=".24"/><ellipse cx="278" cy="124" rx="7" ry="4" fill="#E98F7F" opacity=".24"/>
-                      {/* Hands and laptop */}
-                      <path d="M175 246c4-9 13-14 23-13l24 7c8 2 10 11 4 16-3 3-7 4-11 3l-21-4-8 7c-8 5-17-6-11-16z" fill="url(#mileSkin)"/>
-                      <path d="M306 240c8-8 18-9 27-3l13 11c7 6 3 17-6 18-3 0-6-1-9-3l-17-11-8 2c-9 1-11-9-4-14z" fill="url(#mileSkin)"/>
-                      <path d="M209 245l15-6m86 1 15 6" stroke="#B97861" strokeWidth="2" strokeLinecap="round"/>
-                      <path d="M211 192h111l-8 70H219z" fill="#11194F" stroke="#AAB5FF" strokeWidth="2"/>
-                      <path d="M219 199h95l-7 55h-82z" fill="url(#mileScreen)"/>
-                      <path d="M234 215h37m-37 9h53m-53 9h31" stroke="#AEB9FF" strokeOpacity=".65" strokeWidth="3" strokeLinecap="round"/>
-                      <path d="M207 262h124l15 9H192z" fill="#E4E8FF"/>
-                      <path d="M239 265h57" stroke="#8E9AE0" strokeWidth="2" strokeLinecap="round"/>
-                      {/* Coffee and notebook */}
-                      <g transform="translate(358 235)">
-                        <ellipse cx="24" cy="27" rx="23" ry="5" fill="#0A1046" opacity=".25"/>
-                        <rect x="4" y="0" width="38" height="28" rx="7" fill="#D7F36A"/>
-                        <path d="M42 7h5c9 0 9 14 0 14h-5" stroke="#D7F36A" strokeWidth="5"/>
-                        <path d="M13 8h20" stroke="#F8FFD8" strokeWidth="2" strokeLinecap="round"/>
-                      </g>
-                      <g transform="translate(91 239) rotate(-5)">
-                        <rect x="0" y="0" width="62" height="37" rx="5" fill="#F6F7FF"/>
-                        <path d="M10 10h38M10 18h30M10 26h21" stroke="#9AA5D6" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M0 0l8 5v32" stroke="#D7F36A" strokeWidth="3"/>
-                      </g>
-                      {/* Grounded caption label */}
-                      <g transform="translate(176 353)">
-                        <rect width="188" height="27" rx="13.5" fill="#10154F" stroke="#D7F36A" strokeOpacity=".55"/>
-                        <circle cx="15" cy="13.5" r="4" fill="#D7F36A"/>
-                        <text x="28" y="17.5" fill="#F1F3FF" fontSize="9" fontWeight="700" letterSpacing="1.4">EVERY STEP HAS A PURPOSE</text>
-                      </g>
-                    </svg>
+                    <MileThreeScene />
                   </div>
                   <div className="w-full rounded-2xl border border-white/15 bg-white/[.08] p-4 backdrop-blur-sm sm:p-5">
                     <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold text-white">Your profile strength</p><p className="mt-1 text-[11px] leading-5 text-[#DCE0F5]">A stronger profile makes better introductions possible.</p></div><span className="rounded-lg bg-[#D7F36A] px-2.5 py-1.5 text-sm font-extrabold text-[#183522]">{profileCompletion}%</span></div>
