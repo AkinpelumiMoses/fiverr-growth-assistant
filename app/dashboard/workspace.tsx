@@ -802,13 +802,13 @@ export default function DashboardWorkspace() {
                   <p className="mt-4 max-w-xl text-sm leading-7 text-[#D3E2D8] sm:text-[15px]">Your work, your network and your next opportunity come together here. Pick up where you left off and keep moving forward.</p>
                   <div className="mt-7 flex flex-wrap gap-3">
                     <button onClick={nextMove.run} className="inline-flex items-center gap-2 rounded-lg bg-[#D7F36A] px-4 py-3 text-xs font-extrabold text-[#183522] transition hover:bg-[#E5FA91]"><NextMoveIcon size={15}/> {nextMove.action}</button>
-                    <button onClick={()=>go("Community")} className="inline-flex items-center gap-2 rounded-full border border-[#D7F36A]/50 bg-[#102F21] px-4 py-3 text-xs font-bold !text-[#D7F36A] transition hover:bg-[#183522]"><Users size={15} className="!text-[#D7F36A]"/> Meet the community</button>
+                    <button onClick={()=>go("Community")} className="inline-flex items-center gap-2 rounded-full border border-[#D7F36A]/50 bg-[#102F21] px-4 py-3 text-xs font-bold !text-[#D7F36A] transition hover:bg-[#183522]"><Users size={15} className="!text-[#D7F36A]"/> <span className="!text-[#D7F36A]" style={{color:"#D7F36A"}}>Meet the community</span></button>
                   </div>
                 </div>
                 <div className="rounded-2xl border border-white/15 bg-[#204D39] p-5 sm:p-6">
                   <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold text-white">Your profile strength</p><p className="mt-1 text-[11px] leading-5 text-[#C6D9CC]">A stronger profile makes better introductions possible.</p></div><span className="rounded-lg bg-[#D7F36A] px-2.5 py-1.5 text-sm font-extrabold text-[#183522]">{profileCompletion}%</span></div>
                   <div className="mt-5 h-2 overflow-hidden rounded-full bg-[#102F21]"><div className="h-full rounded-full bg-[#D7F36A] transition-all" style={{width:profileCompletion+"%"}}/></div>
-                  <button onClick={()=>go("Profile")} className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#D7F36A]/50 bg-[#102F21] px-5 py-3 text-xs font-extrabold !text-[#D7F36A] shadow-sm transition hover:bg-[#183522]">Complete your profile <ArrowUpRight size={14} className="!text-[#D7F36A]"/></button>
+                  <button onClick={()=>go("Profile")} className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#D7F36A]/50 bg-[#102F21] px-5 py-3 text-xs font-extrabold !text-[#D7F36A] shadow-sm transition hover:bg-[#183522]"><span className="!text-[#D7F36A]" style={{color:"#D7F36A"}}>Complete your profile</span> <ArrowUpRight size={14} className="!text-[#D7F36A]"/></button>
                 </div>
               </div>
             </section>
