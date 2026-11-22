@@ -35,39 +35,25 @@ const starterTasks = [
 
 
 function MileThreeScene() {
-  const [muted, setMuted] = useState(true);
-  const [filmUnavailable, setFilmUnavailable] = useState(false);
   return (
-    <section className="w-full max-w-[560px] overflow-hidden rounded-[28px] border border-white/10 bg-[#101D28] shadow-[0_28px_70px_rgba(0,0,0,.28)]" aria-label="The MILE cinematic story">
-      <div className="flex items-center justify-between gap-3 px-4 pb-3 pt-4 sm:px-5">
-        <div className="flex items-center gap-2.5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#D7F36A] text-[11px] font-black text-[#17251E]">M.</span>
-          <div><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-white">The MILE story</p><p className="mt-0.5 text-[9px] text-white/45">A film about the next meaningful step</p></div>
+    <section className="relative flex min-h-[340px] w-full max-w-[560px] flex-col items-center justify-center overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(ellipse_at_50%_44%,rgba(215,243,106,.15),transparent_38%),linear-gradient(145deg,#111b2a_0%,#0b1220_55%,#101b28_100%)] px-6 py-8 text-center shadow-[0_28px_70px_rgba(0,0,0,.3)]" aria-label="MILE three-dimensional brand icon">
+      <div className="pointer-events-none absolute inset-0 opacity-[.13]" style={{backgroundImage:"linear-gradient(rgba(255,255,255,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.14) 1px,transparent 1px)",backgroundSize:"34px 34px",maskImage:"radial-gradient(ellipse at center,black,transparent 75%)"}} />
+      <div className="relative flex h-[218px] w-full items-center justify-center" style={{perspective:"900px"}}>
+        <div className="absolute h-[178px] w-[178px] rounded-full border border-[#D7F36A]/20 shadow-[0_0_55px_rgba(215,243,106,.12)]" style={{transform:"rotateX(68deg) rotateZ(-22deg)"}} />
+        <div className="absolute h-[210px] w-[210px] rounded-full border border-white/10" style={{transform:"rotateX(68deg) rotateZ(28deg)"}} />
+        <div className="absolute h-3 w-3 rounded-full bg-[#D7F36A] shadow-[0_0_24px_8px_rgba(215,243,106,.4)]" style={{transform:"translate(92px,-63px)"}} />
+        <div className="relative flex h-[142px] w-[142px] items-center justify-center rounded-[34px] border border-white/25 bg-gradient-to-br from-[#f1ffad] via-[#D7F36A] to-[#8eae35] shadow-[inset_0_3px_2px_rgba(255,255,255,.8),inset_0_-12px_18px_rgba(71,91,20,.25),0_24px_0_#647d2c,0_34px_45px_rgba(0,0,0,.5),0_0_70px_rgba(215,243,106,.22)]" style={{transform:"rotateX(13deg) rotateY(-17deg) rotateZ(-8deg)",transformStyle:"preserve-3d"}}>
+          <div className="absolute inset-[9px] rounded-[27px] border border-white/35" />
+          <span className="relative -mt-2 text-[76px] font-black leading-none tracking-[-.12em] text-[#14231d] drop-shadow-[0_3px_0_rgba(255,255,255,.28)]" style={{transform:"translateZ(24px)"}}>M</span>
+          <span className="absolute bottom-3 right-4 h-2.5 w-2.5 rounded-full bg-white/90 shadow-[0_0_14px_rgba(255,255,255,.9)]" />
         </div>
-        <button type="button" onClick={() => setMuted((value) => !value)} className="rounded-full border border-white/15 bg-white/[.06] px-3 py-2 text-[10px] font-bold text-white/80 transition hover:bg-white/10" aria-pressed={!muted}>{muted ? "Enable sound" : "Mute film"}</button>
+        <div className="absolute right-[calc(50%-112px)] top-[20px] h-[48px] w-[48px] rounded-[13px] border border-white/20 bg-gradient-to-br from-[#53647b] to-[#1a2b40] shadow-[0_9px_0_#101c2b,0_18px_25px_rgba(0,0,0,.38)]" style={{transform:"rotateX(18deg) rotateY(-24deg) rotateZ(18deg)"}} />
+        <div className="absolute bottom-[17px] left-[calc(50%-122px)] h-[35px] w-[35px] rounded-[10px] border border-white/25 bg-gradient-to-br from-[#e5f89b] to-[#91b43e] shadow-[0_7px_0_#627c2d,0_14px_20px_rgba(0,0,0,.35)]" style={{transform:"rotateX(18deg) rotateY(24deg) rotateZ(-18deg)"}} />
       </div>
-      <div className="relative aspect-video overflow-hidden bg-[#080f16]">
-        {!filmUnavailable ? (
-          <video className="absolute inset-0 h-full w-full object-cover" src="/media/mile-film.mp4" autoPlay muted={muted} playsInline controls preload="metadata" onError={() => setFilmUnavailable(true)}>
-            <track kind="captions" src="/media/mile-film.vtt" srcLang="en" label="English" default />
-          </video>
-        ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_50%_40%,rgba(215,243,106,.12),transparent_55%),linear-gradient(135deg,#172630,#080f16)] px-7 text-center">
-            <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D7F36A] text-lg font-black text-[#17251E]">M.</span>
-            <p className="text-[10px] font-extrabold tracking-[.2em] text-[#D7F36A]">THE MILE FILM</p>
-            <h3 className="mt-3 max-w-sm text-xl font-extrabold leading-tight text-white">Every step has a purpose.</h3>
-            <p className="mt-3 max-w-xs text-xs leading-6 text-white/60">The live-action film is being prepared. Please refresh this page shortly.</p>
-          </div>
-        )}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#081018]/80 via-transparent to-[#081018]/20"/>
-        <div className="pointer-events-none absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6">
-          <p className="text-[8px] font-black tracking-[.22em] text-[#D7F36A] sm:text-[9px]">YOUR JOURNEY. YOUR NEXT MILE.</p>
-          <p className="mt-1 max-w-md text-lg font-extrabold leading-tight text-white drop-shadow-lg sm:text-2xl">You don't have to figure out the entire journey today.</p>
-        </div>
-      </div>
-      <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
-        <p className="text-[10px] font-semibold text-white/55">MILE. <span className="text-[#D7F36A]">Every step has a purpose.</span></p>
-        <span className="text-[9px] tracking-wide text-white/35">60-SECOND FILM · ENGLISH CAPTIONS</span>
+      <div className="relative mt-2">
+        <p className="text-[9px] font-extrabold uppercase tracking-[.28em] text-[#D7F36A]">Move with intention</p>
+        <h3 className="mt-3 text-2xl font-extrabold tracking-tight text-white sm:text-[28px]">Every step has a purpose.</h3>
+        <p className="mx-auto mt-2 max-w-[310px] text-xs leading-6 text-white/55">Build your direction. Strengthen your craft. Make your next move count.</p>
       </div>
     </section>
   );
