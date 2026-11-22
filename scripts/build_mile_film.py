@@ -10,10 +10,10 @@ WORK.mkdir(parents=True, exist_ok=True)
 
 SCENES = [
  ("https://www.pexels.com/video/focused-man-working-late-night-at-home-office-35331898/", "You have the skill. You have the ambition. You know there's more you can achieve. But sometimes, knowing your next step isn't easy."),
- ("https://www.pexels.com/video/man-working-late-at-night-5197394/", "You try different things. You improve your craft. You search for opportunities. Yet progress can feel uncertain when you don't have a clear direction."),
- ("https://www.pexels.com/video/man-working-on-laptop-5091920/", "That's where MILE comes in. A place to understand your services, strengthen your strategy, explore your market and make more intentional moves."),
- ("https://www.pexels.com/video/modern-office-space-with-diverse-team-collaboration-31482844/", "Because growth isn't just about working harder. It's about learning, connecting and becoming better with every step."),
- ("https://www.pexels.com/video/people-working-in-an-office-6914684/", "You don't have to figure out the entire journey today. You just have to take the next meaningful step. MILE. Every step has a purpose."),
+ ("https://www.pexels.com/video/man-working-late-at-home-desk-in-dim-room-35331905/", "You try different things. You improve your craft. You search for opportunities. Yet progress can feel uncertain when you don't have a clear direction."),
+ ("https://www.pexels.com/video/a-man-typing-on-laptop-7546817/", "That's where MILE comes in. A place to understand your services, strengthen your strategy, explore your market and make more intentional moves."),
+ ("https://www.pexels.com/video/businessmen-working-as-a-team-8425715/", "Because growth isn't just about working harder. It's about learning, connecting and becoming better with every step."),
+ ("https://www.pexels.com/video/man-working-on-a-laptop-7171003/", "You don't have to figure out the entire journey today. You just have to take the next meaningful step. MILE. Every step has a purpose."),
 ]
 def run(args):
     subprocess.run(args, check=True)
