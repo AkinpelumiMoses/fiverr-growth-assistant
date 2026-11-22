@@ -36,26 +36,30 @@ const starterTasks = [
 
 function MileThreeScene() {
   return (
-    <section className="relative flex min-h-[340px] w-full max-w-[560px] flex-col items-center justify-center overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(ellipse_at_50%_44%,rgba(215,243,106,.15),transparent_38%),linear-gradient(145deg,#111b2a_0%,#0b1220_55%,#101b28_100%)] px-6 py-8 text-center shadow-[0_28px_70px_rgba(0,0,0,.3)]" aria-label="MILE three-dimensional brand icon">
-      <div className="pointer-events-none absolute inset-0 opacity-[.13]" style={{backgroundImage:"linear-gradient(rgba(255,255,255,.14) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.14) 1px,transparent 1px)",backgroundSize:"34px 34px",maskImage:"radial-gradient(ellipse at center,black,transparent 75%)"}} />
-      <div className="relative flex h-[218px] w-full items-center justify-center" style={{perspective:"900px"}}>
-        <div className="absolute h-[178px] w-[178px] rounded-full border border-[#D7F36A]/20 shadow-[0_0_55px_rgba(215,243,106,.12)]" style={{transform:"rotateX(68deg) rotateZ(-22deg)"}} />
-        <div className="absolute h-[210px] w-[210px] rounded-full border border-white/10" style={{transform:"rotateX(68deg) rotateZ(28deg)"}} />
-        <div className="absolute h-3 w-3 rounded-full bg-[#D7F36A] shadow-[0_0_24px_8px_rgba(215,243,106,.4)]" style={{transform:"translate(92px,-63px)"}} />
-        <div className="relative flex h-[142px] w-[142px] items-center justify-center rounded-[34px] border border-white/25 bg-gradient-to-br from-[#f1ffad] via-[#D7F36A] to-[#8eae35] shadow-[inset_0_3px_2px_rgba(255,255,255,.8),inset_0_-12px_18px_rgba(71,91,20,.25),0_24px_0_#647d2c,0_34px_45px_rgba(0,0,0,.5),0_0_70px_rgba(215,243,106,.22)]" style={{transform:"rotateX(13deg) rotateY(-17deg) rotateZ(-8deg)",transformStyle:"preserve-3d"}}>
-          <div className="absolute inset-[9px] rounded-[27px] border border-white/35" />
-          <span className="relative -mt-2 text-[76px] font-black leading-none tracking-[-.12em] text-[#14231d] drop-shadow-[0_3px_0_rgba(255,255,255,.28)]" style={{transform:"translateZ(24px)"}}>M</span>
-          <span className="absolute bottom-3 right-4 h-2.5 w-2.5 rounded-full bg-white/90 shadow-[0_0_14px_rgba(255,255,255,.9)]" />
-        </div>
-        <div className="absolute right-[calc(50%-112px)] top-[20px] h-[48px] w-[48px] rounded-[13px] border border-white/20 bg-gradient-to-br from-[#53647b] to-[#1a2b40] shadow-[0_9px_0_#101c2b,0_18px_25px_rgba(0,0,0,.38)]" style={{transform:"rotateX(18deg) rotateY(-24deg) rotateZ(18deg)"}} />
-        <div className="absolute bottom-[17px] left-[calc(50%-122px)] h-[35px] w-[35px] rounded-[10px] border border-white/25 bg-gradient-to-br from-[#e5f89b] to-[#91b43e] shadow-[0_7px_0_#627c2d,0_14px_20px_rgba(0,0,0,.35)]" style={{transform:"rotateX(18deg) rotateY(24deg) rotateZ(-18deg)"}} />
-      </div>
-      <div className="relative mt-2">
-        <p className="text-[9px] font-extrabold uppercase tracking-[.28em] text-[#D7F36A]">Move with intention</p>
-        <h3 className="mt-3 text-2xl font-extrabold tracking-tight text-white sm:text-[28px]">Every step has a purpose.</h3>
-        <p className="mx-auto mt-2 max-w-[310px] text-xs leading-6 text-white/55">Build your direction. Strengthen your craft. Make your next move count.</p>
-      </div>
-    </section>
+    <div className="flex min-h-[300px] w-full items-center justify-center" aria-label="Three-dimensional forward path icon">
+      <svg viewBox="0 0 320 260" role="img" aria-label="A rising path ending in a forward arrow, representing the next meaningful move" className="h-auto w-full max-w-[340px] overflow-visible">
+        <defs>
+          <linearGradient id="mileStepTop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#F2FFB4"/><stop offset=".52" stopColor="#D7F36A"/><stop offset="1" stopColor="#9DBD42"/></linearGradient>
+          <linearGradient id="mileStepSide" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#91B33C"/><stop offset="1" stopColor="#405D25"/></linearGradient>
+          <linearGradient id="mileArrow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#F4FFBD"/><stop offset=".45" stopColor="#D7F36A"/><stop offset="1" stopColor="#A4C64B"/></linearGradient>
+          <filter id="mileIconShadow" x="-35%" y="-35%" width="180%" height="190%"><feGaussianBlur in="SourceAlpha" stdDeviation="8"/><feOffset dy="12"/><feComponentTransfer><feFuncA type="linear" slope=".28"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <g filter="url(#mileIconShadow)" strokeLinejoin="round">
+          <path d="M35 174 L91 143 L143 173 L87 205 Z" fill="url(#mileStepTop)" />
+          <path d="M35 174 L87 205 L87 226 L35 195 Z" fill="#627F2D"/>
+          <path d="M87 205 L143 173 L143 194 L87 226 Z" fill="url(#mileStepSide)"/>
+          <path d="M91 128 L147 97 L199 127 L143 159 Z" fill="url(#mileStepTop)"/>
+          <path d="M91 128 L143 159 L143 180 L91 149 Z" fill="#627F2D"/>
+          <path d="M143 159 L199 127 L199 148 L143 180 Z" fill="url(#mileStepSide)"/>
+          <path d="M147 82 L203 51 L255 81 L199 113 Z" fill="url(#mileStepTop)"/>
+          <path d="M147 82 L199 113 L199 134 L147 103 Z" fill="#627F2D"/>
+          <path d="M199 113 L255 81 L255 102 L199 134 Z" fill="url(#mileStepSide)"/>
+          <path d="M128 152 L179 123 L179 102 L213 83 L213 104 L254 80 L254 128 L213 152 L213 174 L179 193 L179 172 L128 201 Z" fill="url(#mileArrow)" stroke="#F3FFBF" strokeWidth="2.5"/>
+          <path d="M179 102 L213 83 L213 104 L254 80 L213 128 L213 107 L179 126 Z" fill="#F4FFB8" opacity=".75"/>
+          <path d="M179 126 L213 107 L213 128 L179 147 Z" fill="#91B33C" opacity=".55"/>
+        </g>
+      </svg>
+    </div>
   );
 }
 
