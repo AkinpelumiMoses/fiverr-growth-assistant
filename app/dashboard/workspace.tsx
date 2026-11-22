@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { createClient } from "@/lib/supabase/client";
 import CommunityDirectory from "@/app/community/community-directory";
 import CommunityFeed from "@/app/community/community-feed";
@@ -43,207 +44,285 @@ function MileThreeScene() {
     if (!host) return;
     let frame = 0;
     let disposed = false;
+    let mixer: THREE.AnimationMixer | null = null;
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#123D2B");
-    scene.fog = new THREE.Fog("#123D2B", 10, 22);
-    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-    camera.position.set(6.8, 5.2, 8.8);
-    camera.lookAt(0, 1.65, 0);
+
+    const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+    camera.position.set(6.1, 3.7, 9.2);
+    camera.lookAt(0, 1.9, 0);
+
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.08;
     host.appendChild(renderer.domElement);
 
-    const hemi = new THREE.HemisphereLight("#EAF0FF", "#283A34", 2.1);
+    const hemi = new THREE.HemisphereLight("#F2F4FF", "#203B31", 2.2);
     scene.add(hemi);
-    const key = new THREE.DirectionalLight("#FFF0DA", 4.2);
-    key.position.set(-4, 8, 6); key.castShadow = true;
+    const key = new THREE.DirectionalLight("#FFF0DE", 4.8);
+    key.position.set(-4, 8, 6);
+    key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
-    key.shadow.camera.left = -7; key.shadow.camera.right = 7;
-    key.shadow.camera.top = 7; key.shadow.camera.bottom = -7;
-    key.shadow.bias = -0.00015;
     scene.add(key);
-    const rim = new THREE.PointLight("#D7F36A", 28, 12);
-    rim.position.set(3.5, 4.5, -3); scene.add(rim);
-    const fill = new THREE.PointLight("#8798FF", 15, 10);
-    fill.position.set(-4, 2.5, 2); scene.add(fill);
+    const rim = new THREE.PointLight("#D7F36A", 18, 10);
+    rim.position.set(3.2, 4.4, -2.8);
+    scene.add(rim);
+    const fill = new THREE.PointLight("#8294FF", 10, 10);
+    fill.position.set(-4, 3, 2);
+    scene.add(fill);
 
-    const mat = (color: string, roughness = .62, metalness = 0) =>
+    const material = (color: string, roughness = .55, metalness = 0) =>
       new THREE.MeshStandardMaterial({ color, roughness, metalness });
-    const navy = mat("#202B63", .48);
-    const deepNavy = mat("#101A43", .42);
-    const lime = mat("#D7F36A", .38);
-    const skin = mat("#B97859", .68);
-    const skinLight = mat("#D99A78", .62);
-    const shirt = mat("#F0F1E9", .7);
-    const deskMat = mat("#DCE2D8", .34, .12);
-    const darkMetal = mat("#263047", .3, .72);
-    const floorMat = mat("#183B31", .9);
-    const sphere = (parent: THREE.Object3D, position: [number,number,number], scale: [number,number,number], material: THREE.Material) => {
-      const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 32), material);
-      mesh.position.set(...position); mesh.scale.set(...scale); mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh); return mesh;
-    };
-    const box = (parent: THREE.Object3D, position: [number,number,number], size: [number,number,number], material: THREE.Material, radius = 0) => {
-      const geometry = radius ? new THREE.BoxGeometry(...size, 4, 4, 4) : new THREE.BoxGeometry(...size);
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.position.set(...position); mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh); return mesh;
-    };
-    const cylinder = (parent: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3, radius: number, material: THREE.Material, radial = 24) => {
-      const direction = new THREE.Vector3().subVectors(b, a);
-      const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius * .92, radius, direction.length(), radial), material);
-      mesh.position.copy(a).add(b).multiplyScalar(.5);
-      mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), direction.normalize());
-      mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh); return mesh;
-    };
-    const capsule = (parent: THREE.Object3D, position: [number,number,number], radius: number, length: number, material: THREE.Material, rotation?: [number,number,number]) => {
-      const mesh = new THREE.Mesh(new THREE.CapsuleGeometry(radius, length, 8, 24), material);
-      mesh.position.set(...position); if (rotation) mesh.rotation.set(...rotation);
-      mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh); return mesh;
-    };
 
-    // A softly lit studio floor and a quiet halo behind the character.
-    const floor = new THREE.Mesh(new THREE.CircleGeometry(8, 80), floorMat);
-    floor.rotation.x = -Math.PI / 2; floor.position.y = -.04; floor.receiveShadow = true; scene.add(floor);
-    const halo = new THREE.Mesh(new THREE.TorusGeometry(2.35, .018, 12, 120), new THREE.MeshBasicMaterial({ color: "#D7F36A", transparent: true, opacity: .42 }));
-    halo.position.set(0, 2.4, -1.7); halo.rotation.x = .2; scene.add(halo);
-    const platform = new THREE.Mesh(new THREE.CylinderGeometry(2.9, 3.15, .16, 80), mat("#24483B", .72));
-    platform.position.set(0, .04, 0); platform.receiveShadow = true; platform.castShadow = true; scene.add(platform);
+    const floor = new THREE.Mesh(
+      new THREE.CircleGeometry(8, 96),
+      material("#183B31", .94)
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -.04;
+    floor.receiveShadow = true;
+    scene.add(floor);
 
-    // Desk with substantial thickness, metal legs and a restrained edge highlight.
-    box(scene, [0, 1.78, -.15], [4.7, .16, 1.65], deskMat);
-    box(scene, [0, 1.68, -.15], [4.55, .055, 1.52], mat("#AEBDB1", .45));
-    for (const x of [-1.92, 1.92]) {
-      const leg = box(scene, [x, .88, -.15], [.12, 1.55, .12], darkMetal);
-      leg.rotation.z = x < 0 ? -.035 : .035;
-      box(scene, [x, .12, -.15], [.48, .08, .55], darkMetal);
+    const platform = new THREE.Mesh(
+      new THREE.CylinderGeometry(2.95, 3.18, .18, 96),
+      material("#23483B", .72)
+    );
+    platform.position.y = .06;
+    platform.receiveShadow = true;
+    platform.castShadow = true;
+    scene.add(platform);
+
+    // Art-directed desk: enough physical depth to make the character feel embedded in a real scene.
+    const deskTop = new THREE.Mesh(
+      new THREE.BoxGeometry(4.8, .18, 1.7),
+      material("#DDE3DA", .34, .08)
+    );
+    deskTop.position.set(.1, 1.62, .08);
+    deskTop.castShadow = true;
+    deskTop.receiveShadow = true;
+    scene.add(deskTop);
+
+    const deskFront = new THREE.Mesh(
+      new THREE.BoxGeometry(4.58, .68, .12),
+      material("#223A61", .42, .25)
+    );
+    deskFront.position.set(.1, 1.25, -.69);
+    deskFront.castShadow = true;
+    scene.add(deskFront);
+
+    for (const x of [-1.95, 2.05]) {
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(.13, 1.3, .13), material("#263047", .25, .7));
+      leg.position.set(x, .68, .08);
+      leg.castShadow = true;
+      scene.add(leg);
     }
 
-    // Chair and seated figure, modelled as intersecting smooth 3D forms.
-    const chair = new THREE.Group(); chair.position.set(-.35, 0, 1.02); scene.add(chair);
-    const chairBack = new THREE.Mesh(new THREE.BoxGeometry(1.05, 1.45, .2), navy);
-    chairBack.position.set(0, 1.65, -.08); chairBack.rotation.x = -.08; chairBack.castShadow = true; chair.add(chairBack);
-    sphere(chair, [0, 1.05, .12], [.62, .17, .58], deepNavy);
-    cylinder(chair, new THREE.Vector3(0,.1,.1), new THREE.Vector3(0,.98,.1), .075, darkMetal);
-    for (let i=0;i<5;i++) { const a=i*Math.PI*2/5; cylinder(chair,new THREE.Vector3(0,.12,.1),new THREE.Vector3(Math.cos(a)*.52,.07,.1+Math.sin(a)*.52),.035,darkMetal); }
+    // Laptop with a physical screen and MILE accent.
+    const laptopBase = new THREE.Mesh(
+      new THREE.BoxGeometry(1.5, .08, .92),
+      material("#27314A", .3, .65)
+    );
+    laptopBase.position.set(.15, 1.75, .04);
+    laptopBase.castShadow = true;
+    scene.add(laptopBase);
 
-    const person = new THREE.Group(); person.position.set(-.2, 0, .62); scene.add(person);
-    // hips and legs: seated pose, with knees forward and feet tucked under the desk.
-    capsule(person, [0, 1.38, .12], .43, .44, navy, [Math.PI/2, 0, 0]);
-    capsule(person, [-.31, .88, .42], .22, .72, navy, [1.18, 0, -.2]);
-    capsule(person, [.31, .88, .42], .22, .72, navy, [1.18, 0, .2]);
-    capsule(person, [-.28, .43, -.05], .17, .58, deepNavy, [.18, 0, -.05]);
-    capsule(person, [.28, .43, -.05], .17, .58, deepNavy, [.18, 0, .05]);
-    sphere(person, [-.28, .15, .12], [.3,.13,.2], lime);
-    sphere(person, [.28, .15, .12], [.3,.13,.2], lime);
+    const laptopScreen = new THREE.Mesh(
+      new THREE.BoxGeometry(1.48, 1.05, .07),
+      material("#10183B", .3, .25)
+    );
+    laptopScreen.position.set(.15, 2.28, -.36);
+    laptopScreen.rotation.x = -.08;
+    laptopScreen.castShadow = true;
+    scene.add(laptopScreen);
 
-    // Torso, collar and neck.
-    capsule(person, [0, 2.12, .02], .48, .78, navy, [-.12, 0, 0]);
-    capsule(person, [0, 2.62, .02], .16, .18, skinLight);
-    const collar = new THREE.Mesh(new THREE.ConeGeometry(.2,.28,4), shirt);
-    collar.position.set(0,2.48,.39); collar.rotation.y=Math.PI/4; collar.castShadow=true; person.add(collar);
+    const screenGlow = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.29, .84),
+      new THREE.MeshBasicMaterial({ color: "#263B8C" })
+    );
+    screenGlow.position.set(.15, 2.28, -.398);
+    screenGlow.rotation.x = -.08;
+    scene.add(screenGlow);
 
-    // Head with ears, facial planes, nose and a calm focused expression.
-    sphere(person, [0, 3.05, .02], [.39,.49,.36], skinLight);
-    sphere(person, [-.39,3.06,.02], [.075,.12,.09], skin);
-    sphere(person, [.39,3.06,.02], [.075,.12,.09], skin);
-    sphere(person, [0,3.36,.015], [.39,.22,.36], skinLight);
-    sphere(person, [-.145,3.08,.337], [.045,.055,.025], deepNavy);
-    sphere(person, [.145,3.08,.337], [.045,.055,.025], deepNavy);
-    sphere(person, [0,2.99,.375], [.055,.085,.055], skin);
-    const smile = new THREE.Mesh(new THREE.TorusGeometry(.075,.012,8,24,Math.PI), mat("#854C43"));
-    smile.position.set(0,2.89,.353); smile.rotation.z=Math.PI; person.add(smile);
-    // Subtle brows and a smooth bald crown, with soft key-light highlights.
-    for (const x of [-.145,.145]) {
-      const brow = new THREE.Mesh(new THREE.CapsuleGeometry(.012,.09,4,10), mat("#754D42"));
-      brow.position.set(x,3.17,.34); brow.rotation.z=x<0?-.12:.12; person.add(brow);
+    const logo = new THREE.Mesh(
+      new THREE.CircleGeometry(.14, 32),
+      new THREE.MeshBasicMaterial({ color: "#D7F36A" })
+    );
+    logo.position.set(.15, 2.29, -.405);
+    logo.rotation.x = Math.PI / 2;
+    scene.add(logo);
+
+    // Coffee, notebook and plant add believable scale and a lived-in workspace.
+    const cup = new THREE.Mesh(new THREE.CylinderGeometry(.15, .13, .25, 40), material("#D7F36A", .4));
+    cup.position.set(1.65, 1.84, .28);
+    cup.castShadow = true;
+    scene.add(cup);
+
+    const coffee = new THREE.Mesh(new THREE.CircleGeometry(.112, 32), material("#4B3428", .9));
+    coffee.rotation.x = -Math.PI / 2;
+    coffee.position.set(1.65, 1.97, .28);
+    scene.add(coffee);
+
+    const notebook = new THREE.Mesh(new THREE.BoxGeometry(.72, .07, .48), material("#F2F0E4", .72));
+    notebook.position.set(-1.55, 1.75, .25);
+    notebook.rotation.y = -.08;
+    notebook.castShadow = true;
+    scene.add(notebook);
+
+    const plantPot = new THREE.Mesh(new THREE.CylinderGeometry(.18, .14, .3, 32), material("#E8EADF", .72));
+    plantPot.position.set(-1.95, 1.83, -.43);
+    plantPot.castShadow = true;
+    scene.add(plantPot);
+
+    for (let i = 0; i < 6; i++) {
+      const leaf = new THREE.Mesh(new THREE.SphereGeometry(.11, 24, 18), material("#88A987", .7));
+      leaf.scale.set(.5, 1.65, .38);
+      leaf.position.set(-1.95 + Math.cos(i * 1.05) * .16, 2.12 + Math.sin(i * 1.05) * .08, -.43 + Math.sin(i * 1.05) * .12);
+      leaf.rotation.z = (i - 2.5) * .26;
+      leaf.castShadow = true;
+      scene.add(leaf);
     }
 
-    // Arms reach forward naturally towards the keyboard.
-    const shoulderL = new THREE.Vector3(-.39,2.36,.02), elbowL = new THREE.Vector3(-.68,1.96,.48), handL = new THREE.Vector3(-.42,1.82,.76);
-    const shoulderR = new THREE.Vector3(.39,2.36,.02), elbowR = new THREE.Vector3(.67,1.98,.48), handR = new THREE.Vector3(.42,1.82,.76);
-    for (const [a,b,c] of [[shoulderL,elbowL,handL],[shoulderR,elbowR,handR]] as [THREE.Vector3,THREE.Vector3,THREE.Vector3][]) {
-      sphere(person, a.toArray() as [number,number,number], [.22,.23,.22], navy);
-      cylinder(person,a,b,.145,navy);
-      sphere(person,b.toArray() as [number,number,number],[.15,.15,.15],navy);
-      cylinder(person,b,c,.105,skinLight);
-      sphere(person,c.toArray() as [number,number,number],[.14,.09,.16],skinLight);
-    }
-
-    // Laptop with a real raised screen, metallic body and a luminous MILE mark.
-    const laptop = new THREE.Group(); laptop.position.set(.05,1.88,.1); scene.add(laptop);
-    const base = box(laptop,[0,.05,.2],[1.45,.075,.88],darkMetal);
-    box(laptop,[0,.092,.2],[1.34,.012,.77],mat("#AEB9B0",.32,.35));
-    const screen = box(laptop,[0,.62,-.2],[1.43,1.08,.075],deepNavy);
-    screen.rotation.x=-.12;
-    box(laptop,[0,.62,-.153],[1.29,.93,.012],mat("#293B78",.3));
-    sphere(laptop,[0,.64,-.14],[.16,.16,.012],lime);
-    box(laptop,[0,.34,.23],[.25,.012,.12],mat("#D7F36A",.3));
-
-    // A ceramic coffee cup, a closed notebook and a tiny desk plant.
-    const cup = new THREE.Mesh(new THREE.CylinderGeometry(.15,.13,.25,40), lime);
-    cup.position.set(1.72,1.98,.15); cup.castShadow=true; scene.add(cup);
-    const coffee = new THREE.Mesh(new THREE.CircleGeometry(.115,32), mat("#4B3428"));
-    coffee.rotation.x=-Math.PI/2; coffee.position.set(1.72,2.11,.15); scene.add(coffee);
-    const handle = new THREE.Mesh(new THREE.TorusGeometry(.09,.025,12,32), lime);
-    handle.position.set(1.86,2.02,.15); handle.rotation.y=Math.PI/2; scene.add(handle);
-    box(scene,[-1.72,1.91,.25],[.66,.08,.48],mat("#D7F36A",.55));
-    box(scene,[-1.72,1.96,.25],[.62,.025,.44],mat("#F3F0DF",.7));
-    const pot = new THREE.Mesh(new THREE.CylinderGeometry(.18,.14,.32,32), mat("#E7E9DD"));
-    pot.position.set(-2.0,1.98,-.48); pot.castShadow=true; scene.add(pot);
-    for (let i=0;i<5;i++) {
-      const leaf = new THREE.Mesh(new THREE.SphereGeometry(.12,20,16), mat("#8FB18A"));
-      leaf.scale.set(.55,1.8,.38); leaf.position.set(-2+Math.cos(i*1.25)*.16,2.3+Math.sin(i*1.25)*.08,-.48+Math.sin(i*1.25)*.12);
-      leaf.rotation.z=(i-2)*.28; leaf.castShadow=true; scene.add(leaf);
-    }
-
-    // Floating opportunity and momentum tiles are actual 3D objects, not flat overlays.
-    const tile = (x:number,y:number,z:number,w:number,h:number,accent:boolean) => {
-      const group = new THREE.Group(); group.position.set(x,y,z); group.rotation.y=x>0?-.2:.2; group.rotation.z=x>0?.06:-.07; scene.add(group);
-      const panel = new THREE.Mesh(new THREE.BoxGeometry(w,h,.09), mat("#F6F7F0",.38));
-      panel.castShadow=true; panel.receiveShadow=true; group.add(panel);
-      const dot = new THREE.Mesh(new THREE.SphereGeometry(.075,20,16), accent?lime:mat("#A5B1E8"));
-      dot.position.set(-w*.34,h*.28,.07); group.add(dot);
-      for(let i=0;i<3;i++) {
-        const line = new THREE.Mesh(new THREE.BoxGeometry(w*(.46-i*.08),.035,.018), mat(i===2?"#B7C2B7":"#C7CEC8"));
-        line.position.set(.02,h*.25-i*.16,.065); group.add(line);
+    // Floating interface tiles are physical 3D cards, not SVG drawings.
+    const addCard = (position: [number, number, number], rotationZ: number, accent = true) => {
+      const group = new THREE.Group();
+      group.position.set(...position);
+      group.rotation.z = rotationZ;
+      scene.add(group);
+      const shadow = new THREE.Mesh(
+        new THREE.BoxGeometry(1.18, .82, .08),
+        material("#08112D", .75)
+      );
+      shadow.position.set(.045, -.055, -.08);
+      group.add(shadow);
+      const panel = new THREE.Mesh(
+        new THREE.BoxGeometry(1.18, .82, .08),
+        material("#F6F7F1", .34)
+      );
+      panel.castShadow = true;
+      group.add(panel);
+      const dot = new THREE.Mesh(
+        new THREE.SphereGeometry(.07, 20, 16),
+        accent ? material("#D7F36A", .4) : material("#9CA8E8", .5)
+      );
+      dot.position.set(-.42, .27, .08);
+      group.add(dot);
+      for (let i = 0; i < 3; i++) {
+        const line = new THREE.Mesh(
+          new THREE.BoxGeometry(.62 - i * .1, .035, .018),
+          material(i === 2 ? "#B5C1B9" : "#CDD3CE", .7)
+        );
+        line.position.set(.05, .26 - i * .15, .065);
+        group.add(line);
       }
       return group;
     };
-    const leftTile = tile(-2.05,3.15,-.35,.95,.82,true);
-    const rightTile = tile(2.05,3.42,-.45,1.05,.9,false);
-    const badge = new THREE.Mesh(new THREE.TorusGeometry(.27,.07,14,48), lime);
-    badge.position.set(2.1,2.35,-.5); badge.rotation.x=.25; scene.add(badge);
+
+    const leftCard = addCard([-2.02, 3.12, -.4], -.09, true);
+    const rightCard = addCard([2.02, 3.42, -.5], .08, false);
+
+    // Realistic Rocketbox character from the open Avatar Studio project.
+    // The model carries skin, hair, clothing, facial detail and motion-captured clips.
+    const loader = new GLTFLoader();
+    const modelUrl = "https://memoriesrohit.github.io/avatar-studio/models/ryan_smart.glb";
+    loader.load(
+      modelUrl,
+      (gltf) => {
+        if (disposed) return;
+        const character = gltf.scene;
+        character.traverse((object) => {
+          if (object instanceof THREE.Mesh) {
+            object.castShadow = true;
+            object.receiveShadow = true;
+            if (Array.isArray(object.material)) {
+              object.material.forEach((m) => { m.needsUpdate = true; });
+            } else if (object.material) {
+              object.material.needsUpdate = true;
+            }
+          }
+        });
+
+        const bounds = new THREE.Box3().setFromObject(character);
+        const size = bounds.getSize(new THREE.Vector3());
+        const scale = 3.35 / Math.max(size.y, .001);
+        character.scale.setScalar(scale);
+
+        const scaledBounds = new THREE.Box3().setFromObject(character);
+        const center = scaledBounds.getCenter(new THREE.Vector3());
+        const minY = scaledBounds.min.y;
+
+        character.position.set(-.55, .08 - minY, .05);
+        character.position.x -= center.x * .06;
+
+        scene.add(character);
+
+        if (gltf.animations.length) {
+          mixer = new THREE.AnimationMixer(character);
+          const preferred = gltf.animations.find((clip) => /think/i.test(clip.name))
+            || gltf.animations.find((clip) => /idle/i.test(clip.name))
+            || gltf.animations[0];
+          mixer.clipAction(preferred).play();
+        }
+      },
+      undefined,
+      () => {
+        // Keep the scene usable if the external model is temporarily unavailable.
+      }
+    );
 
     const resize = () => {
-      if (!host || disposed) return;
-      const width = Math.max(1, host.clientWidth), height = Math.max(1, host.clientHeight);
-      renderer.setSize(width,height,false); camera.aspect=width/height; camera.updateProjectionMatrix();
+      if (disposed || !host) return;
+      const width = Math.max(1, host.clientWidth);
+      const height = Math.max(1, host.clientHeight);
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
     };
-    const observer = new ResizeObserver(resize); observer.observe(host); resize();
+
+    const observer = new ResizeObserver(resize);
+    observer.observe(host);
+    resize();
+
     const clock = new THREE.Clock();
     const animate = () => {
       if (disposed) return;
-      const t=clock.getElapsedTime();
-      person.position.y=Math.sin(t*.8)*.012;
-      leftTile.position.y=3.15+Math.sin(t*.7)*.045;
-      rightTile.position.y=3.42+Math.sin(t*.7+1.2)*.05;
-      badge.rotation.z=t*.18;
-      renderer.render(scene,camera);
-      frame=requestAnimationFrame(animate);
+      const delta = clock.getDelta();
+      mixer?.update(delta);
+      const t = clock.elapsedTime;
+      leftCard.position.y = 3.12 + Math.sin(t * .7) * .045;
+      rightCard.position.y = 3.42 + Math.sin(t * .7 + 1.2) * .05;
+      renderer.render(scene, camera);
+      frame = requestAnimationFrame(animate);
     };
     animate();
+
     return () => {
-      disposed=true; cancelAnimationFrame(frame); observer.disconnect();
-      scene.traverse((object) => { if (object instanceof THREE.Mesh) { object.geometry.dispose(); const materials=Array.isArray(object.material)?object.material:[object.material]; materials.forEach(m=>m.dispose()); } });
-      renderer.dispose(); renderer.domElement.remove();
+      disposed = true;
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      scene.traverse((object) => {
+        if (object instanceof THREE.Mesh) {
+          object.geometry.dispose();
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
+          materials.forEach((m) => m.dispose());
+        }
+      });
+      renderer.dispose();
+      renderer.domElement.remove();
     };
   }, []);
 
-  return <div ref={hostRef} className="relative z-10 h-[330px] w-full max-w-[460px] overflow-hidden sm:h-[370px]" aria-label="A dimensional 3D scene of a freelancer working at a desk" role="img" />;
+  return (
+    <div
+      ref={hostRef}
+      className="relative z-10 h-[330px] w-full max-w-[460px] overflow-hidden sm:h-[370px]"
+      role="img"
+      aria-label="A realistic 3D freelancer working in a dimensional MILE workspace"
+    />
+  );
 }
 
 export default function DashboardWorkspace() {
