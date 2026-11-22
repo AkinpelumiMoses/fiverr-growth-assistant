@@ -37,7 +37,7 @@ clips = []
 for index, (url, _) in enumerate(SCENES, 1):
     target = WORK / f"scene{index}.mp4"
     run([
-        "yt-dlp", "--no-warnings", "--no-progress", "--no-playlist",
+        "yt-dlp", "--no-warnings", "--no-progress", "--no-playlist", "--extractor-args", "generic:impersonate",
         "--force-overwrites", "-f",
         "bv*[ext=mp4][height<=1080]/b[ext=mp4]/best",
         "--merge-output-format", "mp4", "-o", str(target), url
