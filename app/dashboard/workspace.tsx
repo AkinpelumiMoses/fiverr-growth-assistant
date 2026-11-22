@@ -107,7 +107,7 @@ function MileThreeScene() {
         <button type="button" onClick={() => setStage((value) => (value + 1) % stages.length)} className="rounded-lg px-2 py-2 text-[10px] font-bold text-[#D7F36A] transition hover:bg-white/5">Next chapter →</button>
       </footer>
       <p className="relative z-10 mt-3 text-center text-[10px] font-semibold tracking-wide text-white/75">MILE. <span className="text-[#D7F36A]">Every step has a purpose.</span></p>
-      <style jsx global>{String.raw\`@keyframes mileHeroEnter{from{opacity:0;transform:translateX(-50%) translateY(12px) scale(.96)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}@keyframes mileHeroBreathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}@keyframes mileCardIn{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}@media(prefers-reduced-motion:reduce){.animate-ping,.animate-pulse{animation:none!important}}\`}</style>
+      <style jsx global>{"@keyframes mileHeroEnter{from{opacity:0;transform:translateX(-50%) translateY(12px) scale(.96)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}@keyframes mileHeroBreathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}@keyframes mileCardIn{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}@media(prefers-reduced-motion:reduce){.animate-ping,.animate-pulse{animation:none!important}}"}</style>
     </section>
   );
 }
