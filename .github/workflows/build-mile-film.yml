@@ -30,7 +30,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg
           python -m pip install --upgrade pip
-          pip install yt-dlp edge-tts
+          pip install 'yt-dlp[default]' edge-tts
       - name: Build film
         run: python scripts/build_mile_film.py
       - name: Commit generated film and captions
