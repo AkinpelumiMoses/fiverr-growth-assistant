@@ -35,10 +35,79 @@ const starterTasks = [
 
 
 function MileThreeScene() {
+  const [soundOn, setSoundOn] = useState(false);
+  const [stage, setStage] = useState(0);
+  const audioRef = useRef<AudioContext | null>(null);
+  const stages = [
+    { title: "A new opportunity arrives", detail: "The next step starts with a connection.", tag: "NEW OPPORTUNITY" },
+    { title: "The right people connect", detail: "Skills meet ideas. A working relationship begins.", tag: "CONNECTION MADE" },
+    { title: "Good work happens together", detail: "Ideas become focused, shared progress.", tag: "IN COLLABORATION" },
+    { title: "Progress becomes momentum", detail: "Every completed step moves you forward.", tag: "MILESTONE REACHED" },
+  ];
+
+  const playCue = (step: number) => {
+    try {
+      const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioContextClass) return;
+      const context = audioRef.current ?? new AudioContextClass();
+      audioRef.current = context;
+      if (context.state === "suspended") void context.resume();
+      const now = context.currentTime;
+      const notes = step === 0 ? [660] : step === 1 ? [523, 784] : step === 2 ? [587, 740] : [523, 659, 784];
+      notes.forEach((frequency, index) => {
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(frequency, now + index * 0.11);
+        gain.gain.setValueAtTime(0.0001, now + index * 0.11);
+        gain.gain.exponentialRampToValueAtTime(0.045, now + index * 0.11 + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.11 + 0.42);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start(now + index * 0.11);
+        oscillator.stop(now + index * 0.11 + 0.45);
+      });
+    } catch {
+      // Sound is an enhancement; the visual story remains fully usable without it.
+    }
+  };
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setStage((current) => {
+        const next = (current + 1) % stages.length;
+        if (soundOn) playCue(next);
+        return next;
+      });
+    }, 4200);
+    return () => window.clearInterval(timer);
+  }, [soundOn]);
+
+  useEffect(() => () => {
+    if (audioRef.current && audioRef.current.state !== "closed") void audioRef.current.close();
+  }, []);
+
   return (
-    <div className="relative isolate w-full max-w-[540px] overflow-visible" role="img" aria-label="Three freelancers collaborating around a desk, sharing ideas and building their next opportunity together">
-      <div className="pointer-events-none absolute inset-x-[12%] bottom-[8%] h-[18%] rounded-full bg-[#D7F36A]/20 blur-2xl" />
-      <svg viewBox="0 0 620 470" className="relative z-10 block h-auto w-full drop-shadow-[0_24px_28px_rgba(4,14,10,0.24)]" xmlns="http://www.w3.org/2000/svg">
+    <div className="mile-story relative isolate w-full max-w-[540px] overflow-hidden rounded-[26px] border border-white/15 bg-[#102D24]/55 px-3 pb-4 pt-3 shadow-[0_24px_60px_rgba(0,0,0,.22)] sm:px-5" aria-label="MILE animated story: opportunity, connection, collaboration and progress">
+      <div className="mile-story-glow pointer-events-none absolute inset-0" />
+      <div className="relative z-20 flex items-center justify-between gap-3 px-1">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-[#D7F36A] shadow-[0_0_12px_#D7F36A]" />
+          <span className="text-[9px] font-extrabold uppercase tracking-[.2em] text-white/75">The MILE journey</span>
+        </div>
+        <button type="button" onClick={() => {
+          const next = !soundOn;
+          setSoundOn(next);
+          if (next) playCue(stage);
+        }} aria-pressed={soundOn} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-[10px] font-bold text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D7F36A]">
+          <span aria-hidden="true">{soundOn ? "♫" : "♪"}</span>{soundOn ? "Sound on" : "Sound off"}
+        </button>
+      </div>
+      <div className="relative z-10 mx-auto mt-1 w-full">
+        <div className="mile-story-art-wrap relative mx-auto w-full max-w-[490px]">
+          <div className="mile-story-orbit mile-story-orbit-one" />
+          <div className="mile-story-orbit mile-story-orbit-two" />
+                <svg viewBox="0 0 620 470" className="mile-story-art relative z-10 block h-auto w-full drop-shadow-[0_24px_28px_rgba(4,14,10,0.24)]" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="mileSceneBg" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#214C38"/><stop offset="1" stopColor="#102D24"/></linearGradient>
           <linearGradient id="mileDesk" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#D6B58A"/><stop offset="1" stopColor="#A8794E"/></linearGradient>
@@ -113,10 +182,40 @@ function MileThreeScene() {
         <circle cx="314" cy="68" r="7" fill="#D7F36A"/><circle cx="333" cy="51" r="3" fill="#FFFFFF" opacity=".8"/>
         <path d="M302 62l-11-11m48 32 11 10" stroke="#D7F36A" strokeWidth="3" strokeLinecap="round" opacity=".8"/>
       </svg>
-      <div className="relative z-10 mx-auto -mt-1 flex w-fit items-center gap-2 rounded-full border border-white/20 bg-[#0B241B]/85 px-4 py-2 shadow-lg backdrop-blur">
-        <span className="h-2 w-2 rounded-full bg-[#D7F36A] shadow-[0_0_12px_#D7F36A]"/>
-        <span className="text-[10px] font-extrabold uppercase tracking-[.2em] text-white">People. Progress. Opportunity.</span>
+          <div className="mile-story-float mile-story-float-left absolute left-[1%] top-[17%] rounded-xl border border-[#D7F36A]/25 bg-[#F8FAF3] px-3 py-2 text-[#193B2B] shadow-xl">
+            <span className="block text-[8px] font-extrabold tracking-[.13em] text-[#64806D]">PROJECT INVITE</span>
+            <span className="mt-1 flex items-center gap-1.5 text-[10px] font-bold"><span className="h-1.5 w-1.5 rounded-full bg-[#1DBF73]"/> A new brief is here</span>
+          </div>
+          <div className="mile-story-float mile-story-float-right absolute right-[0%] top-[23%] rounded-xl border border-white/20 bg-[#D7F36A] px-3 py-2 text-[#183522] shadow-xl">
+            <span className="block text-[8px] font-extrabold tracking-[.13em]">TEAM UPDATE</span>
+            <span className="mt-1 flex items-center gap-1.5 text-[10px] font-extrabold"><span aria-hidden="true">✓</span> Shared progress</span>
+          </div>
+          <div className="mile-story-success absolute bottom-[10%] right-[5%] flex h-10 w-10 items-center justify-center rounded-full border-4 border-[#102D24] bg-[#D7F36A] text-lg font-black text-[#183522] shadow-lg">✓</div>
+        </div>
       </div>
+      <div className="relative z-20 mx-auto mt-0 max-w-[390px] text-center">
+        <div className="mb-2 flex items-center justify-center gap-1.5" aria-label={`Story step ${stage + 1} of 4`}>
+          {stages.map((item, index) => <span key={item.tag} className={`h-1 rounded-full transition-all duration-500 ${index === stage ? "w-7 bg-[#D7F36A]" : "w-3 bg-white/30"}`} />)}
+        </div>
+        <p className="text-[8px] font-extrabold tracking-[.2em] text-[#D7F36A]">{stages[stage].tag}</p>
+        <h3 className="mt-1 text-base font-extrabold tracking-tight text-white sm:text-lg" aria-live="polite">{stages[stage].title}</h3>
+        <p className="mt-1 text-[10px] leading-5 text-white/65">{stages[stage].detail}</p>
+      </div>
+      <style jsx>{`
+        .mile-story-glow{background:radial-gradient(ellipse at 50% 42%,rgba(215,243,106,.12),transparent 57%)}
+        .mile-story-art{animation:mile-art-breathe 5.5s ease-in-out infinite;transform-origin:50% 60%}
+        .mile-story-float{z-index:15;animation:mile-float 4s ease-in-out infinite}
+        .mile-story-float-right{animation-delay:-2s}
+        .mile-story-orbit{position:absolute;left:50%;top:48%;border:1px solid rgba(215,243,106,.16);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
+        .mile-story-orbit-one{width:82%;height:70%;animation:mile-orbit 18s linear infinite}
+        .mile-story-orbit-two{width:66%;height:58%;border-style:dashed;animation:mile-orbit 26s linear infinite reverse}
+        .mile-story-success{animation:mile-success 4.2s ease-in-out infinite}
+        @keyframes mile-art-breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.012)}}
+        @keyframes mile-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+        @keyframes mile-orbit{to{transform:translate(-50%,-50%) rotate(360deg)}}
+        @keyframes mile-success{0%,65%,100%{transform:scale(.9);opacity:.65}78%{transform:scale(1.12);opacity:1}}
+        @media(prefers-reduced-motion:reduce){.mile-story-art,.mile-story-float,.mile-story-orbit,.mile-story-success{animation:none}}
+      `}</style>
     </div>
   );
 }
