@@ -38,7 +38,7 @@ run(["edge-tts","--voice","en-NG-AbeoNeural","--rate","-4%","--pitch","-2Hz","--
 normalized=[]
 for i,clip in enumerate(clips,1):
     out=WORK/f"normalized{i}.mp4"
-    run(["ffmpeg","-y","-i",str(clip),"-t","12","-vf",
+    run(["ffmpeg","-y","-stream_loop","-1","-i",str(clip),"-t","12","-vf",
          "scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,setsar=1,fps=25,eq=contrast=1.06:saturation=0.92:brightness=-0.035,fade=t=in:st=0:d=0.55,fade=t=out:st=11.45:d=0.55",
          "-an","-c:v","libx264","-preset","veryfast","-crf","23","-pix_fmt","yuv420p","-movflags","+faststart",str(out)])
     normalized.append(out)
