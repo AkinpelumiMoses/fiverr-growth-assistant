@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import * as THREE from "three";
 import { createClient } from "@/lib/supabase/client";
 import CommunityDirectory from "@/app/community/community-directory";
 import CommunityFeed from "@/app/community/community-feed";
@@ -36,355 +35,89 @@ const starterTasks = [
 
 
 function MileThreeScene() {
-  const hostRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const host = hostRef.current;
-    if (!host) return;
-    let raf = 0;
-    let disposed = false;
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-4.15, 4.15, 3.2, -3.2, 0.1, 60);
-    camera.position.set(7, 6.2, 10);
-    camera.lookAt(0, 0, 0);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setClearColor(0x000000, 0);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.2;
-    host.appendChild(renderer.domElement);
-
-    scene.add(new THREE.HemisphereLight("#FFFFFF", "#17234A", 2.1));
-    const key = new THREE.DirectionalLight("#FFFFFF", 3.8);
-    key.position.set(-4, 7, 8);
-    scene.add(key);
-    const rim = new THREE.DirectionalLight("#AAB2FF", 2.8);
-    rim.position.set(5, 2, -5);
-    scene.add(rim);
-    const lime = new THREE.PointLight("#D7F36A", 20, 9);
-    lime.position.set(0.8, 1.8, 3);
-    scene.add(lime);
-
-    const material = (color: string, metalness = 0.22, roughness = 0.28, emissive?: string) =>
-      new THREE.MeshStandardMaterial({
-        color, metalness, roughness,
-        ...(emissive ? { emissive, emissiveIntensity: 0.32 } : {}),
-      });
-
-    const navy = material("#20265F", 0.48, 0.24);
-    const indigo = material("#343B91", 0.5, 0.23);
-    const pale = material("#F4F6FF", 0.16, 0.32);
-    const limeMat = material("#D7F36A", 0.38, 0.22, "#A5C83C");
-    const blueMat = material("#8792FF", 0.36, 0.24, "#424CBA");
-    const mintMat = material("#8DE0BD", 0.3, 0.25, "#3D9B7C");
-
-    const roundedShape = (w: number, h: number, r: number) => {
-      const s = new THREE.Shape();
-      s.moveTo(-w / 2 + r, -h / 2);
-      s.lineTo(w / 2 - r, -h / 2);
-      s.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
-      s.lineTo(w / 2, h / 2 - r);
-      s.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
-      s.lineTo(-w / 2 + r, h / 2);
-      s.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
-      s.lineTo(-w / 2, -h / 2 + r);
-      s.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
-      return s;
-    };
-
-    const extruded = (w: number, h: number, d: number, mat: THREE.Material, radius = 0.08) => {
-      const geometry = new THREE.ExtrudeGeometry(roundedShape(w, h, radius), {
-        depth: d, bevelEnabled: true, bevelSegments: 3, steps: 1,
-        bevelSize: 0.035, bevelThickness: 0.035, curveSegments: 8,
-      });
-      geometry.center();
-      return new THREE.Mesh(geometry, mat);
-    };
-
-    const tube = (points: THREE.Vector3[], radius: number, mat: THREE.Material) => {
-      const curve = new THREE.CatmullRomCurve3(points);
-      const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, 48, radius, 10, false), mat);
-      scene.add(mesh);
-      return mesh;
-    };
-
-    const makeText = (top: string, bottom: string, accent: string) => {
-      const canvas = document.createElement("canvas");
-      canvas.width = 512;
-      canvas.height = 150;
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.clearRect(0, 0, 512, 150);
-        ctx.fillStyle = accent;
-        ctx.font = "800 34px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(top, 256, 58);
-        ctx.fillStyle = "rgba(255,255,255,.78)";
-        ctx.font = "500 21px Arial";
-        ctx.fillText(bottom, 256, 98);
-      }
-      const texture = new THREE.CanvasTexture(canvas);
-      texture.colorSpace = THREE.SRGBColorSpace;
-      const mesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(1.42, 0.42),
-        new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false })
-      );
-      mesh.position.z = 0.42;
-      return mesh;
-    };
-
-    // Work: a dimensional portfolio case with layered project sheets and a real handle.
-    const work = new THREE.Group();
-    work.position.set(-2.05, 1.62, 0);
-    work.rotation.set(-0.12, -0.2, -0.16);
-    scene.add(work);
-    const portfolio = extruded(0.92, 0.72, 0.22, indigo, 0.12);
-    portfolio.position.z = 0.05;
-    work.add(portfolio);
-    const folderFace = extruded(0.78, 0.56, 0.06, navy, 0.08);
-    folderFace.position.set(0, -0.02, 0.19);
-    work.add(folderFace);
-    const sheet1 = extruded(0.48, 0.58, 0.035, pale, 0.035);
-    sheet1.position.set(-0.06, 0.15, -0.13);
-    sheet1.rotation.z = 0.1;
-    work.add(sheet1);
-    const sheet2 = extruded(0.48, 0.58, 0.035, blueMat, 0.035);
-    sheet2.position.set(0.12, 0.1, -0.08);
-    sheet2.rotation.z = -0.12;
-    work.add(sheet2);
-    const handle = new THREE.Mesh(
-      new THREE.TorusGeometry(0.19, 0.045, 12, 36, Math.PI),
-      limeMat
-    );
-    handle.position.set(0, 0.38, 0.02);
-    work.add(handle);
-    const clasp = extruded(0.18, 0.1, 0.07, limeMat, 0.025);
-    clasp.position.set(0, -0.12, 0.32);
-    work.add(clasp);
-    work.add(makeText("YOUR WORK", "Skills  •  Projects", "#D7F36A"));
-
-    // Network: three dimensional member figures linked around a shared centre.
-    const community = new THREE.Group();
-    community.position.set(-2.05, 0, 0);
-    scene.add(community);
-    const people = [
-      { x: -0.35, y: 0.16, z: 0.12, m: blueMat, scale: 0.82 },
-      { x: 0.34, y: 0.18, z: 0.1, m: limeMat, scale: 0.9 },
-      { x: 0, y: -0.3, z: 0.2, m: mintMat, scale: 0.76 },
-    ];
-    people.forEach((person) => {
-      const avatar = new THREE.Group();
-      avatar.position.set(person.x, person.y, person.z);
-      avatar.scale.setScalar(person.scale);
-      const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.14, 0.22, 5, 16), person.m);
-      torso.position.y = -0.16;
-      avatar.add(torso);
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.115, 24, 20), pale);
-      head.position.y = 0.12;
-      avatar.add(head);
-      community.add(avatar);
-    });
-    tube([
-      new THREE.Vector3(-0.38, 0.12, 0.05),
-      new THREE.Vector3(-0.12, 0.35, 0.12),
-      new THREE.Vector3(0.22, 0.34, 0.12),
-      new THREE.Vector3(0.4, 0.12, 0.05),
-      new THREE.Vector3(0.05, -0.36, 0.14),
-      new THREE.Vector3(-0.38, 0.12, 0.05),
-    ], 0.018, blueMat).parent = community;
-    const communityRing = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.025, 10, 80), blueMat);
-    communityRing.rotation.x = 0.4;
-    community.add(communityRing);
-    community.add(makeText("YOUR NETWORK", "People  •  Connections", "#B8C0FF"));
-
-    // Growth: ascending solid blocks and a sculpted rising path.
-    const growth = new THREE.Group();
-    growth.position.set(-2.05, -1.62, 0);
-    growth.rotation.y = -0.16;
-    scene.add(growth);
-    [-0.43, -0.12, 0.19, 0.5].forEach((x, i) => {
-      const bar = extruded(0.22, 0.24 + i * 0.17, 0.25, i === 3 ? limeMat : mintMat, 0.035);
-      bar.position.set(x, -0.12 + (0.24 + i * 0.17) / 2, 0.08);
-      growth.add(bar);
-    });
-    const growthCurve = new THREE.CatmullRomCurve3([
-      new THREE.Vector3(-0.52, -0.05, 0.28),
-      new THREE.Vector3(-0.12, 0.16, 0.34),
-      new THREE.Vector3(0.2, 0.38, 0.34),
-      new THREE.Vector3(0.52, 0.72, 0.34),
-    ]);
-    growth.add(new THREE.Mesh(new THREE.TubeGeometry(growthCurve, 40, 0.035, 10, false), limeMat));
-    const arrowHead = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.25, 4), limeMat);
-    arrowHead.position.set(0.52, 0.78, 0.34);
-    arrowHead.rotation.z = -0.55;
-    growth.add(arrowHead);
-    growth.add(makeText("YOUR GROWTH", "Progress  •  Momentum", "#9AE8C7"));
-
-    // MILE is the centrepiece: a dimensional ring/bridge that gathers the three streams.
-    const hub = new THREE.Group();
-    hub.position.set(0.18, 0, 0.2);
-    scene.add(hub);
-    const hubBase = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.9, 0.2, 8, 1), navy);
-    hubBase.rotation.x = Math.PI / 2;
-    hub.add(hubBase);
-    const outer = new THREE.Mesh(new THREE.TorusGeometry(0.78, 0.105, 20, 96), limeMat);
-    hub.add(outer);
-    const inner = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.035, 12, 96), blueMat);
-    inner.rotation.z = Math.PI / 8;
-    hub.add(inner);
-    const core = new THREE.Mesh(new THREE.SphereGeometry(0.48, 48, 40), indigo);
-    core.position.z = 0.06;
-    hub.add(core);
-    const mileCanvas = document.createElement("canvas");
-    mileCanvas.width = 512;
-    mileCanvas.height = 256;
-    const mctx = mileCanvas.getContext("2d");
-    if (mctx) {
-      mctx.fillStyle = "#D7F36A";
-      mctx.font = "900 118px Arial";
-      mctx.textAlign = "center";
-      mctx.textBaseline = "middle";
-      mctx.fillText("MILE", 256, 105);
-      mctx.fillStyle = "#FFFFFF";
-      mctx.font = "600 25px Arial";
-      mctx.fillText("EVERY STEP HAS A PURPOSE", 256, 190);
-    }
-    const mileTexture = new THREE.CanvasTexture(mileCanvas);
-    mileTexture.colorSpace = THREE.SRGBColorSpace;
-    const mileFace = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.28, 0.64),
-      new THREE.MeshBasicMaterial({ map: mileTexture, transparent: true, depthWrite: false })
-    );
-    mileFace.position.set(0, 0, 0.53);
-    hub.add(mileFace);
-
-    // Opportunity: a bright open portal with a dimensional star at its centre.
-    const opportunity = new THREE.Group();
-    opportunity.position.set(2.15, 0.08, 0.12);
-    scene.add(opportunity);
-    const portal = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.09, 18, 80), limeMat);
-    portal.scale.set(0.78, 1.2, 0.8);
-    opportunity.add(portal);
-    const portalInner = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.022, 10, 72), pale);
-    portalInner.scale.set(0.78, 1.2, 0.8);
-    opportunity.add(portalInner);
-    const starShape = new THREE.Shape();
-    for (let i = 0; i < 10; i++) {
-      const radius = i % 2 === 0 ? 0.34 : 0.15;
-      const angle = (i / 10) * Math.PI * 2 - Math.PI / 2;
-      const x = Math.cos(angle) * radius;
-      const y = Math.sin(angle) * radius;
-      if (i === 0) starShape.moveTo(x, y);
-      else starShape.lineTo(x, y);
-    }
-    starShape.closePath();
-    const star = new THREE.Mesh(
-      new THREE.ExtrudeGeometry(starShape, { depth: 0.13, bevelEnabled: true, bevelSize: 0.035, bevelThickness: 0.035, bevelSegments: 3 }),
-      limeMat
-    );
-    star.geometry.center();
-    star.position.z = 0.18;
-    opportunity.add(star);
-    opportunity.add(makeText("NEXT OPPORTUNITY", "The next step forward", "#D7F36A"));
-
-    // Distinct energy routes: three inputs converge into MILE, then continue outward.
-    const routes = [
-      [new THREE.Vector3(-1.48, 1.55, 0.08), new THREE.Vector3(-0.95, 1.12, 0.18), new THREE.Vector3(-0.48, 0.52, 0.32)],
-      [new THREE.Vector3(-1.42, 0.02, 0.08), new THREE.Vector3(-0.92, 0.02, 0.25), new THREE.Vector3(-0.58, 0.02, 0.4)],
-      [new THREE.Vector3(-1.48, -1.55, 0.08), new THREE.Vector3(-0.92, -1.05, 0.2), new THREE.Vector3(-0.46, -0.5, 0.32)],
-      [new THREE.Vector3(0.88, 0.02, 0.45), new THREE.Vector3(1.28, 0.02, 0.4), new THREE.Vector3(1.58, 0.02, 0.25)],
-    ].map((points, i) => {
-      const curve = new THREE.CatmullRomCurve3(points);
-      const line = new THREE.Mesh(
-        new THREE.TubeGeometry(curve, 48, i === 3 ? 0.035 : 0.022, 10, false),
-        i === 3 ? limeMat : blueMat
-      );
-      scene.add(line);
-      const pulse = new THREE.Mesh(
-        new THREE.SphereGeometry(0.07, 20, 16),
-        material("#FFFFFF", 0.1, 0.15, i === 3 ? "#D7F36A" : "#A8B4FF")
-      );
-      scene.add(pulse);
-      return { curve, pulse, offset: i * 0.21 };
-    });
-
-    // A few restrained glints give the forms depth without turning the scene into decoration.
-    const glints: THREE.Mesh[] = [];
-    [[-0.1, 2.25, 0.1], [1.2, 1.35, -0.1], [1.25, -1.25, 0.1], [-1.0, -2.35, 0.1]].forEach(([x, y, z], i) => {
-      const dot = new THREE.Mesh(new THREE.SphereGeometry(i === 0 ? 0.045 : 0.028, 16, 12), i % 2 ? blueMat : limeMat);
-      dot.position.set(x, y, z);
-      scene.add(dot);
-      glints.push(dot);
-    });
-
-    const resize = () => {
-      if (disposed || !host) return;
-      const width = Math.max(1, host.clientWidth);
-      const height = Math.max(1, host.clientHeight);
-      const aspect = width / height;
-      const viewHeight = 6.4;
-      camera.left = -(viewHeight * aspect) / 2;
-      camera.right = (viewHeight * aspect) / 2;
-      camera.top = viewHeight / 2;
-      camera.bottom = -viewHeight / 2;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height, false);
-    };
-    const observer = new ResizeObserver(resize);
-    observer.observe(host);
-    resize();
-
-    const clock = new THREE.Clock();
-    const animate = () => {
-      if (disposed) return;
-      const t = clock.getElapsedTime();
-      hub.rotation.z = Math.sin(t * 0.35) * 0.035;
-      outer.rotation.z = t * 0.16;
-      inner.rotation.z = -t * 0.22;
-      work.position.y = 1.62 + Math.sin(t * 0.75) * 0.035;
-      community.position.y = Math.sin(t * 0.7 + 1) * 0.025;
-      growth.position.y = -1.62 + Math.sin(t * 0.7 + 2) * 0.025;
-      portal.rotation.z = Math.sin(t * 0.45) * 0.05;
-      opportunity.children[2].rotation.z = t * 0.22;
-      routes.forEach(({ curve, pulse, offset }) => {
-        pulse.position.copy(curve.getPoint((t * 0.22 + offset) % 1));
-      });
-      glints.forEach((dot, i) => {
-        dot.scale.setScalar(0.8 + (Math.sin(t * 1.6 + i) + 1) * 0.18);
-      });
-      renderer.render(scene, camera);
-      raf = requestAnimationFrame(animate);
-    };
-    animate();
-
-    return () => {
-      disposed = true;
-      cancelAnimationFrame(raf);
-      observer.disconnect();
-      scene.traverse((object) => {
-        if (object instanceof THREE.Mesh) {
-          object.geometry.dispose();
-          const materials = Array.isArray(object.material) ? object.material : [object.material];
-          materials.forEach((item) => {
-            if ("map" in item && item.map) item.map.dispose();
-            item.dispose();
-          });
-        }
-      });
-      renderer.dispose();
-      renderer.domElement.remove();
-    };
-  }, []);
-
   return (
-    <div
-      ref={hostRef}
-      className="relative z-10 h-[330px] w-full max-w-[460px] overflow-visible sm:h-[370px]"
-      role="img"
-      aria-label="A premium isometric 3D illustration showing a portfolio, connected freelancer community and growth coming together through MILE and opening into a new opportunity"
-    />
+    <div className="relative isolate w-full max-w-[540px] overflow-visible" role="img" aria-label="Three freelancers collaborating around a desk, sharing ideas and building their next opportunity together">
+      <div className="pointer-events-none absolute inset-x-[12%] bottom-[8%] h-[18%] rounded-full bg-[#D7F36A]/20 blur-2xl" />
+      <svg viewBox="0 0 620 470" className="relative z-10 block h-auto w-full drop-shadow-[0_24px_28px_rgba(4,14,10,0.24)]" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="mileSceneBg" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#214C38"/><stop offset="1" stopColor="#102D24"/></linearGradient>
+          <linearGradient id="mileDesk" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#D6B58A"/><stop offset="1" stopColor="#A8794E"/></linearGradient>
+          <linearGradient id="mileLaptop" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#394A51"/><stop offset="1" stopColor="#17262D"/></linearGradient>
+          <linearGradient id="mileLime" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#E8FF9B"/><stop offset="1" stopColor="#B7D94C"/></linearGradient>
+          <filter id="mileShadow" x="-30%" y="-30%" width="160%" height="180%"><feGaussianBlur stdDeviation="12"/></filter>
+        </defs>
+        <ellipse cx="313" cy="407" rx="226" ry="28" fill="#071A13" opacity=".32" filter="url(#mileShadow)"/>
+        <path d="M95 340c-6-40 9-68 41-79l51-14 47 39-8 100H115z" fill="#A8C95A" opacity=".9"/>
+        <path d="M425 340c-5-43 11-68 46-80l45-9 38 40-3 98H445z" fill="#A8C95A" opacity=".9"/>
+        <path d="M154 332v71m27-71v71m288-71v71m28-71v71" stroke="#7D9A42" strokeWidth="12" strokeLinecap="round"/>
+        <path d="M86 315c26-17 67-28 113-25l66 32-9 49H88z" fill="#D7F36A"/>
+        <path d="M380 321c32-25 81-34 127-19l45 28-7 43H384z" fill="#D7F36A"/>
+        <path d="M190 318c37-34 83-49 137-49 53 0 103 15 144 49l-20 62H209z" fill="url(#mileDesk)"/>
+        <path d="M205 365h246l-13 18H218z" fill="#8C603E" opacity=".85"/>
+        <path d="M246 382v32m164-32v32" stroke="#9A704A" strokeWidth="12" strokeLinecap="round"/>
+        <path d="M251 286l4-104c1-24 18-40 43-40h29c24 0 42 17 43 40l3 104-45 27h-34z" fill="#263A42"/>
+        <path d="M260 180c2-30 23-48 53-48 29 0 50 18 53 48l-6 44h-96z" fill="#20292D"/>
+        <ellipse cx="313" cy="173" rx="42" ry="48" fill="#9B6248"/>
+        <path d="M273 164c2-35 22-57 51-57 27 0 45 18 49 47-17-5-29-16-37-29-13 18-34 31-63 39z" fill="#171E20"/>
+        <path d="M291 177h7m29 0h7" stroke="#241B18" strokeWidth="4" strokeLinecap="round"/>
+        <path d="M300 198c9 7 19 7 28 0" stroke="#5D3028" strokeWidth="3" fill="none" strokeLinecap="round"/>
+        <path d="M279 220c18 16 49 18 69 0l26 63-43 31-57-31z" fill="#315D49"/>
+        <path d="M280 239l-41 40-33 11" stroke="#9B6248" strokeWidth="19" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M360 241l32 35 27-4" stroke="#9B6248" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M238 281l-12 6m191-15 13 1" stroke="#9B6248" strokeWidth="14" strokeLinecap="round"/>
+        <path d="M101 269c-4-35 15-63 47-66 31-3 54 19 55 52l-8 43-84 2z" fill="#182B2C"/>
+        <ellipse cx="151" cy="235" rx="33" ry="39" fill="#7D4B38"/>
+        <path d="M119 226c3-31 21-49 47-45 20 3 34 17 36 39-20 1-38-7-51-21-7 12-18 21-32 27z" fill="#12191A"/>
+        <path d="M123 270c13-13 44-17 60-3l24 64-86 4z" fill="#263F66"/>
+        <path d="M180 286l30 26 31-5" stroke="#7D4B38" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M448 263c2-37 24-61 55-59 31 2 49 27 44 62l-10 35h-84z" fill="#171F25"/>
+        <ellipse cx="500" cy="234" rx="34" ry="39" fill="#8B5944"/>
+        <path d="M464 225c0-31 19-51 44-51 27 0 42 19 41 48-15-4-29-15-37-28-12 17-28 27-48 31z" fill="#141B20"/>
+        <path d="M468 269c16-13 45-15 63 1l22 64h-105z" fill="#233D63"/>
+        <path d="M476 286l-30 25-31-6" stroke="#8B5944" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M205 292l49-12 24 11-13 10-53 10z" fill="#9B6248"/>
+        <path d="M399 286l-38-10-22 12 12 10 46 6z" fill="#9B6248"/>
+        <path d="M250 292l50-10 27 8-5 8-65 8z" fill="#263238"/>
+        <path d="M340 292l43-11 29 8-4 9-58 9z" fill="#263238"/>
+        <g transform="translate(243 275)">
+          <path d="M0 13l77-13 22 10-78 15z" fill="#E7ECE7"/>
+          <path d="M21 25l78-15v4L21 29z" fill="#AAB7B0"/>
+          <path d="M0 13v5l21 11v-4z" fill="#BBC8C0"/>
+          <path d="M17 10l47-8 11 5-48 9z" fill="#3D5E50"/>
+          <path d="M44 8l4-1" stroke="#D7F36A" strokeWidth="2" strokeLinecap="round"/>
+        </g>
+        <g transform="translate(414 264)">
+          <rect x="0" y="0" width="48" height="33" rx="5" transform="rotate(-9)" fill="#1B2C32"/>
+          <rect x="5" y="4" width="38" height="24" rx="3" transform="rotate(-9)" fill="#BBD7C4"/>
+          <path d="M12 12l19-3m-17 8 14-2" stroke="#426F58" strokeWidth="2" strokeLinecap="round"/>
+        </g>
+        <g transform="translate(178 320)">
+          <rect width="34" height="25" rx="6" fill="#243A32"/>
+          <path d="M7 7h20M7 13h14" stroke="#D7F36A" strokeWidth="2" strokeLinecap="round"/>
+        </g>
+        <g transform="translate(472 318)">
+          <path d="M0 8h29l-3 24H4z" fill="#F4F1E8"/>
+          <path d="M29 13c13-2 12 15 0 15" fill="none" stroke="#F4F1E8" strokeWidth="5"/>
+          <path d="M8 4c-4-8 6-9 3-15m9 15c-4-8 6-9 3-15" stroke="#D7F36A" strokeWidth="2" strokeLinecap="round" fill="none"/>
+        </g>
+        <g transform="translate(80 95)">
+          <rect width="105" height="62" rx="14" fill="#F7FAF3"/>
+          <circle cx="22" cy="22" r="7" fill="#D7F36A"/><path d="M38 22h48M15 42h70" stroke="#9EAAA0" strokeWidth="5" strokeLinecap="round"/>
+          <path d="M94 62l13 16" stroke="#F7FAF3" strokeWidth="5" strokeLinecap="round"/>
+        </g>
+        <g transform="translate(442 78)">
+          <rect width="102" height="64" rx="14" fill="#D7F36A"/>
+          <path d="M19 42l15-14 12 7 25-23" fill="none" stroke="#234333" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M60 12h11v11" fill="none" stroke="#234333" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        </g>
+        <circle cx="314" cy="68" r="7" fill="#D7F36A"/><circle cx="333" cy="51" r="3" fill="#FFFFFF" opacity=".8"/>
+        <path d="M302 62l-11-11m48 32 11 10" stroke="#D7F36A" strokeWidth="3" strokeLinecap="round" opacity=".8"/>
+      </svg>
+      <div className="relative z-10 mx-auto -mt-1 flex w-fit items-center gap-2 rounded-full border border-white/20 bg-[#0B241B]/85 px-4 py-2 shadow-lg backdrop-blur">
+        <span className="h-2 w-2 rounded-full bg-[#D7F36A] shadow-[0_0_12px_#D7F36A]"/>
+        <span className="text-[10px] font-extrabold uppercase tracking-[.2em] text-white">People. Progress. Opportunity.</span>
+      </div>
+    </div>
   );
 }
 
@@ -1264,7 +997,7 @@ export default function DashboardWorkspace() {
                   </div>
                 </div>
                 <div className="flex flex-col items-center gap-3">
-                  <div className="relative flex min-h-[330px] w-full max-w-[460px] items-center justify-center overflow-hidden" role="img" aria-label="A freelancer building their next opportunity at a desk, surrounded by signals of progress, skills and professional growth">
+                  <div className="relative flex min-h-[360px] w-full max-w-[540px] items-center justify-center overflow-visible">
                     <MileThreeScene />
                   </div>
                   <div className="w-full rounded-2xl border border-white/15 bg-white/[.08] p-4 backdrop-blur-sm sm:p-5">
