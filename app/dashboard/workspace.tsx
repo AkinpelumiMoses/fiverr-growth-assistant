@@ -35,79 +35,40 @@ const starterTasks = [
 
 
 function MileThreeScene() {
-  const [stage, setStage] = useState(0);
-  const [playing, setPlaying] = useState(true);
-  const stages = [
-    { tag: "CHAPTER 01 · THE BEGINNING", title: "The talent was there. The direction wasn't.", detail: "Late nights. A growing skill set. Too many unanswered questions — and no clear next move.", feature: "A freelancer with potential", card: "Where do I begin?", scene: "from-slate-800 via-slate-900 to-[#172630]" },
-    { tag: "CHAPTER 02 · FINDING DIRECTION", title: "Growth starts when the next step becomes clear.", detail: "A stronger profile, a clear service and a plan turn scattered effort into focused action.", feature: "Profile · Growth Plan", card: "One clear next step", scene: "from-[#25463f] via-[#1a3438] to-[#172c32]" },
-    { tag: "CHAPTER 03 · LEARNING THE MARKET", title: "Better decisions come from better understanding.", detail: "The AI Growth Coach, Gig Analyzer and research tools help turn questions into practical improvements.", feature: "AI Coach · Gig Analyzer · Research", card: "Understand. Improve. Test.", scene: "from-[#263d54] via-[#1b3042] to-[#172838]" },
-    { tag: "CHAPTER 04 · GROWING TOGETHER", title: "You don't have to build alone.", detail: "Community creates room to exchange ideas, find collaborators and learn from people on a similar journey.", feature: "MILE Community", card: "A connection changes the journey", scene: "from-[#354451] via-[#203846] to-[#172d37]" },
-    { tag: "CHAPTER 05 · THE NEXT MILE", title: "Progress is not the finish line. It's momentum.", detail: "A completed project is a milestone. The confidence, insight and relationships built along the way make the next one possible.", feature: "Performance · Your next move", card: "Every step has a purpose.", scene: "from-[#3c5146] via-[#1f403c] to-[#172f31]" },
-  ];
-  useEffect(() => {
-    if (!playing) return;
-    const timer = window.setInterval(() => setStage((value) => (value + 1) % stages.length), 6200);
-    return () => window.clearInterval(timer);
-  }, [playing]);
-  const current = stages[stage];
+  const [muted, setMuted] = useState(true);
+  const [filmUnavailable, setFilmUnavailable] = useState(false);
   return (
-    <section className="relative isolate w-full max-w-[560px] overflow-hidden rounded-[28px] border border-white/10 bg-[#101D28] px-4 pb-5 pt-4 shadow-[0_28px_70px_rgba(0,0,0,.28)] sm:px-6" aria-label="The MILE journey, a five-chapter story">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_42%,rgba(215,243,106,.13),transparent_56%)]"/>
-      <header className="relative z-20 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5"><span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#D7F36A] text-[11px] font-black text-[#17251E]">M.</span><div><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-white">The MILE story</p><p className="mt-0.5 text-[9px] text-white/45">A journey in five chapters</p></div></div>
-        <button type="button" onClick={() => setPlaying((value) => !value)} aria-pressed={playing} className="rounded-full border border-white/15 bg-white/[.06] px-3 py-2 text-[10px] font-bold text-white/75 transition hover:bg-white/10">{playing ? "Ⅱ Pause story" : "▶ Play story"}</button>
-      </header>
-      <div className={"relative mx-auto mt-3 aspect-[1.22/1] w-full max-w-[490px] overflow-hidden rounded-[22px] border border-white/[.08] bg-gradient-to-br " + current.scene}>
-        <div className="absolute right-[7%] top-[8%] h-[42%] w-[34%] rounded-xl border-[7px] border-white/[.08] bg-gradient-to-br from-[#D7F36A]/20 to-sky-300/10 shadow-[inset_0_0_35px_rgba(215,243,106,.08)]"/>
-        <div className="absolute right-[17%] top-[17%] h-8 w-8 rounded-full bg-[#D7F36A]/80 shadow-[0_0_45px_rgba(215,243,106,.5)] transition-all duration-1000"/>
-        <div className="absolute bottom-0 h-[22%] w-full bg-gradient-to-b from-[#23343a] to-[#17252c] [clip-path:polygon(0_18%,100%_0,100%_100%,0_100%)]"/>
-        <div className="absolute bottom-[13%] h-px w-full bg-gradient-to-r from-transparent via-[#D7F36A]/50 to-transparent"/>
-        <div className="absolute bottom-[10%] left-[5%] h-[16%] w-[36%] rounded-t-xl bg-gradient-to-br from-[#D1B28A] to-[#936C4C] shadow-xl">
-          <div className="absolute -top-[48%] left-[34%] h-[48%] w-[47%] -skew-y-6 rounded-t-md border-4 border-[#6D8381] bg-gradient-to-br from-[#1d2c36] to-[#344e56]"><span className="absolute inset-[16%] rounded-sm bg-gradient-to-br from-[#D7F36A]/30 to-[#7db8a3]/40"/><i className="absolute left-[22%] top-[35%] h-[3px] w-[52%] rounded bg-[#D7F36A]/60"/></div>
-          <div className="absolute -top-5 right-2 h-5 w-4 rounded-b-md bg-[#e8e9df]"/>
+    <section className="w-full max-w-[560px] overflow-hidden rounded-[28px] border border-white/10 bg-[#101D28] shadow-[0_28px_70px_rgba(0,0,0,.28)]" aria-label="The MILE cinematic story">
+      <div className="flex items-center justify-between gap-3 px-4 pb-3 pt-4 sm:px-5">
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#D7F36A] text-[11px] font-black text-[#17251E]">M.</span>
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-white">The MILE story</p><p className="mt-0.5 text-[9px] text-white/45">A film about the next meaningful step</p></div>
         </div>
-        <div className="absolute bottom-[8%] left-1/2 z-[5] h-[80%] -translate-x-1/2 animate-[mileHeroEnter_.9s_ease-out_both]">
-          <svg viewBox="0 0 260 330" className="h-full w-auto max-w-none drop-shadow-[0_18px_18px_rgba(0,0,0,.25)]" role="img" aria-label="The same freelancer throughout the journey">
-            <defs><linearGradient id="mileHeroJacket" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#477B68"/><stop offset="1" stopColor="#214B42"/></linearGradient><linearGradient id="mileHeroSkin" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#B97856"/><stop offset="1" stopColor="#875039"/></linearGradient></defs>
-            <ellipse cx="130" cy="309" rx="76" ry="12" fill="#071018" opacity=".3"/>
-            <g className="origin-[130px_180px] animate-[mileHeroBreathe_3.6s_ease-in-out_infinite]">
-              <path d="M88 188Q78 225 83 276L105 286L119 224L143 224L157 286L181 276Q184 225 171 188Z" fill="#263B43"/>
-              <path d="M91 270L82 297Q79 306 91 309H119Q128 305 122 297L112 274Z M145 274L140 297Q137 306 149 309H178Q187 305 180 296L169 270Z" fill="#E7E9DD"/>
-              <path d="M83 125Q93 106 130 106Q168 106 178 126L188 213Q160 236 72 213Z" fill="url(#mileHeroJacket)"/>
-              <path d="M117 110L130 136L145 110L154 213H105Z" fill="#E7E9DD"/><path d="M129 137L136 146L130 197L123 146Z" fill="#D7F36A"/>
-              <path d="M88 137Q68 151 64 194L51 220Q47 230 58 234Q67 237 74 226L101 185Z M174 137Q193 151 197 194L209 218Q214 230 203 235Q193 238 187 226L161 185Z" fill="url(#mileHeroSkin)"/>
-              <path d="M100 74Q100 32 131 29Q164 31 164 75L157 112Q151 132 130 132Q109 130 102 111Z" fill="url(#mileHeroSkin)"/>
-              <path d="M98 78Q89 37 119 20Q151 5 171 40Q178 57 164 81L158 62Q145 63 130 52Q119 69 99 76Z" fill="#171C22"/>
-              <path d="M105 83Q114 77 122 83M140 83Q149 77 157 83" fill="none" stroke="#422D27" strokeWidth="3.5" strokeLinecap="round"/>
-              <ellipse cx="115" cy="91" rx="3.5" ry="4" fill="#241C1A"/><ellipse cx="148" cy="91" rx="3.5" ry="4" fill="#241C1A"/>
-              <path d="M119 108Q132 117 145 107" fill="none" stroke="#633B30" strokeWidth="3" strokeLinecap="round"/>
-            </g>
-          </svg>
-        </div>
-        <div className="absolute left-[4%] top-[12%] z-10 flex min-h-[64px] w-[44%] animate-[mileCardIn_.8s_ease-out_both] flex-col gap-1.5 rounded-xl border border-white/20 bg-[#F7F9F0]/95 px-3 py-2.5 text-[#1c3028] shadow-xl">
-          <span className="text-[7px] font-black tracking-[.15em] text-[#64806d]">MILE · NEXT STEP</span><strong className="text-[clamp(9px,2vw,12px)] leading-snug">{current.card}</strong><div className="mt-1 h-1 overflow-hidden rounded-full bg-[#dfe7da]"><i className="block h-full rounded-full bg-[#1d9a63] transition-all duration-700" style={{width: ((stage + 1) * 20) + "%"}}/></div>
-        </div>
-        <div className="absolute bottom-[13%] right-[3%] z-10 flex w-[38%] animate-[mileCardIn_.8s_.2s_ease-out_both] items-center gap-2 rounded-xl border border-white/15 bg-[#D7F36A] px-3 py-2.5 text-[clamp(8px,1.8vw,10px)] font-extrabold leading-snug text-[#1c3028] shadow-xl">
-          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#1d382b] text-sm text-[#D7F36A]">{["?","↗","✳","◎","✓"][stage]}</span>{current.feature}
-        </div>
-        <div className="absolute right-[8%] top-[8%] z-10 flex items-center gap-1.5 text-[#D7F36A]"><span className="text-lg">✦</span><small className="text-[7px] font-black tracking-widest">{stage === 4 ? "NEXT MILE" : "STEP 0" + (stage + 1)}</small></div>
-        <div className="absolute left-[13%] top-[48%] h-1.5 w-1.5 animate-ping rounded-full bg-[#D7F36A]"/><div className="absolute right-[12%] top-[58%] h-1 w-1 animate-pulse rounded-full bg-[#D7F36A]"/>
+        <button type="button" onClick={() => setMuted((value) => !value)} className="rounded-full border border-white/15 bg-white/[.06] px-3 py-2 text-[10px] font-bold text-white/80 transition hover:bg-white/10" aria-pressed={!muted}>{muted ? "Enable sound" : "Mute film"}</button>
       </div>
-      <div className="relative z-10 mx-auto mt-4 max-w-[430px] text-center">
-        <div className="mb-2 flex items-center justify-center gap-1.5" aria-label={"Chapter " + (stage + 1) + " of 5"}>
-          {stages.map((item, index) => <button key={item.tag} type="button" onClick={() => setStage(index)} aria-label={"Go to " + item.tag} aria-current={index === stage ? "step" : undefined} className={"h-1.5 rounded-full transition-all duration-500 " + (index === stage ? "w-9 bg-[#D7F36A]" : "w-3 bg-white/25 hover:bg-white/45")}/>)}
+      <div className="relative aspect-video overflow-hidden bg-[#080f16]">
+        {!filmUnavailable ? (
+          <video className="absolute inset-0 h-full w-full object-cover" src="/media/mile-film.mp4" autoPlay muted={muted} playsInline controls preload="metadata" onError={() => setFilmUnavailable(true)}>
+            <track kind="captions" src="/media/mile-film.vtt" srcLang="en" label="English" default />
+          </video>
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_50%_40%,rgba(215,243,106,.12),transparent_55%),linear-gradient(135deg,#172630,#080f16)] px-7 text-center">
+            <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#D7F36A] text-lg font-black text-[#17251E]">M.</span>
+            <p className="text-[10px] font-extrabold tracking-[.2em] text-[#D7F36A]">THE MILE FILM</p>
+            <h3 className="mt-3 max-w-sm text-xl font-extrabold leading-tight text-white">Every step has a purpose.</h3>
+            <p className="mt-3 max-w-xs text-xs leading-6 text-white/60">The live-action film is being prepared. Please refresh this page shortly.</p>
+          </div>
+        )}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#081018]/80 via-transparent to-[#081018]/20"/>
+        <div className="pointer-events-none absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6">
+          <p className="text-[8px] font-black tracking-[.22em] text-[#D7F36A] sm:text-[9px]">YOUR JOURNEY. YOUR NEXT MILE.</p>
+          <p className="mt-1 max-w-md text-lg font-extrabold leading-tight text-white drop-shadow-lg sm:text-2xl">You don't have to figure out the entire journey today.</p>
         </div>
-        <p className="text-[8px] font-extrabold tracking-[.19em] text-[#D7F36A]">{current.tag}</p>
-        <h3 className="mt-2 text-[17px] font-extrabold leading-snug tracking-tight text-white sm:text-[19px]" aria-live="polite">{current.title}</h3>
-        <p className="mx-auto mt-2 max-w-[390px] text-[11px] leading-[1.75] text-white/60">{current.detail}</p>
       </div>
-      <footer className="relative z-10 mt-4 flex items-center justify-between border-t border-white/10 pt-3">
-        <button type="button" onClick={() => setStage((value) => (value + stages.length - 1) % stages.length)} className="rounded-lg px-2 py-2 text-[10px] font-bold text-white/55 transition hover:bg-white/5 hover:text-white">← Previous</button>
-        <span className="text-[9px] font-semibold tracking-[.12em] text-white/35">{String(stage + 1).padStart(2, "0")} / 05</span>
-        <button type="button" onClick={() => setStage((value) => (value + 1) % stages.length)} className="rounded-lg px-2 py-2 text-[10px] font-bold text-[#D7F36A] transition hover:bg-white/5">Next chapter →</button>
-      </footer>
-      <p className="relative z-10 mt-3 text-center text-[10px] font-semibold tracking-wide text-white/75">MILE. <span className="text-[#D7F36A]">Every step has a purpose.</span></p>
-      <style jsx global>{"@keyframes mileHeroEnter{from{opacity:0;transform:translateX(-50%) translateY(12px) scale(.96)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}@keyframes mileHeroBreathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}@keyframes mileCardIn{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}@media(prefers-reduced-motion:reduce){.animate-ping,.animate-pulse{animation:none!important}}"}</style>
+      <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
+        <p className="text-[10px] font-semibold text-white/55">MILE. <span className="text-[#D7F36A]">Every step has a purpose.</span></p>
+        <span className="text-[9px] tracking-wide text-white/35">60-SECOND FILM · ENGLISH CAPTIONS</span>
+      </div>
     </section>
   );
 }
