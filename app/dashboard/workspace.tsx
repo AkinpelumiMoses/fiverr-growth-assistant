@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { createClient } from "@/lib/supabase/client";
 import CommunityDirectory from "@/app/community/community-directory";
 import CommunityFeed from "@/app/community/community-feed";
@@ -42,191 +41,296 @@ function MileThreeScene() {
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
-    let frame = 0;
+    let raf = 0;
     let disposed = false;
 
     const scene = new THREE.Scene();
-    // A genuinely transparent canvas: the dashboard surface remains visible behind the artwork.
-    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-    camera.position.set(0, 0, 9.2);
+    const camera = new THREE.OrthographicCamera(-4.15, 4.15, 3.2, -3.2, 0.1, 60);
+    camera.position.set(7, 6.2, 10);
     camera.lookAt(0, 0, 0);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.2;
     host.appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight("#FFFFFF", 1.6));
-    const key = new THREE.DirectionalLight("#FFFFFF", 3.2);
-    key.position.set(-3, 5, 7);
+    scene.add(new THREE.HemisphereLight("#FFFFFF", "#17234A", 2.1));
+    const key = new THREE.DirectionalLight("#FFFFFF", 3.8);
+    key.position.set(-4, 7, 8);
     scene.add(key);
-    const limeLight = new THREE.PointLight("#D7F36A", 18, 12);
-    limeLight.position.set(0, 1.5, 3);
-    scene.add(limeLight);
-    const blueLight = new THREE.PointLight("#747BFF", 13, 12);
-    blueLight.position.set(3, -2, 2);
-    scene.add(blueLight);
+    const rim = new THREE.DirectionalLight("#AAB2FF", 2.8);
+    rim.position.set(5, 2, -5);
+    scene.add(rim);
+    const lime = new THREE.PointLight("#D7F36A", 20, 9);
+    lime.position.set(0.8, 1.8, 3);
+    scene.add(lime);
 
-    const mat = (color: string, roughness = 0.3, metalness = 0.18, emissive?: string) =>
+    const material = (color: string, metalness = 0.22, roughness = 0.28, emissive?: string) =>
       new THREE.MeshStandardMaterial({
-        color, roughness, metalness,
-        ...(emissive ? { emissive, emissiveIntensity: 0.28 } : {}),
+        color, metalness, roughness,
+        ...(emissive ? { emissive, emissiveIntensity: 0.32 } : {}),
       });
 
-    // Labels are part of the information architecture, not decorative interface tiles.
-    const makeLabel = (title: string, symbol: string, accent: string) => {
+    const navy = material("#20265F", 0.48, 0.24);
+    const indigo = material("#343B91", 0.5, 0.23);
+    const pale = material("#F4F6FF", 0.16, 0.32);
+    const limeMat = material("#D7F36A", 0.38, 0.22, "#A5C83C");
+    const blueMat = material("#8792FF", 0.36, 0.24, "#424CBA");
+    const mintMat = material("#8DE0BD", 0.3, 0.25, "#3D9B7C");
+
+    const roundedShape = (w: number, h: number, r: number) => {
+      const s = new THREE.Shape();
+      s.moveTo(-w / 2 + r, -h / 2);
+      s.lineTo(w / 2 - r, -h / 2);
+      s.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
+      s.lineTo(w / 2, h / 2 - r);
+      s.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
+      s.lineTo(-w / 2 + r, h / 2);
+      s.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
+      s.lineTo(-w / 2, -h / 2 + r);
+      s.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
+      return s;
+    };
+
+    const extruded = (w: number, h: number, d: number, mat: THREE.Material, radius = 0.08) => {
+      const geometry = new THREE.ExtrudeGeometry(roundedShape(w, h, radius), {
+        depth: d, bevelEnabled: true, bevelSegments: 3, steps: 1,
+        bevelSize: 0.035, bevelThickness: 0.035, curveSegments: 8,
+      });
+      geometry.center();
+      return new THREE.Mesh(geometry, mat);
+    };
+
+    const tube = (points: THREE.Vector3[], radius: number, mat: THREE.Material) => {
+      const curve = new THREE.CatmullRomCurve3(points);
+      const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, 48, radius, 10, false), mat);
+      scene.add(mesh);
+      return mesh;
+    };
+
+    const makeText = (top: string, bottom: string, accent: string) => {
       const canvas = document.createElement("canvas");
       canvas.width = 512;
-      canvas.height = 176;
+      canvas.height = 150;
       const ctx = canvas.getContext("2d");
-      if (!ctx) return new THREE.CanvasTexture(canvas);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#11183D";
-      ctx.beginPath();
-      ctx.roundRect(8, 8, 496, 160, 34);
-      ctx.fill();
-      ctx.strokeStyle = "rgba(255,255,255,.17)";
-      ctx.lineWidth = 3;
-      ctx.stroke();
-      ctx.fillStyle = accent;
-      ctx.beginPath();
-      ctx.arc(86, 88, 43, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = "#101638";
-      ctx.font = "bold 46px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(symbol, 86, 90);
-      ctx.fillStyle = "#FFFFFF";
-      ctx.textAlign = "left";
-      ctx.font = "bold 38px Arial";
-      ctx.fillText(title, 150, 100);
+      if (ctx) {
+        ctx.clearRect(0, 0, 512, 150);
+        ctx.fillStyle = accent;
+        ctx.font = "800 34px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(top, 256, 58);
+        ctx.fillStyle = "rgba(255,255,255,.78)";
+        ctx.font = "500 21px Arial";
+        ctx.fillText(bottom, 256, 98);
+      }
       const texture = new THREE.CanvasTexture(canvas);
       texture.colorSpace = THREE.SRGBColorSpace;
-      return texture;
-    };
-
-    const makeNode = (title: string, symbol: string, position: [number, number, number], accent: string) => {
-      const group = new THREE.Group();
-      group.position.set(...position);
-      scene.add(group);
-
-      const orb = new THREE.Mesh(new THREE.SphereGeometry(0.31, 48, 40), mat(accent, 0.2, 0.42, accent));
-      orb.castShadow = true;
-      group.add(orb);
-
-      const inner = new THREE.Mesh(new THREE.SphereGeometry(0.16, 32, 28), mat("#FFFFFF", 0.18, 0.1));
-      inner.position.set(0, 0, 0.19);
-      group.add(inner);
-
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.43, 0.025, 12, 80), mat(accent, 0.24, 0.65, accent));
-      ring.rotation.x = 0.22;
-      ring.rotation.y = 0.28;
-      group.add(ring);
-
-      const label = new THREE.Mesh(
-        new THREE.PlaneGeometry(1.72, 0.59),
-        new THREE.MeshBasicMaterial({ map: makeLabel(title, symbol, accent), transparent: true, depthWrite: false })
+      const mesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.42, 0.42),
+        new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false })
       );
-      label.position.set(0.12, -0.63, 0.08);
-      group.add(label);
-      return { group, ring };
+      mesh.position.z = 0.42;
+      return mesh;
     };
 
-    // Three meaningful parts of a freelancer's journey converge on MILE.
-    const work = makeNode("YOUR WORK", "↗", [-2.18, 1.05, 0], "#D7F36A");
-    const people = makeNode("YOUR NETWORK", "◎", [2.18, 1.05, 0], "#A8B4FF");
-    const growth = makeNode("YOUR GROWTH", "↑", [-2.18, -1.22, 0], "#83DDB1");
-    const opportunity = makeNode("OPPORTUNITY", "✦", [2.18, -1.22, 0], "#D7F36A");
-
-    // Central MILE hub: the visual point where the three streams meet.
-    const hub = new THREE.Group();
-    scene.add(hub);
-    const core = new THREE.Mesh(new THREE.SphereGeometry(0.78, 64, 56), mat("#25215C", 0.2, 0.55, "#25215C"));
-    hub.add(core);
-    const coreInner = new THREE.Mesh(new THREE.SphereGeometry(0.57, 48, 40), mat("#11183D", 0.24, 0.42));
-    coreInner.position.z = 0.22;
-    hub.add(coreInner);
-    const halo = new THREE.Mesh(new THREE.TorusGeometry(0.96, 0.045, 16, 120), mat("#D7F36A", 0.2, 0.65, "#D7F36A"));
-    halo.rotation.x = 0.45;
-    hub.add(halo);
-    const halo2 = new THREE.Mesh(new THREE.TorusGeometry(1.12, 0.018, 10, 120), mat("#A8B4FF", 0.22, 0.7, "#747BFF"));
-    halo2.rotation.y = 0.7;
-    hub.add(halo2);
-
-    const hubCanvas = document.createElement("canvas");
-    hubCanvas.width = 512;
-    hubCanvas.height = 256;
-    const hctx = hubCanvas.getContext("2d");
-    if (hctx) {
-      hctx.clearRect(0, 0, 512, 256);
-      hctx.fillStyle = "#D7F36A";
-      hctx.font = "900 112px Arial";
-      hctx.textAlign = "center";
-      hctx.textBaseline = "middle";
-      hctx.fillText("MILE", 256, 104);
-      hctx.fillStyle = "#FFFFFF";
-      hctx.font = "600 27px Arial";
-      hctx.fillText("EVERY STEP CONNECTS", 256, 183);
-    }
-    const hubTexture = new THREE.CanvasTexture(hubCanvas);
-    hubTexture.colorSpace = THREE.SRGBColorSpace;
-    const hubLabel = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.48, 0.74),
-      new THREE.MeshBasicMaterial({ map: hubTexture, transparent: true, depthWrite: false })
+    // Work: a dimensional portfolio case with layered project sheets and a real handle.
+    const work = new THREE.Group();
+    work.position.set(-2.05, 1.62, 0);
+    work.rotation.set(-0.12, -0.2, -0.16);
+    scene.add(work);
+    const portfolio = extruded(0.92, 0.72, 0.22, indigo, 0.12);
+    portfolio.position.z = 0.05;
+    work.add(portfolio);
+    const folderFace = extruded(0.78, 0.56, 0.06, navy, 0.08);
+    folderFace.position.set(0, -0.02, 0.19);
+    work.add(folderFace);
+    const sheet1 = extruded(0.48, 0.58, 0.035, pale, 0.035);
+    sheet1.position.set(-0.06, 0.15, -0.13);
+    sheet1.rotation.z = 0.1;
+    work.add(sheet1);
+    const sheet2 = extruded(0.48, 0.58, 0.035, blueMat, 0.035);
+    sheet2.position.set(0.12, 0.1, -0.08);
+    sheet2.rotation.z = -0.12;
+    work.add(sheet2);
+    const handle = new THREE.Mesh(
+      new THREE.TorusGeometry(0.19, 0.045, 12, 36, Math.PI),
+      limeMat
     );
-    hubLabel.position.set(0, 0.02, 0.84);
-    hub.add(hubLabel);
+    handle.position.set(0, 0.38, 0.02);
+    work.add(handle);
+    const clasp = extruded(0.18, 0.1, 0.07, limeMat, 0.025);
+    clasp.position.set(0, -0.12, 0.32);
+    work.add(clasp);
+    work.add(makeText("YOUR WORK", "Skills  •  Projects", "#D7F36A"));
 
-    // Curved links make the meaning legible: work, people and growth feed the hub;
-    // the hub then leads to a concrete opportunity.
-    const paths = [
-      new THREE.QuadraticBezierCurve3(new THREE.Vector3(-1.86, 0.94, -0.1), new THREE.Vector3(-1.12, 0.5, 0.25), new THREE.Vector3(-0.62, 0.38, 0.25)),
-      new THREE.QuadraticBezierCurve3(new THREE.Vector3(1.86, 0.94, -0.1), new THREE.Vector3(1.12, 0.5, 0.25), new THREE.Vector3(0.62, 0.38, 0.25)),
-      new THREE.QuadraticBezierCurve3(new THREE.Vector3(-1.86, -1.08, -0.1), new THREE.Vector3(-1.12, -0.5, 0.25), new THREE.Vector3(-0.62, -0.38, 0.25)),
-      new THREE.QuadraticBezierCurve3(new THREE.Vector3(0.68, -0.35, 0.3), new THREE.Vector3(1.28, -0.55, 0.35), new THREE.Vector3(1.88, -1.05, 0.05)),
+    // Network: three dimensional member figures linked around a shared centre.
+    const community = new THREE.Group();
+    community.position.set(-2.05, 0, 0);
+    scene.add(community);
+    const people = [
+      { x: -0.35, y: 0.16, z: 0.12, m: blueMat, scale: 0.82 },
+      { x: 0.34, y: 0.18, z: 0.1, m: limeMat, scale: 0.9 },
+      { x: 0, y: -0.3, z: 0.2, m: mintMat, scale: 0.76 },
     ];
-    const pathMaterials: THREE.MeshStandardMaterial[] = [];
-    paths.forEach((curve, index) => {
-      const material = new THREE.MeshStandardMaterial({
-        color: index === 3 ? "#D7F36A" : "#A8B4FF",
-        emissive: index === 3 ? "#D7F36A" : "#747BFF",
-        emissiveIntensity: 0.48,
-        metalness: 0.55,
-        roughness: 0.28,
-        transparent: true,
-        opacity: 0.86,
-      });
-      pathMaterials.push(material);
-      const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 64, 0.025, 10, false), material);
-      scene.add(tube);
+    people.forEach((person) => {
+      const avatar = new THREE.Group();
+      avatar.position.set(person.x, person.y, person.z);
+      avatar.scale.setScalar(person.scale);
+      const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.14, 0.22, 5, 16), person.m);
+      torso.position.y = -0.16;
+      avatar.add(torso);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.115, 24, 20), pale);
+      head.position.y = 0.12;
+      avatar.add(head);
+      community.add(avatar);
     });
+    tube([
+      new THREE.Vector3(-0.38, 0.12, 0.05),
+      new THREE.Vector3(-0.12, 0.35, 0.12),
+      new THREE.Vector3(0.22, 0.34, 0.12),
+      new THREE.Vector3(0.4, 0.12, 0.05),
+      new THREE.Vector3(0.05, -0.36, 0.14),
+      new THREE.Vector3(-0.38, 0.12, 0.05),
+    ], 0.018, blueMat).parent = community;
+    const communityRing = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.025, 10, 80), blueMat);
+    communityRing.rotation.x = 0.4;
+    community.add(communityRing);
+    community.add(makeText("YOUR NETWORK", "People  •  Connections", "#B8C0FF"));
 
-    // Small moving pulses show information travelling through the connected system.
-    const pulses = paths.map((curve, index) => {
+    // Growth: ascending solid blocks and a sculpted rising path.
+    const growth = new THREE.Group();
+    growth.position.set(-2.05, -1.62, 0);
+    growth.rotation.y = -0.16;
+    scene.add(growth);
+    [-0.43, -0.12, 0.19, 0.5].forEach((x, i) => {
+      const bar = extruded(0.22, 0.24 + i * 0.17, 0.25, i === 3 ? limeMat : mintMat, 0.035);
+      bar.position.set(x, -0.12 + (0.24 + i * 0.17) / 2, 0.08);
+      growth.add(bar);
+    });
+    const growthCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(-0.52, -0.05, 0.28),
+      new THREE.Vector3(-0.12, 0.16, 0.34),
+      new THREE.Vector3(0.2, 0.38, 0.34),
+      new THREE.Vector3(0.52, 0.72, 0.34),
+    ]);
+    growth.add(new THREE.Mesh(new THREE.TubeGeometry(growthCurve, 40, 0.035, 10, false), limeMat));
+    const arrowHead = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.25, 4), limeMat);
+    arrowHead.position.set(0.52, 0.78, 0.34);
+    arrowHead.rotation.z = -0.55;
+    growth.add(arrowHead);
+    growth.add(makeText("YOUR GROWTH", "Progress  •  Momentum", "#9AE8C7"));
+
+    // MILE is the centrepiece: a dimensional ring/bridge that gathers the three streams.
+    const hub = new THREE.Group();
+    hub.position.set(0.18, 0, 0.2);
+    scene.add(hub);
+    const hubBase = new THREE.Mesh(new THREE.CylinderGeometry(0.78, 0.9, 0.2, 8, 1), navy);
+    hubBase.rotation.x = Math.PI / 2;
+    hub.add(hubBase);
+    const outer = new THREE.Mesh(new THREE.TorusGeometry(0.78, 0.105, 20, 96), limeMat);
+    hub.add(outer);
+    const inner = new THREE.Mesh(new THREE.TorusGeometry(0.58, 0.035, 12, 96), blueMat);
+    inner.rotation.z = Math.PI / 8;
+    hub.add(inner);
+    const core = new THREE.Mesh(new THREE.SphereGeometry(0.48, 48, 40), indigo);
+    core.position.z = 0.06;
+    hub.add(core);
+    const mileCanvas = document.createElement("canvas");
+    mileCanvas.width = 512;
+    mileCanvas.height = 256;
+    const mctx = mileCanvas.getContext("2d");
+    if (mctx) {
+      mctx.fillStyle = "#D7F36A";
+      mctx.font = "900 118px Arial";
+      mctx.textAlign = "center";
+      mctx.textBaseline = "middle";
+      mctx.fillText("MILE", 256, 105);
+      mctx.fillStyle = "#FFFFFF";
+      mctx.font = "600 25px Arial";
+      mctx.fillText("EVERY STEP HAS A PURPOSE", 256, 190);
+    }
+    const mileTexture = new THREE.CanvasTexture(mileCanvas);
+    mileTexture.colorSpace = THREE.SRGBColorSpace;
+    const mileFace = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.28, 0.64),
+      new THREE.MeshBasicMaterial({ map: mileTexture, transparent: true, depthWrite: false })
+    );
+    mileFace.position.set(0, 0, 0.53);
+    hub.add(mileFace);
+
+    // Opportunity: a bright open portal with a dimensional star at its centre.
+    const opportunity = new THREE.Group();
+    opportunity.position.set(2.15, 0.08, 0.12);
+    scene.add(opportunity);
+    const portal = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.09, 18, 80), limeMat);
+    portal.scale.set(0.78, 1.2, 0.8);
+    opportunity.add(portal);
+    const portalInner = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.022, 10, 72), pale);
+    portalInner.scale.set(0.78, 1.2, 0.8);
+    opportunity.add(portalInner);
+    const starShape = new THREE.Shape();
+    for (let i = 0; i < 10; i++) {
+      const radius = i % 2 === 0 ? 0.34 : 0.15;
+      const angle = (i / 10) * Math.PI * 2 - Math.PI / 2;
+      const x = Math.cos(angle) * radius;
+      const y = Math.sin(angle) * radius;
+      if (i === 0) starShape.moveTo(x, y);
+      else starShape.lineTo(x, y);
+    }
+    starShape.closePath();
+    const star = new THREE.Mesh(
+      new THREE.ExtrudeGeometry(starShape, { depth: 0.13, bevelEnabled: true, bevelSize: 0.035, bevelThickness: 0.035, bevelSegments: 3 }),
+      limeMat
+    );
+    star.geometry.center();
+    star.position.z = 0.18;
+    opportunity.add(star);
+    opportunity.add(makeText("NEXT OPPORTUNITY", "The next step forward", "#D7F36A"));
+
+    // Distinct energy routes: three inputs converge into MILE, then continue outward.
+    const routes = [
+      [new THREE.Vector3(-1.48, 1.55, 0.08), new THREE.Vector3(-0.95, 1.12, 0.18), new THREE.Vector3(-0.48, 0.52, 0.32)],
+      [new THREE.Vector3(-1.42, 0.02, 0.08), new THREE.Vector3(-0.92, 0.02, 0.25), new THREE.Vector3(-0.58, 0.02, 0.4)],
+      [new THREE.Vector3(-1.48, -1.55, 0.08), new THREE.Vector3(-0.92, -1.05, 0.2), new THREE.Vector3(-0.46, -0.5, 0.32)],
+      [new THREE.Vector3(0.88, 0.02, 0.45), new THREE.Vector3(1.28, 0.02, 0.4), new THREE.Vector3(1.58, 0.02, 0.25)],
+    ].map((points, i) => {
+      const curve = new THREE.CatmullRomCurve3(points);
+      const line = new THREE.Mesh(
+        new THREE.TubeGeometry(curve, 48, i === 3 ? 0.035 : 0.022, 10, false),
+        i === 3 ? limeMat : blueMat
+      );
+      scene.add(line);
       const pulse = new THREE.Mesh(
-        new THREE.SphereGeometry(index === 3 ? 0.085 : 0.065, 24, 20),
-        new THREE.MeshStandardMaterial({
-          color: "#FFFFFF",
-          emissive: index === 3 ? "#D7F36A" : "#A8B4FF",
-          emissiveIntensity: 1.4,
-          roughness: 0.18,
-        })
+        new THREE.SphereGeometry(0.07, 20, 16),
+        material("#FFFFFF", 0.1, 0.15, i === 3 ? "#D7F36A" : "#A8B4FF")
       );
       scene.add(pulse);
-      return { curve, pulse, offset: index * 0.23 };
+      return { curve, pulse, offset: i * 0.21 };
+    });
+
+    // A few restrained glints give the forms depth without turning the scene into decoration.
+    const glints: THREE.Mesh[] = [];
+    [[-0.1, 2.25, 0.1], [1.2, 1.35, -0.1], [1.25, -1.25, 0.1], [-1.0, -2.35, 0.1]].forEach(([x, y, z], i) => {
+      const dot = new THREE.Mesh(new THREE.SphereGeometry(i === 0 ? 0.045 : 0.028, 16, 12), i % 2 ? blueMat : limeMat);
+      dot.position.set(x, y, z);
+      scene.add(dot);
+      glints.push(dot);
     });
 
     const resize = () => {
       if (disposed || !host) return;
       const width = Math.max(1, host.clientWidth);
       const height = Math.max(1, host.clientHeight);
-      renderer.setSize(width, height, false);
-      camera.aspect = width / height;
+      const aspect = width / height;
+      const viewHeight = 6.4;
+      camera.left = -(viewHeight * aspect) / 2;
+      camera.right = (viewHeight * aspect) / 2;
+      camera.top = viewHeight / 2;
+      camera.bottom = -viewHeight / 2;
       camera.updateProjectionMatrix();
+      renderer.setSize(width, height, false);
     };
     const observer = new ResizeObserver(resize);
     observer.observe(host);
@@ -236,33 +340,36 @@ function MileThreeScene() {
     const animate = () => {
       if (disposed) return;
       const t = clock.getElapsedTime();
-      hub.rotation.y = Math.sin(t * 0.32) * 0.07;
-      halo.rotation.z = t * 0.22;
-      halo2.rotation.x = 0.7 + t * 0.16;
-      [work, people, growth, opportunity].forEach((node, index) => {
-        node.group.position.z = Math.sin(t * 0.8 + index * 1.1) * 0.055;
-        node.ring.rotation.z = t * (index % 2 ? -0.3 : 0.3);
+      hub.rotation.z = Math.sin(t * 0.35) * 0.035;
+      outer.rotation.z = t * 0.16;
+      inner.rotation.z = -t * 0.22;
+      work.position.y = 1.62 + Math.sin(t * 0.75) * 0.035;
+      community.position.y = Math.sin(t * 0.7 + 1) * 0.025;
+      growth.position.y = -1.62 + Math.sin(t * 0.7 + 2) * 0.025;
+      portal.rotation.z = Math.sin(t * 0.45) * 0.05;
+      opportunity.children[2].rotation.z = t * 0.22;
+      routes.forEach(({ curve, pulse, offset }) => {
+        pulse.position.copy(curve.getPoint((t * 0.22 + offset) % 1));
       });
-      pulses.forEach(({ curve, pulse, offset }) => {
-        const progress = (t * 0.19 + offset) % 1;
-        pulse.position.copy(curve.getPoint(progress));
+      glints.forEach((dot, i) => {
+        dot.scale.setScalar(0.8 + (Math.sin(t * 1.6 + i) + 1) * 0.18);
       });
       renderer.render(scene, camera);
-      frame = requestAnimationFrame(animate);
+      raf = requestAnimationFrame(animate);
     };
     animate();
 
     return () => {
       disposed = true;
-      cancelAnimationFrame(frame);
+      cancelAnimationFrame(raf);
       observer.disconnect();
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
           object.geometry.dispose();
           const materials = Array.isArray(object.material) ? object.material : [object.material];
-          materials.forEach((material) => {
-            if ("map" in material && material.map) material.map.dispose();
-            material.dispose();
+          materials.forEach((item) => {
+            if ("map" in item && item.map) item.map.dispose();
+            item.dispose();
           });
         }
       });
@@ -276,10 +383,11 @@ function MileThreeScene() {
       ref={hostRef}
       className="relative z-10 h-[330px] w-full max-w-[460px] overflow-visible sm:h-[370px]"
       role="img"
-      aria-label="A connected MILE network: work, people and growth converge through the MILE hub and lead to a new opportunity"
+      aria-label="A premium isometric 3D illustration showing a portfolio, connected freelancer community and growth coming together through MILE and opening into a new opportunity"
     />
   );
 }
+
 export default function DashboardWorkspace() {
   const supabase = useMemo(() => createClient(), []);
   const [section, setSection] = useState<Section>("Overview");
