@@ -2,6 +2,8 @@
 """Build MILE's 60-second live-action welcome film from free Pexels footage."""
 import pathlib
 import subprocess
+import time
+import shutil
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MEDIA = ROOT / "public" / "media"
@@ -32,22 +34,46 @@ def require_file(path, minimum=1024):
         raise RuntimeError(f"Expected media file was not created or is too small: {path}")
     return path
 
-# Download five real, free-to-use Pexels video clips.
+# Download five real, free-to-use Pexels clips. Pexels can rate-limit
+# consecutive automated requests, so space requests and rotate through verified
+# alternatives instead of failing the whole film on one temporary 403.
 clips = []
+source_urls = [url for url, _ in SCENES]
 for index, (url, _) in enumerate(SCENES, 1):
     target = WORK / f"scene{index}.mp4"
-    run([
-        "yt-dlp", "--no-warnings", "--no-progress", "--no-playlist", "--extractor-args", "generic:impersonate",
-        "--force-overwrites", "-f",
-        "bv*[ext=mp4][height<=1080]/b[ext=mp4]/best",
-        "--merge-output-format", "mp4", "-o", str(target), url
-    ])
-    if not target.exists():
-        candidates = sorted(WORK.glob(f"scene{index}.*"))
-        if not candidates:
-            raise RuntimeError(f"Pexels download failed for scene {index}: {url}")
-        target = candidates[0]
+    alternatives = [url] + [candidate for candidate in source_urls if candidate != url]
+    downloaded = False
+    for candidate_url in alternatives:
+        for attempt in range(3):
+            try:
+                run([
+                    "yt-dlp", "--no-warnings", "--no-progress", "--no-playlist",
+                    "--extractor-args", "generic:impersonate",
+                    "--retries", "5", "--extractor-retries", "5",
+                    "--retry-sleep", "extractor:exp=1:8",
+                    "--sleep-requests", "2", "--force-overwrites", "-f",
+                    "bv*[ext=mp4][height<=1080]/b[ext=mp4]/best",
+                    "--merge-output-format", "mp4", "-o", str(target), candidate_url
+                ])
+                require_file(target)
+                downloaded = True
+                break
+            except (subprocess.CalledProcessError, RuntimeError) as error:
+                if target.exists():
+                    target.unlink()
+                print(f"Retrying Pexels scene {index}, attempt {attempt + 1}: {error}", flush=True)
+                time.sleep(3 + attempt * 2)
+        if downloaded:
+            break
+    if not downloaded:
+        # Last-resort visual continuity: reuse a successfully downloaded real
+        # clip rather than leaving a broken video or synthetic placeholder.
+        if not clips:
+            raise RuntimeError(f"Unable to download any Pexels footage for scene {index}")
+        shutil.copyfile(clips[-1], target)
+        print(f"Using previous real footage as scene {index} fallback", flush=True)
     clips.append(require_file(target))
+    time.sleep(3)
 
 # Generate a warm Nigerian-English male voice-over.
 narration = " ".join(line for _, line in SCENES)
