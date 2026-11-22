@@ -44,234 +44,181 @@ function MileThreeScene() {
     if (!host) return;
     let frame = 0;
     let disposed = false;
-    let mixer: THREE.AnimationMixer | null = null;
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color("#123D2B");
 
-    const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
-    camera.position.set(6.1, 3.7, 9.2);
-    camera.lookAt(0, 1.9, 0);
+    const scene = new THREE.Scene();
+    // A genuinely transparent canvas: the dashboard surface remains visible behind the artwork.
+    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+    camera.position.set(0, 0, 9.2);
+    camera.lookAt(0, 0, 0);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.08;
+    renderer.toneMappingExposure = 1.15;
     host.appendChild(renderer.domElement);
 
-    const hemi = new THREE.HemisphereLight("#F2F4FF", "#203B31", 2.2);
-    scene.add(hemi);
-    const key = new THREE.DirectionalLight("#FFF0DE", 4.8);
-    key.position.set(-4, 8, 6);
-    key.castShadow = true;
-    key.shadow.mapSize.set(2048, 2048);
+    scene.add(new THREE.AmbientLight("#FFFFFF", 1.6));
+    const key = new THREE.DirectionalLight("#FFFFFF", 3.2);
+    key.position.set(-3, 5, 7);
     scene.add(key);
-    const rim = new THREE.PointLight("#D7F36A", 18, 10);
-    rim.position.set(3.2, 4.4, -2.8);
-    scene.add(rim);
-    const fill = new THREE.PointLight("#8294FF", 10, 10);
-    fill.position.set(-4, 3, 2);
-    scene.add(fill);
+    const limeLight = new THREE.PointLight("#D7F36A", 18, 12);
+    limeLight.position.set(0, 1.5, 3);
+    scene.add(limeLight);
+    const blueLight = new THREE.PointLight("#747BFF", 13, 12);
+    blueLight.position.set(3, -2, 2);
+    scene.add(blueLight);
 
-    const material = (color: string, roughness = .55, metalness = 0) =>
-      new THREE.MeshStandardMaterial({ color, roughness, metalness });
+    const mat = (color: string, roughness = 0.3, metalness = 0.18, emissive?: string) =>
+      new THREE.MeshStandardMaterial({
+        color, roughness, metalness,
+        ...(emissive ? { emissive, emissiveIntensity: 0.28 } : {}),
+      });
 
-    const floor = new THREE.Mesh(
-      new THREE.CircleGeometry(8, 96),
-      material("#183B31", .94)
-    );
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -.04;
-    floor.receiveShadow = true;
-    scene.add(floor);
-
-    const platform = new THREE.Mesh(
-      new THREE.CylinderGeometry(2.95, 3.18, .18, 96),
-      material("#23483B", .72)
-    );
-    platform.position.y = .06;
-    platform.receiveShadow = true;
-    platform.castShadow = true;
-    scene.add(platform);
-
-    // Art-directed desk: enough physical depth to make the character feel embedded in a real scene.
-    const deskTop = new THREE.Mesh(
-      new THREE.BoxGeometry(4.8, .18, 1.7),
-      material("#DDE3DA", .34, .08)
-    );
-    deskTop.position.set(.1, 1.62, .08);
-    deskTop.castShadow = true;
-    deskTop.receiveShadow = true;
-    scene.add(deskTop);
-
-    const deskFront = new THREE.Mesh(
-      new THREE.BoxGeometry(4.58, .68, .12),
-      material("#223A61", .42, .25)
-    );
-    deskFront.position.set(.1, 1.25, -.69);
-    deskFront.castShadow = true;
-    scene.add(deskFront);
-
-    for (const x of [-1.95, 2.05]) {
-      const leg = new THREE.Mesh(new THREE.BoxGeometry(.13, 1.3, .13), material("#263047", .25, .7));
-      leg.position.set(x, .68, .08);
-      leg.castShadow = true;
-      scene.add(leg);
-    }
-
-    // Laptop with a physical screen and MILE accent.
-    const laptopBase = new THREE.Mesh(
-      new THREE.BoxGeometry(1.5, .08, .92),
-      material("#27314A", .3, .65)
-    );
-    laptopBase.position.set(.15, 1.75, .04);
-    laptopBase.castShadow = true;
-    scene.add(laptopBase);
-
-    const laptopScreen = new THREE.Mesh(
-      new THREE.BoxGeometry(1.48, 1.05, .07),
-      material("#10183B", .3, .25)
-    );
-    laptopScreen.position.set(.15, 2.28, -.36);
-    laptopScreen.rotation.x = -.08;
-    laptopScreen.castShadow = true;
-    scene.add(laptopScreen);
-
-    const screenGlow = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.29, .84),
-      new THREE.MeshBasicMaterial({ color: "#263B8C" })
-    );
-    screenGlow.position.set(.15, 2.28, -.398);
-    screenGlow.rotation.x = -.08;
-    scene.add(screenGlow);
-
-    const logo = new THREE.Mesh(
-      new THREE.CircleGeometry(.14, 32),
-      new THREE.MeshBasicMaterial({ color: "#D7F36A" })
-    );
-    logo.position.set(.15, 2.29, -.405);
-    logo.rotation.x = Math.PI / 2;
-    scene.add(logo);
-
-    // Coffee, notebook and plant add believable scale and a lived-in workspace.
-    const cup = new THREE.Mesh(new THREE.CylinderGeometry(.15, .13, .25, 40), material("#D7F36A", .4));
-    cup.position.set(1.65, 1.84, .28);
-    cup.castShadow = true;
-    scene.add(cup);
-
-    const coffee = new THREE.Mesh(new THREE.CircleGeometry(.112, 32), material("#4B3428", .9));
-    coffee.rotation.x = -Math.PI / 2;
-    coffee.position.set(1.65, 1.97, .28);
-    scene.add(coffee);
-
-    const notebook = new THREE.Mesh(new THREE.BoxGeometry(.72, .07, .48), material("#F2F0E4", .72));
-    notebook.position.set(-1.55, 1.75, .25);
-    notebook.rotation.y = -.08;
-    notebook.castShadow = true;
-    scene.add(notebook);
-
-    const plantPot = new THREE.Mesh(new THREE.CylinderGeometry(.18, .14, .3, 32), material("#E8EADF", .72));
-    plantPot.position.set(-1.95, 1.83, -.43);
-    plantPot.castShadow = true;
-    scene.add(plantPot);
-
-    for (let i = 0; i < 6; i++) {
-      const leaf = new THREE.Mesh(new THREE.SphereGeometry(.11, 24, 18), material("#88A987", .7));
-      leaf.scale.set(.5, 1.65, .38);
-      leaf.position.set(-1.95 + Math.cos(i * 1.05) * .16, 2.12 + Math.sin(i * 1.05) * .08, -.43 + Math.sin(i * 1.05) * .12);
-      leaf.rotation.z = (i - 2.5) * .26;
-      leaf.castShadow = true;
-      scene.add(leaf);
-    }
-
-    // Floating interface tiles are physical 3D cards, not SVG drawings.
-    const addCard = (position: [number, number, number], rotationZ: number, accent = true) => {
-      const group = new THREE.Group();
-      group.position.set(...position);
-      group.rotation.z = rotationZ;
-      scene.add(group);
-      const shadow = new THREE.Mesh(
-        new THREE.BoxGeometry(1.18, .82, .08),
-        material("#08112D", .75)
-      );
-      shadow.position.set(.045, -.055, -.08);
-      group.add(shadow);
-      const panel = new THREE.Mesh(
-        new THREE.BoxGeometry(1.18, .82, .08),
-        material("#F6F7F1", .34)
-      );
-      panel.castShadow = true;
-      group.add(panel);
-      const dot = new THREE.Mesh(
-        new THREE.SphereGeometry(.07, 20, 16),
-        accent ? material("#D7F36A", .4) : material("#9CA8E8", .5)
-      );
-      dot.position.set(-.42, .27, .08);
-      group.add(dot);
-      for (let i = 0; i < 3; i++) {
-        const line = new THREE.Mesh(
-          new THREE.BoxGeometry(.62 - i * .1, .035, .018),
-          material(i === 2 ? "#B5C1B9" : "#CDD3CE", .7)
-        );
-        line.position.set(.05, .26 - i * .15, .065);
-        group.add(line);
-      }
-      return group;
+    // Labels are part of the information architecture, not decorative interface tiles.
+    const makeLabel = (title: string, symbol: string, accent: string) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 512;
+      canvas.height = 176;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return new THREE.CanvasTexture(canvas);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#11183D";
+      ctx.beginPath();
+      ctx.roundRect(8, 8, 496, 160, 34);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,.17)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(86, 88, 43, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#101638";
+      ctx.font = "bold 46px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(symbol, 86, 90);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.textAlign = "left";
+      ctx.font = "bold 38px Arial";
+      ctx.fillText(title, 150, 100);
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.colorSpace = THREE.SRGBColorSpace;
+      return texture;
     };
 
-    const leftCard = addCard([-2.02, 3.12, -.4], -.09, true);
-    const rightCard = addCard([2.02, 3.42, -.5], .08, false);
+    const makeNode = (title: string, symbol: string, position: [number, number, number], accent: string) => {
+      const group = new THREE.Group();
+      group.position.set(...position);
+      scene.add(group);
 
-    // Realistic Rocketbox character from the open Avatar Studio project.
-    // The model carries skin, hair, clothing, facial detail and motion-captured clips.
-    const loader = new GLTFLoader();
-    const modelUrl = "https://memoriesrohit.github.io/avatar-studio/models/ryan_smart.glb";
-    loader.load(
-      modelUrl,
-      (gltf) => {
-        if (disposed) return;
-        const character = gltf.scene;
-        character.traverse((object) => {
-          if (object instanceof THREE.Mesh) {
-            object.castShadow = true;
-            object.receiveShadow = true;
-            if (Array.isArray(object.material)) {
-              object.material.forEach((m) => { m.needsUpdate = true; });
-            } else if (object.material) {
-              object.material.needsUpdate = true;
-            }
-          }
-        });
+      const orb = new THREE.Mesh(new THREE.SphereGeometry(0.31, 48, 40), mat(accent, 0.2, 0.42, accent));
+      orb.castShadow = true;
+      group.add(orb);
 
-        const bounds = new THREE.Box3().setFromObject(character);
-        const size = bounds.getSize(new THREE.Vector3());
-        const scale = 3.35 / Math.max(size.y, .001);
-        character.scale.setScalar(scale);
+      const inner = new THREE.Mesh(new THREE.SphereGeometry(0.16, 32, 28), mat("#FFFFFF", 0.18, 0.1));
+      inner.position.set(0, 0, 0.19);
+      group.add(inner);
 
-        const scaledBounds = new THREE.Box3().setFromObject(character);
-        const center = scaledBounds.getCenter(new THREE.Vector3());
-        const minY = scaledBounds.min.y;
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.43, 0.025, 12, 80), mat(accent, 0.24, 0.65, accent));
+      ring.rotation.x = 0.22;
+      ring.rotation.y = 0.28;
+      group.add(ring);
 
-        character.position.set(-.55, .08 - minY, .05);
-        character.position.x -= center.x * .06;
+      const label = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.72, 0.59),
+        new THREE.MeshBasicMaterial({ map: makeLabel(title, symbol, accent), transparent: true, depthWrite: false })
+      );
+      label.position.set(0.12, -0.63, 0.08);
+      group.add(label);
+      return { group, ring };
+    };
 
-        scene.add(character);
+    // Three meaningful parts of a freelancer's journey converge on MILE.
+    const work = makeNode("YOUR WORK", "↗", [-2.18, 1.05, 0], "#D7F36A");
+    const people = makeNode("YOUR NETWORK", "◎", [2.18, 1.05, 0], "#A8B4FF");
+    const growth = makeNode("YOUR GROWTH", "↑", [-2.18, -1.22, 0], "#83DDB1");
+    const opportunity = makeNode("OPPORTUNITY", "✦", [2.18, -1.22, 0], "#D7F36A");
 
-        if (gltf.animations.length) {
-          mixer = new THREE.AnimationMixer(character);
-          const preferred = gltf.animations.find((clip) => /think/i.test(clip.name))
-            || gltf.animations.find((clip) => /idle/i.test(clip.name))
-            || gltf.animations[0];
-          mixer.clipAction(preferred).play();
-        }
-      },
-      undefined,
-      () => {
-        // Keep the scene usable if the external model is temporarily unavailable.
-      }
+    // Central MILE hub: the visual point where the three streams meet.
+    const hub = new THREE.Group();
+    scene.add(hub);
+    const core = new THREE.Mesh(new THREE.SphereGeometry(0.78, 64, 56), mat("#25215C", 0.2, 0.55, "#25215C"));
+    hub.add(core);
+    const coreInner = new THREE.Mesh(new THREE.SphereGeometry(0.57, 48, 40), mat("#11183D", 0.24, 0.42));
+    coreInner.position.z = 0.22;
+    hub.add(coreInner);
+    const halo = new THREE.Mesh(new THREE.TorusGeometry(0.96, 0.045, 16, 120), mat("#D7F36A", 0.2, 0.65, "#D7F36A"));
+    halo.rotation.x = 0.45;
+    hub.add(halo);
+    const halo2 = new THREE.Mesh(new THREE.TorusGeometry(1.12, 0.018, 10, 120), mat("#A8B4FF", 0.22, 0.7, "#747BFF"));
+    halo2.rotation.y = 0.7;
+    hub.add(halo2);
+
+    const hubCanvas = document.createElement("canvas");
+    hubCanvas.width = 512;
+    hubCanvas.height = 256;
+    const hctx = hubCanvas.getContext("2d");
+    if (hctx) {
+      hctx.clearRect(0, 0, 512, 256);
+      hctx.fillStyle = "#D7F36A";
+      hctx.font = "900 112px Arial";
+      hctx.textAlign = "center";
+      hctx.textBaseline = "middle";
+      hctx.fillText("MILE", 256, 104);
+      hctx.fillStyle = "#FFFFFF";
+      hctx.font = "600 27px Arial";
+      hctx.fillText("EVERY STEP CONNECTS", 256, 183);
+    }
+    const hubTexture = new THREE.CanvasTexture(hubCanvas);
+    hubTexture.colorSpace = THREE.SRGBColorSpace;
+    const hubLabel = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.48, 0.74),
+      new THREE.MeshBasicMaterial({ map: hubTexture, transparent: true, depthWrite: false })
     );
+    hubLabel.position.set(0, 0.02, 0.84);
+    hub.add(hubLabel);
+
+    // Curved links make the meaning legible: work, people and growth feed the hub;
+    // the hub then leads to a concrete opportunity.
+    const paths = [
+      new THREE.QuadraticBezierCurve3(new THREE.Vector3(-1.86, 0.94, -0.1), new THREE.Vector3(-1.12, 0.5, 0.25), new THREE.Vector3(-0.62, 0.38, 0.25)),
+      new THREE.QuadraticBezierCurve3(new THREE.Vector3(1.86, 0.94, -0.1), new THREE.Vector3(1.12, 0.5, 0.25), new THREE.Vector3(0.62, 0.38, 0.25)),
+      new THREE.QuadraticBezierCurve3(new THREE.Vector3(-1.86, -1.08, -0.1), new THREE.Vector3(-1.12, -0.5, 0.25), new THREE.Vector3(-0.62, -0.38, 0.25)),
+      new THREE.QuadraticBezierCurve3(new THREE.Vector3(0.68, -0.35, 0.3), new THREE.Vector3(1.28, -0.55, 0.35), new THREE.Vector3(1.88, -1.05, 0.05)),
+    ];
+    const pathMaterials: THREE.MeshStandardMaterial[] = [];
+    paths.forEach((curve, index) => {
+      const material = new THREE.MeshStandardMaterial({
+        color: index === 3 ? "#D7F36A" : "#A8B4FF",
+        emissive: index === 3 ? "#D7F36A" : "#747BFF",
+        emissiveIntensity: 0.48,
+        metalness: 0.55,
+        roughness: 0.28,
+        transparent: true,
+        opacity: 0.86,
+      });
+      pathMaterials.push(material);
+      const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 64, 0.025, 10, false), material);
+      scene.add(tube);
+    });
+
+    // Small moving pulses show information travelling through the connected system.
+    const pulses = paths.map((curve, index) => {
+      const pulse = new THREE.Mesh(
+        new THREE.SphereGeometry(index === 3 ? 0.085 : 0.065, 24, 20),
+        new THREE.MeshStandardMaterial({
+          color: "#FFFFFF",
+          emissive: index === 3 ? "#D7F36A" : "#A8B4FF",
+          emissiveIntensity: 1.4,
+          roughness: 0.18,
+        })
+      );
+      scene.add(pulse);
+      return { curve, pulse, offset: index * 0.23 };
+    });
 
     const resize = () => {
       if (disposed || !host) return;
@@ -281,7 +228,6 @@ function MileThreeScene() {
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
     };
-
     const observer = new ResizeObserver(resize);
     observer.observe(host);
     resize();
@@ -289,11 +235,18 @@ function MileThreeScene() {
     const clock = new THREE.Clock();
     const animate = () => {
       if (disposed) return;
-      const delta = clock.getDelta();
-      mixer?.update(delta);
-      const t = clock.elapsedTime;
-      leftCard.position.y = 3.12 + Math.sin(t * .7) * .045;
-      rightCard.position.y = 3.42 + Math.sin(t * .7 + 1.2) * .05;
+      const t = clock.getElapsedTime();
+      hub.rotation.y = Math.sin(t * 0.32) * 0.07;
+      halo.rotation.z = t * 0.22;
+      halo2.rotation.x = 0.7 + t * 0.16;
+      [work, people, growth, opportunity].forEach((node, index) => {
+        node.group.position.z = Math.sin(t * 0.8 + index * 1.1) * 0.055;
+        node.ring.rotation.z = t * (index % 2 ? -0.3 : 0.3);
+      });
+      pulses.forEach(({ curve, pulse, offset }) => {
+        const progress = (t * 0.19 + offset) % 1;
+        pulse.position.copy(curve.getPoint(progress));
+      });
       renderer.render(scene, camera);
       frame = requestAnimationFrame(animate);
     };
@@ -307,7 +260,10 @@ function MileThreeScene() {
         if (object instanceof THREE.Mesh) {
           object.geometry.dispose();
           const materials = Array.isArray(object.material) ? object.material : [object.material];
-          materials.forEach((m) => m.dispose());
+          materials.forEach((material) => {
+            if ("map" in material && material.map) material.map.dispose();
+            material.dispose();
+          });
         }
       });
       renderer.dispose();
@@ -318,13 +274,12 @@ function MileThreeScene() {
   return (
     <div
       ref={hostRef}
-      className="relative z-10 h-[330px] w-full max-w-[460px] overflow-hidden sm:h-[370px]"
+      className="relative z-10 h-[330px] w-full max-w-[460px] overflow-visible sm:h-[370px]"
       role="img"
-      aria-label="A realistic 3D freelancer working in a dimensional MILE workspace"
+      aria-label="A connected MILE network: work, people and growth converge through the MILE hub and lead to a new opportunity"
     />
   );
 }
-
 export default function DashboardWorkspace() {
   const supabase = useMemo(() => createClient(), []);
   const [section, setSection] = useState<Section>("Overview");
