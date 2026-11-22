@@ -35,188 +35,80 @@ const starterTasks = [
 
 
 function MileThreeScene() {
-  const [soundOn, setSoundOn] = useState(false);
   const [stage, setStage] = useState(0);
-  const audioRef = useRef<AudioContext | null>(null);
+  const [playing, setPlaying] = useState(true);
   const stages = [
-    { title: "A new opportunity arrives", detail: "The next step starts with a connection.", tag: "NEW OPPORTUNITY" },
-    { title: "The right people connect", detail: "Skills meet ideas. A working relationship begins.", tag: "CONNECTION MADE" },
-    { title: "Good work happens together", detail: "Ideas become focused, shared progress.", tag: "IN COLLABORATION" },
-    { title: "Progress becomes momentum", detail: "Every completed step moves you forward.", tag: "MILESTONE REACHED" },
+    { tag: "CHAPTER 01 · THE BEGINNING", title: "The talent was there. The direction wasn't.", detail: "Late nights. A growing skill set. Too many unanswered questions — and no clear next move.", feature: "A freelancer with potential", card: "Where do I begin?", scene: "from-slate-800 via-slate-900 to-[#172630]" },
+    { tag: "CHAPTER 02 · FINDING DIRECTION", title: "Growth starts when the next step becomes clear.", detail: "A stronger profile, a clear service and a plan turn scattered effort into focused action.", feature: "Profile · Growth Plan", card: "One clear next step", scene: "from-[#25463f] via-[#1a3438] to-[#172c32]" },
+    { tag: "CHAPTER 03 · LEARNING THE MARKET", title: "Better decisions come from better understanding.", detail: "The AI Growth Coach, Gig Analyzer and research tools help turn questions into practical improvements.", feature: "AI Coach · Gig Analyzer · Research", card: "Understand. Improve. Test.", scene: "from-[#263d54] via-[#1b3042] to-[#172838]" },
+    { tag: "CHAPTER 04 · GROWING TOGETHER", title: "You don't have to build alone.", detail: "Community creates room to exchange ideas, find collaborators and learn from people on a similar journey.", feature: "MILE Community", card: "A connection changes the journey", scene: "from-[#354451] via-[#203846] to-[#172d37]" },
+    { tag: "CHAPTER 05 · THE NEXT MILE", title: "Progress is not the finish line. It's momentum.", detail: "A completed project is a milestone. The confidence, insight and relationships built along the way make the next one possible.", feature: "Performance · Your next move", card: "Every step has a purpose.", scene: "from-[#3c5146] via-[#1f403c] to-[#172f31]" },
   ];
-
-  const playCue = (step: number) => {
-    try {
-      const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-      if (!AudioContextClass) return;
-      const context = audioRef.current ?? new AudioContextClass();
-      audioRef.current = context;
-      if (context.state === "suspended") void context.resume();
-      const now = context.currentTime;
-      const notes = step === 0 ? [660] : step === 1 ? [523, 784] : step === 2 ? [587, 740] : [523, 659, 784];
-      notes.forEach((frequency, index) => {
-        const oscillator = context.createOscillator();
-        const gain = context.createGain();
-        oscillator.type = "sine";
-        oscillator.frequency.setValueAtTime(frequency, now + index * 0.11);
-        gain.gain.setValueAtTime(0.0001, now + index * 0.11);
-        gain.gain.exponentialRampToValueAtTime(0.045, now + index * 0.11 + 0.025);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.11 + 0.42);
-        oscillator.connect(gain);
-        gain.connect(context.destination);
-        oscillator.start(now + index * 0.11);
-        oscillator.stop(now + index * 0.11 + 0.45);
-      });
-    } catch {
-      // Sound is an enhancement; the visual story remains fully usable without it.
-    }
-  };
-
   useEffect(() => {
-    const timer = window.setInterval(() => {
-      setStage((current) => {
-        const next = (current + 1) % stages.length;
-        if (soundOn) playCue(next);
-        return next;
-      });
-    }, 4200);
+    if (!playing) return;
+    const timer = window.setInterval(() => setStage((value) => (value + 1) % stages.length), 6200);
     return () => window.clearInterval(timer);
-  }, [soundOn]);
-
-  useEffect(() => () => {
-    if (audioRef.current && audioRef.current.state !== "closed") void audioRef.current.close();
-  }, []);
-
+  }, [playing]);
+  const current = stages[stage];
   return (
-    <div className="mile-story relative isolate w-full max-w-[540px] overflow-hidden rounded-[26px] border border-white/15 bg-[#102D24]/55 px-3 pb-4 pt-3 shadow-[0_24px_60px_rgba(0,0,0,.22)] sm:px-5" aria-label="MILE animated story: opportunity, connection, collaboration and progress">
-      <div className="mile-story-glow pointer-events-none absolute inset-0" />
-      <div className="relative z-20 flex items-center justify-between gap-3 px-1">
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-[#D7F36A] shadow-[0_0_12px_#D7F36A]" />
-          <span className="text-[9px] font-extrabold uppercase tracking-[.2em] text-white/75">The MILE journey</span>
+    <section className="relative isolate w-full max-w-[560px] overflow-hidden rounded-[28px] border border-white/10 bg-[#101D28] px-4 pb-5 pt-4 shadow-[0_28px_70px_rgba(0,0,0,.28)] sm:px-6" aria-label="The MILE journey, a five-chapter story">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_42%,rgba(215,243,106,.13),transparent_56%)]"/>
+      <header className="relative z-20 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5"><span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#D7F36A] text-[11px] font-black text-[#17251E]">M.</span><div><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-white">The MILE story</p><p className="mt-0.5 text-[9px] text-white/45">A journey in five chapters</p></div></div>
+        <button type="button" onClick={() => setPlaying((value) => !value)} aria-pressed={playing} className="rounded-full border border-white/15 bg-white/[.06] px-3 py-2 text-[10px] font-bold text-white/75 transition hover:bg-white/10">{playing ? "Ⅱ Pause story" : "▶ Play story"}</button>
+      </header>
+      <div className={"relative mx-auto mt-3 aspect-[1.22/1] w-full max-w-[490px] overflow-hidden rounded-[22px] border border-white/[.08] bg-gradient-to-br " + current.scene}>
+        <div className="absolute right-[7%] top-[8%] h-[42%] w-[34%] rounded-xl border-[7px] border-white/[.08] bg-gradient-to-br from-[#D7F36A]/20 to-sky-300/10 shadow-[inset_0_0_35px_rgba(215,243,106,.08)]"/>
+        <div className="absolute right-[17%] top-[17%] h-8 w-8 rounded-full bg-[#D7F36A]/80 shadow-[0_0_45px_rgba(215,243,106,.5)] transition-all duration-1000"/>
+        <div className="absolute bottom-0 h-[22%] w-full bg-gradient-to-b from-[#23343a] to-[#17252c] [clip-path:polygon(0_18%,100%_0,100%_100%,0_100%)]"/>
+        <div className="absolute bottom-[13%] h-px w-full bg-gradient-to-r from-transparent via-[#D7F36A]/50 to-transparent"/>
+        <div className="absolute bottom-[10%] left-[5%] h-[16%] w-[36%] rounded-t-xl bg-gradient-to-br from-[#D1B28A] to-[#936C4C] shadow-xl">
+          <div className="absolute -top-[48%] left-[34%] h-[48%] w-[47%] -skew-y-6 rounded-t-md border-4 border-[#6D8381] bg-gradient-to-br from-[#1d2c36] to-[#344e56]"><span className="absolute inset-[16%] rounded-sm bg-gradient-to-br from-[#D7F36A]/30 to-[#7db8a3]/40"/><i className="absolute left-[22%] top-[35%] h-[3px] w-[52%] rounded bg-[#D7F36A]/60"/></div>
+          <div className="absolute -top-5 right-2 h-5 w-4 rounded-b-md bg-[#e8e9df]"/>
         </div>
-        <button type="button" onClick={() => {
-          const next = !soundOn;
-          setSoundOn(next);
-          if (next) playCue(stage);
-        }} aria-pressed={soundOn} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-[10px] font-bold text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D7F36A]">
-          <span aria-hidden="true">{soundOn ? "♫" : "♪"}</span>{soundOn ? "Sound on" : "Sound off"}
-        </button>
-      </div>
-      <div className="relative z-10 mx-auto mt-1 w-full">
-        <div className="mile-story-art-wrap relative mx-auto w-full max-w-[490px]">
-          <div className="mile-story-orbit mile-story-orbit-one" />
-          <div className="mile-story-orbit mile-story-orbit-two" />
-                <svg viewBox="0 0 620 470" className="mile-story-art relative z-10 block h-auto w-full drop-shadow-[0_24px_28px_rgba(4,14,10,0.24)]" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="mileSceneBg" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#214C38"/><stop offset="1" stopColor="#102D24"/></linearGradient>
-          <linearGradient id="mileDesk" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#D6B58A"/><stop offset="1" stopColor="#A8794E"/></linearGradient>
-          <linearGradient id="mileLaptop" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#394A51"/><stop offset="1" stopColor="#17262D"/></linearGradient>
-          <linearGradient id="mileLime" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#E8FF9B"/><stop offset="1" stopColor="#B7D94C"/></linearGradient>
-          <filter id="mileShadow" x="-30%" y="-30%" width="160%" height="180%"><feGaussianBlur stdDeviation="12"/></filter>
-        </defs>
-        <ellipse cx="313" cy="407" rx="226" ry="28" fill="#071A13" opacity=".32" filter="url(#mileShadow)"/>
-        <path d="M95 340c-6-40 9-68 41-79l51-14 47 39-8 100H115z" fill="#A8C95A" opacity=".9"/>
-        <path d="M425 340c-5-43 11-68 46-80l45-9 38 40-3 98H445z" fill="#A8C95A" opacity=".9"/>
-        <path d="M154 332v71m27-71v71m288-71v71m28-71v71" stroke="#7D9A42" strokeWidth="12" strokeLinecap="round"/>
-        <path d="M86 315c26-17 67-28 113-25l66 32-9 49H88z" fill="#D7F36A"/>
-        <path d="M380 321c32-25 81-34 127-19l45 28-7 43H384z" fill="#D7F36A"/>
-        <path d="M190 318c37-34 83-49 137-49 53 0 103 15 144 49l-20 62H209z" fill="url(#mileDesk)"/>
-        <path d="M205 365h246l-13 18H218z" fill="#8C603E" opacity=".85"/>
-        <path d="M246 382v32m164-32v32" stroke="#9A704A" strokeWidth="12" strokeLinecap="round"/>
-        <path d="M251 286l4-104c1-24 18-40 43-40h29c24 0 42 17 43 40l3 104-45 27h-34z" fill="#263A42"/>
-        <path d="M260 180c2-30 23-48 53-48 29 0 50 18 53 48l-6 44h-96z" fill="#20292D"/>
-        <ellipse cx="313" cy="173" rx="42" ry="48" fill="#9B6248"/>
-        <path d="M273 164c2-35 22-57 51-57 27 0 45 18 49 47-17-5-29-16-37-29-13 18-34 31-63 39z" fill="#171E20"/>
-        <path d="M291 177h7m29 0h7" stroke="#241B18" strokeWidth="4" strokeLinecap="round"/>
-        <path d="M300 198c9 7 19 7 28 0" stroke="#5D3028" strokeWidth="3" fill="none" strokeLinecap="round"/>
-        <path d="M279 220c18 16 49 18 69 0l26 63-43 31-57-31z" fill="#315D49"/>
-        <path d="M280 239l-41 40-33 11" stroke="#9B6248" strokeWidth="19" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M360 241l32 35 27-4" stroke="#9B6248" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M238 281l-12 6m191-15 13 1" stroke="#9B6248" strokeWidth="14" strokeLinecap="round"/>
-        <path d="M101 269c-4-35 15-63 47-66 31-3 54 19 55 52l-8 43-84 2z" fill="#182B2C"/>
-        <ellipse cx="151" cy="235" rx="33" ry="39" fill="#7D4B38"/>
-        <path d="M119 226c3-31 21-49 47-45 20 3 34 17 36 39-20 1-38-7-51-21-7 12-18 21-32 27z" fill="#12191A"/>
-        <path d="M123 270c13-13 44-17 60-3l24 64-86 4z" fill="#263F66"/>
-        <path d="M180 286l30 26 31-5" stroke="#7D4B38" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M448 263c2-37 24-61 55-59 31 2 49 27 44 62l-10 35h-84z" fill="#171F25"/>
-        <ellipse cx="500" cy="234" rx="34" ry="39" fill="#8B5944"/>
-        <path d="M464 225c0-31 19-51 44-51 27 0 42 19 41 48-15-4-29-15-37-28-12 17-28 27-48 31z" fill="#141B20"/>
-        <path d="M468 269c16-13 45-15 63 1l22 64h-105z" fill="#233D63"/>
-        <path d="M476 286l-30 25-31-6" stroke="#8B5944" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M205 292l49-12 24 11-13 10-53 10z" fill="#9B6248"/>
-        <path d="M399 286l-38-10-22 12 12 10 46 6z" fill="#9B6248"/>
-        <path d="M250 292l50-10 27 8-5 8-65 8z" fill="#263238"/>
-        <path d="M340 292l43-11 29 8-4 9-58 9z" fill="#263238"/>
-        <g transform="translate(243 275)">
-          <path d="M0 13l77-13 22 10-78 15z" fill="#E7ECE7"/>
-          <path d="M21 25l78-15v4L21 29z" fill="#AAB7B0"/>
-          <path d="M0 13v5l21 11v-4z" fill="#BBC8C0"/>
-          <path d="M17 10l47-8 11 5-48 9z" fill="#3D5E50"/>
-          <path d="M44 8l4-1" stroke="#D7F36A" strokeWidth="2" strokeLinecap="round"/>
-        </g>
-        <g transform="translate(414 264)">
-          <rect x="0" y="0" width="48" height="33" rx="5" transform="rotate(-9)" fill="#1B2C32"/>
-          <rect x="5" y="4" width="38" height="24" rx="3" transform="rotate(-9)" fill="#BBD7C4"/>
-          <path d="M12 12l19-3m-17 8 14-2" stroke="#426F58" strokeWidth="2" strokeLinecap="round"/>
-        </g>
-        <g transform="translate(178 320)">
-          <rect width="34" height="25" rx="6" fill="#243A32"/>
-          <path d="M7 7h20M7 13h14" stroke="#D7F36A" strokeWidth="2" strokeLinecap="round"/>
-        </g>
-        <g transform="translate(472 318)">
-          <path d="M0 8h29l-3 24H4z" fill="#F4F1E8"/>
-          <path d="M29 13c13-2 12 15 0 15" fill="none" stroke="#F4F1E8" strokeWidth="5"/>
-          <path d="M8 4c-4-8 6-9 3-15m9 15c-4-8 6-9 3-15" stroke="#D7F36A" strokeWidth="2" strokeLinecap="round" fill="none"/>
-        </g>
-        <g transform="translate(80 95)">
-          <rect width="105" height="62" rx="14" fill="#F7FAF3"/>
-          <circle cx="22" cy="22" r="7" fill="#D7F36A"/><path d="M38 22h48M15 42h70" stroke="#9EAAA0" strokeWidth="5" strokeLinecap="round"/>
-          <path d="M94 62l13 16" stroke="#F7FAF3" strokeWidth="5" strokeLinecap="round"/>
-        </g>
-        <g transform="translate(442 78)">
-          <rect width="102" height="64" rx="14" fill="#D7F36A"/>
-          <path d="M19 42l15-14 12 7 25-23" fill="none" stroke="#234333" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M60 12h11v11" fill="none" stroke="#234333" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
-        </g>
-        <circle cx="314" cy="68" r="7" fill="#D7F36A"/><circle cx="333" cy="51" r="3" fill="#FFFFFF" opacity=".8"/>
-        <path d="M302 62l-11-11m48 32 11 10" stroke="#D7F36A" strokeWidth="3" strokeLinecap="round" opacity=".8"/>
-      </svg>
-          <div className="mile-story-float mile-story-float-left absolute left-[1%] top-[17%] rounded-xl border border-[#D7F36A]/25 bg-[#F8FAF3] px-3 py-2 text-[#193B2B] shadow-xl">
-            <span className="block text-[8px] font-extrabold tracking-[.13em] text-[#64806D]">PROJECT INVITE</span>
-            <span className="mt-1 flex items-center gap-1.5 text-[10px] font-bold"><span className="h-1.5 w-1.5 rounded-full bg-[#1DBF73]"/> A new brief is here</span>
-          </div>
-          <div className="mile-story-float mile-story-float-right absolute right-[0%] top-[23%] rounded-xl border border-white/20 bg-[#D7F36A] px-3 py-2 text-[#183522] shadow-xl">
-            <span className="block text-[8px] font-extrabold tracking-[.13em]">TEAM UPDATE</span>
-            <span className="mt-1 flex items-center gap-1.5 text-[10px] font-extrabold"><span aria-hidden="true">✓</span> Shared progress</span>
-          </div>
-          <div className="mile-story-success absolute bottom-[10%] right-[5%] flex h-10 w-10 items-center justify-center rounded-full border-4 border-[#102D24] bg-[#D7F36A] text-lg font-black text-[#183522] shadow-lg">✓</div>
+        <div className="absolute bottom-[8%] left-1/2 z-[5] h-[80%] -translate-x-1/2 animate-[mileHeroEnter_.9s_ease-out_both]">
+          <svg viewBox="0 0 260 330" className="h-full w-auto max-w-none drop-shadow-[0_18px_18px_rgba(0,0,0,.25)]" role="img" aria-label="The same freelancer throughout the journey">
+            <defs><linearGradient id="mileHeroJacket" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#477B68"/><stop offset="1" stopColor="#214B42"/></linearGradient><linearGradient id="mileHeroSkin" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#B97856"/><stop offset="1" stopColor="#875039"/></linearGradient></defs>
+            <ellipse cx="130" cy="309" rx="76" ry="12" fill="#071018" opacity=".3"/>
+            <g className="origin-[130px_180px] animate-[mileHeroBreathe_3.6s_ease-in-out_infinite]">
+              <path d="M88 188Q78 225 83 276L105 286L119 224L143 224L157 286L181 276Q184 225 171 188Z" fill="#263B43"/>
+              <path d="M91 270L82 297Q79 306 91 309H119Q128 305 122 297L112 274Z M145 274L140 297Q137 306 149 309H178Q187 305 180 296L169 270Z" fill="#E7E9DD"/>
+              <path d="M83 125Q93 106 130 106Q168 106 178 126L188 213Q160 236 72 213Z" fill="url(#mileHeroJacket)"/>
+              <path d="M117 110L130 136L145 110L154 213H105Z" fill="#E7E9DD"/><path d="M129 137L136 146L130 197L123 146Z" fill="#D7F36A"/>
+              <path d="M88 137Q68 151 64 194L51 220Q47 230 58 234Q67 237 74 226L101 185Z M174 137Q193 151 197 194L209 218Q214 230 203 235Q193 238 187 226L161 185Z" fill="url(#mileHeroSkin)"/>
+              <path d="M100 74Q100 32 131 29Q164 31 164 75L157 112Q151 132 130 132Q109 130 102 111Z" fill="url(#mileHeroSkin)"/>
+              <path d="M98 78Q89 37 119 20Q151 5 171 40Q178 57 164 81L158 62Q145 63 130 52Q119 69 99 76Z" fill="#171C22"/>
+              <path d="M105 83Q114 77 122 83M140 83Q149 77 157 83" fill="none" stroke="#422D27" strokeWidth="3.5" strokeLinecap="round"/>
+              <ellipse cx="115" cy="91" rx="3.5" ry="4" fill="#241C1A"/><ellipse cx="148" cy="91" rx="3.5" ry="4" fill="#241C1A"/>
+              <path d="M119 108Q132 117 145 107" fill="none" stroke="#633B30" strokeWidth="3" strokeLinecap="round"/>
+            </g>
+          </svg>
         </div>
-      </div>
-      <div className="relative z-20 mx-auto mt-0 max-w-[390px] text-center">
-        <div className="mb-2 flex items-center justify-center gap-1.5" aria-label={`Story step ${stage + 1} of 4`}>
-          {stages.map((item, index) => <span key={item.tag} className={`h-1 rounded-full transition-all duration-500 ${index === stage ? "w-7 bg-[#D7F36A]" : "w-3 bg-white/30"}`} />)}
+        <div className="absolute left-[4%] top-[12%] z-10 flex min-h-[64px] w-[44%] animate-[mileCardIn_.8s_ease-out_both] flex-col gap-1.5 rounded-xl border border-white/20 bg-[#F7F9F0]/95 px-3 py-2.5 text-[#1c3028] shadow-xl">
+          <span className="text-[7px] font-black tracking-[.15em] text-[#64806d]">MILE · NEXT STEP</span><strong className="text-[clamp(9px,2vw,12px)] leading-snug">{current.card}</strong><div className="mt-1 h-1 overflow-hidden rounded-full bg-[#dfe7da]"><i className="block h-full rounded-full bg-[#1d9a63] transition-all duration-700" style={{width: ((stage + 1) * 20) + "%"}}/></div>
         </div>
-        <p className="text-[8px] font-extrabold tracking-[.2em] text-[#D7F36A]">{stages[stage].tag}</p>
-        <h3 className="mt-1 text-base font-extrabold tracking-tight text-white sm:text-lg" aria-live="polite">{stages[stage].title}</h3>
-        <p className="mt-1 text-[10px] leading-5 text-white/65">{stages[stage].detail}</p>
+        <div className="absolute bottom-[13%] right-[3%] z-10 flex w-[38%] animate-[mileCardIn_.8s_.2s_ease-out_both] items-center gap-2 rounded-xl border border-white/15 bg-[#D7F36A] px-3 py-2.5 text-[clamp(8px,1.8vw,10px)] font-extrabold leading-snug text-[#1c3028] shadow-xl">
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#1d382b] text-sm text-[#D7F36A]">{["?","↗","✳","◎","✓"][stage]}</span>{current.feature}
+        </div>
+        <div className="absolute right-[8%] top-[8%] z-10 flex items-center gap-1.5 text-[#D7F36A]"><span className="text-lg">✦</span><small className="text-[7px] font-black tracking-widest">{stage === 4 ? "NEXT MILE" : "STEP 0" + (stage + 1)}</small></div>
+        <div className="absolute left-[13%] top-[48%] h-1.5 w-1.5 animate-ping rounded-full bg-[#D7F36A]"/><div className="absolute right-[12%] top-[58%] h-1 w-1 animate-pulse rounded-full bg-[#D7F36A]"/>
       </div>
-      <style jsx>{`
-        .mile-story-glow{background:radial-gradient(ellipse at 50% 42%,rgba(215,243,106,.12),transparent 57%)}
-        .mile-story-art{animation:mile-art-breathe 5.5s ease-in-out infinite;transform-origin:50% 60%}
-        .mile-story-float{z-index:15;animation:mile-float 4s ease-in-out infinite}
-        .mile-story-float-right{animation-delay:-2s}
-        .mile-story-orbit{position:absolute;left:50%;top:48%;border:1px solid rgba(215,243,106,.16);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
-        .mile-story-orbit-one{width:82%;height:70%;animation:mile-orbit 18s linear infinite}
-        .mile-story-orbit-two{width:66%;height:58%;border-style:dashed;animation:mile-orbit 26s linear infinite reverse}
-        .mile-story-success{animation:mile-success 4.2s ease-in-out infinite}
-        @keyframes mile-art-breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.012)}}
-        @keyframes mile-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
-        @keyframes mile-orbit{to{transform:translate(-50%,-50%) rotate(360deg)}}
-        @keyframes mile-success{0%,65%,100%{transform:scale(.9);opacity:.65}78%{transform:scale(1.12);opacity:1}}
-        @media(prefers-reduced-motion:reduce){.mile-story-art,.mile-story-float,.mile-story-orbit,.mile-story-success{animation:none}}
-      `}</style>
-    </div>
+      <div className="relative z-10 mx-auto mt-4 max-w-[430px] text-center">
+        <div className="mb-2 flex items-center justify-center gap-1.5" aria-label={"Chapter " + (stage + 1) + " of 5"}>
+          {stages.map((item, index) => <button key={item.tag} type="button" onClick={() => setStage(index)} aria-label={"Go to " + item.tag} aria-current={index === stage ? "step" : undefined} className={"h-1.5 rounded-full transition-all duration-500 " + (index === stage ? "w-9 bg-[#D7F36A]" : "w-3 bg-white/25 hover:bg-white/45")}/>)}
+        </div>
+        <p className="text-[8px] font-extrabold tracking-[.19em] text-[#D7F36A]">{current.tag}</p>
+        <h3 className="mt-2 text-[17px] font-extrabold leading-snug tracking-tight text-white sm:text-[19px]" aria-live="polite">{current.title}</h3>
+        <p className="mx-auto mt-2 max-w-[390px] text-[11px] leading-[1.75] text-white/60">{current.detail}</p>
+      </div>
+      <footer className="relative z-10 mt-4 flex items-center justify-between border-t border-white/10 pt-3">
+        <button type="button" onClick={() => setStage((value) => (value + stages.length - 1) % stages.length)} className="rounded-lg px-2 py-2 text-[10px] font-bold text-white/55 transition hover:bg-white/5 hover:text-white">← Previous</button>
+        <span className="text-[9px] font-semibold tracking-[.12em] text-white/35">{String(stage + 1).padStart(2, "0")} / 05</span>
+        <button type="button" onClick={() => setStage((value) => (value + 1) % stages.length)} className="rounded-lg px-2 py-2 text-[10px] font-bold text-[#D7F36A] transition hover:bg-white/5">Next chapter →</button>
+      </footer>
+      <p className="relative z-10 mt-3 text-center text-[10px] font-semibold tracking-wide text-white/75">MILE. <span className="text-[#D7F36A]">Every step has a purpose.</span></p>
+      <style jsx global>{String.raw\`@keyframes mileHeroEnter{from{opacity:0;transform:translateX(-50%) translateY(12px) scale(.96)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}@keyframes mileHeroBreathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}@keyframes mileCardIn{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}@media(prefers-reduced-motion:reduce){.animate-ping,.animate-pulse{animation:none!important}}\`}</style>
+    </section>
   );
 }
 
