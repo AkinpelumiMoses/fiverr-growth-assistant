@@ -10,6 +10,7 @@ type PublicProfile = {
   primary_niche: string | null; avatar_url: string | null; bio: string | null; fiverr_profile_url: string | null;
   skills: string | null; experience_years: number | null; website_url: string | null; work_platforms: string[] | null;
   upwork_profile_url: string | null; linkedin_url: string | null; other_work_url: string | null;
+  availability_status: "open" | "limited" | "unavailable" | null;
 };
 
 export default function CommunityDirectory() {
@@ -25,6 +26,7 @@ export default function CommunityDirectory() {
   const [search, setSearch] = useState("");
   const [niche, setNiche] = useState("All niches");
   const [platform, setPlatform] = useState("All platforms");
+  const [availability, setAvailability] = useState("All availability");
 
   useEffect(() => {
     let active = true;
@@ -38,7 +40,7 @@ export default function CommunityDirectory() {
         .eq("id", user.id).maybeSingle();
       if (active && !ownProfileError) setOwnProfile(ownData);
       const { data, error: queryError } = await supabase.from("profiles")
-        .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url")
+        .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url,availability_status")
         .eq("community_discoverable", true).order("display_name", { ascending: true }).range(0, 23);
       if (!active) return;
       if (queryError) setError("We couldn't load the community right now. " + queryError.message);
@@ -78,7 +80,7 @@ export default function CommunityDirectory() {
     setLoadingMore(true);
     const start = profiles.length;
     const { data, error: queryError } = await supabase.from("profiles")
-      .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url")
+      .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url,availability_status")
       .eq("community_discoverable", true).order("display_name", { ascending: true }).range(start, start + 23);
     if (queryError) setError("We couldn't load more members. " + queryError.message);
     else {
@@ -130,10 +132,11 @@ export default function CommunityDirectory() {
       if (profile.id === currentUserId) return false;
       const matchesNiche = niche === "All niches" || profile.primary_niche === niche;
       const matchesPlatform = platform === "All platforms" || (profile.work_platforms ?? []).includes(platform);
+      const matchesAvailability = availability === "All availability" || (profile.availability_status ?? "open") === availability;
       const haystack = [profile.display_name, profile.fiverr_username, profile.primary_niche, profile.skills, profile.bio, profile.seller_level, ...(profile.work_platforms ?? [])].filter(Boolean).join(" ").toLowerCase();
-      return matchesNiche && matchesPlatform && (!term || haystack.includes(term));
+      return matchesNiche && matchesPlatform && matchesAvailability && (!term || haystack.includes(term));
     });
-  }, [profiles, search, niche, platform, currentUserId]);
+  }, [profiles, search, niche, platform, availability, currentUserId]);
 
   return <div className="community-directory mx-auto max-w-[1400px]">
     <div className="mb-8"><p className="text-xs font-bold text-[#168B56]">FREELANCER COMMUNITY</p><h2 className="workspace-page-title mt-2 text-4xl font-extrabold md:text-5xl">Freelancers, connected.</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-[#777d77]">Discover freelancers from different platforms and specialties, explore what they do, and find people who can help move work forward.</p></div>
@@ -151,6 +154,7 @@ export default function CommunityDirectory() {
       <label className="relative min-w-0 flex-1"><Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#929992]"/><input aria-label="Search freelancers" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name, username, skill or niche" className="w-full rounded-xl border border-[#dfe5e9] bg-white py-3 pl-10 pr-4 text-sm outline-none focus:border-[#168B56]"/></label>
       <select aria-label="Filter by niche" value={niche} onChange={e => setNiche(e.target.value)} className="rounded-xl border border-[#dfe5e9] bg-white px-4 py-3 text-sm outline-none focus:border-[#168B56] md:min-w-[210px]">{niches.map(item => <option key={item} value={item}>{item}</option>)}</select>
       <select aria-label="Filter by platform" value={platform} onChange={e => setPlatform(e.target.value)} className="rounded-xl border border-[#dfe5e9] bg-white px-4 py-3 text-sm outline-none focus:border-[#168B56] md:min-w-[190px]">{platforms.map(item => <option key={item} value={item}>{item}</option>)}</select>
+      <select aria-label="Filter by availability" value={availability} onChange={e => setAvailability(e.target.value)} className="rounded-xl border border-[#dfe5e9] bg-white px-4 py-3 text-sm outline-none focus:border-[#168B56] md:min-w-[190px]"><option value="All availability">All availability</option><option value="open">Open to work</option><option value="limited">Limited availability</option><option value="unavailable">Not taking work</option></select>
     </div>
     <div className="mb-4 flex items-center justify-between"><p className="text-xs font-semibold text-[#69736c]">{loading ? "Finding freelancers…" : `${filtered.length} freelancer${filtered.length === 1 ? "" : "s"} found`}</p><span className="inline-flex items-center gap-1.5 text-[10px] text-[#929992]"><Users size={13}/> Opt-in profiles only</span></div>
     {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
@@ -167,7 +171,7 @@ export default function CommunityDirectory() {
       return <article key={profile.id} className="flex min-w-0 flex-col rounded-2xl border border-[#e9ece9] bg-white p-5 shadow-[0_8px_30px_rgba(27,42,32,.035)]">
         <div className="flex items-center gap-3"><div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-visible rounded-full bg-[#eaf8ef] text-lg font-bold text-[#168B56]"><div className="h-full w-full overflow-hidden rounded-full">{profile.avatar_url ? <img src={profile.avatar_url} alt="" className="h-full w-full object-cover"/> : initials}</div><span className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white ${online ? "bg-[#18a957]" : "bg-[#b9c0bb]"}`} title={online ? "Online now" : "Offline"}/></div>
           <div className="min-w-0 flex-1"><h3 className="truncate text-sm font-extrabold">{profile.display_name || profile.fiverr_username || "Freelancer"}</h3><p className="mt-1 truncate text-xs text-[#929992]">{profile.primary_niche || "Freelancer"} · {online ? <span className="font-semibold text-[#168B56]">Online now</span> : "Offline"}</p></div></div>
-        <div className="mt-4 flex flex-wrap gap-2">{profile.primary_niche && <span className="rounded-full bg-[#eaf8ef] px-3 py-1.5 text-[10px] font-bold text-[#168B56]">{profile.primary_niche}</span>}{profile.seller_level && <span className="rounded-full bg-[#f3f5f3] px-3 py-1.5 text-[10px] font-semibold text-[#68736b]">{profile.seller_level}</span>}{(profile.work_platforms ?? []).map(item=><span key={item} className="rounded-full border border-[#e5eae6] px-3 py-1.5 text-[10px] font-medium text-[#59645c]">{item}</span>)}</div>
+        <div className="mt-4 flex flex-wrap gap-2">{profile.primary_niche && <span className="rounded-full bg-[#eaf8ef] px-3 py-1.5 text-[10px] font-bold text-[#168B56]">{profile.primary_niche}</span>}<span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${profile.availability_status === "unavailable" ? "bg-[#f3f4f3] text-[#858d87]" : profile.availability_status === "limited" ? "bg-[#fff6df] text-[#8b6a1c]" : "bg-[#eaf8ef] text-[#168B56]"}`}>{profile.availability_status === "unavailable" ? "Not taking work" : profile.availability_status === "limited" ? "Limited availability" : "Open to work"}</span>{profile.seller_level && <span className="rounded-full bg-[#f3f5f3] px-3 py-1.5 text-[10px] font-semibold text-[#68736b]">{profile.seller_level}</span>}{(profile.work_platforms ?? []).map(item=><span key={item} className="rounded-full border border-[#e5eae6] px-3 py-1.5 text-[10px] font-medium text-[#59645c]">{item}</span>)}</div>
         <p className="mt-4 line-clamp-3 min-h-[60px] text-xs leading-6 text-[#69736c]">{profile.bio || "This freelancer has not added a short introduction yet."}</p>
         {profile.skills && <div className="mt-3"><p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[#929992]">Skills</p><p className="line-clamp-2 text-xs leading-5 text-[#515b53]">{profile.skills}</p></div>}
         <div className="mt-auto mt-5 flex flex-col gap-3 border-t border-[#eef0ee] pt-4"><span className="text-[10px] text-[#929992]">{profile.experience_years != null ? `${profile.experience_years} years experience` : "Community member"}</span>
