@@ -16,6 +16,7 @@ export default function CommunityDirectory() {
   const supabase = useMemo(() => createClient(), []);
   const [profiles, setProfiles] = useState<PublicProfile[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [ownProfile, setOwnProfile] = useState<Pick<PublicProfile, "primary_niche" | "skills" | "work_platforms"> | null>(null);
   const [onlineIds, setOnlineIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
@@ -32,6 +33,10 @@ export default function CommunityDirectory() {
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) { if (active) { setError("Please sign in to explore the freelancer community."); setLoading(false); } return; }
       if (active) setCurrentUserId(user.id);
+      const { data: ownData, error: ownProfileError } = await supabase.from("profiles")
+        .select("primary_niche,skills,work_platforms")
+        .eq("id", user.id).maybeSingle();
+      if (active && !ownProfileError) setOwnProfile(ownData);
       const { data, error: queryError } = await supabase.from("profiles")
         .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url")
         .eq("community_discoverable", true).order("display_name", { ascending: true }).range(0, 23);
@@ -86,7 +91,7 @@ export default function CommunityDirectory() {
 
   const niches = useMemo(() => ["All niches", ...Array.from(new Set(profiles.map(p => p.primary_niche?.trim()).filter((v): v is string => Boolean(v))))].sort((a,b) => a === "All niches" ? -1 : a.localeCompare(b)), [profiles]);
   const platforms = useMemo(() => ["All platforms", ...Array.from(new Set(profiles.flatMap(p => p.work_platforms ?? []))).sort()], [profiles]);
-  const myProfile = profiles.find(profile => profile.id === currentUserId) ?? null;
+  const myProfile = ownProfile;
 
   const matchFor = (candidate: PublicProfile) => {
     const ownNiche = (myProfile?.primary_niche ?? "").toLowerCase();
