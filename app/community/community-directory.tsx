@@ -11,13 +11,15 @@ type PublicProfile = {
   skills: string | null; experience_years: number | null; website_url: string | null; work_platforms: string[] | null;
   upwork_profile_url: string | null; linkedin_url: string | null; other_work_url: string | null;
   availability_status: "open" | "limited" | "unavailable" | null;
+  services_offered: string | null; looking_for: string | null;
+  collaboration_interests: string[] | null; preferred_project_types: string[] | null;
 };
 
 export default function CommunityDirectory() {
   const supabase = useMemo(() => createClient(), []);
   const [profiles, setProfiles] = useState<PublicProfile[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [ownProfile, setOwnProfile] = useState<Pick<PublicProfile, "primary_niche" | "skills" | "work_platforms"> | null>(null);
+  const [ownProfile, setOwnProfile] = useState<Pick<PublicProfile, "primary_niche" | "skills" | "work_platforms" | "services_offered" | "looking_for" | "collaboration_interests" | "preferred_project_types" | "availability_status"> | null>(null);
   const [onlineIds, setOnlineIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
@@ -36,11 +38,11 @@ export default function CommunityDirectory() {
       if (authError || !user) { if (active) { setError("Please sign in to explore the freelancer community."); setLoading(false); } return; }
       if (active) setCurrentUserId(user.id);
       const { data: ownData, error: ownProfileError } = await supabase.from("profiles")
-        .select("primary_niche,skills,work_platforms")
+        .select("primary_niche,skills,work_platforms,services_offered,looking_for,collaboration_interests,preferred_project_types,availability_status")
         .eq("id", user.id).maybeSingle();
       if (active && !ownProfileError) setOwnProfile(ownData);
       const { data, error: queryError } = await supabase.from("profiles")
-        .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url,availability_status")
+        .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url,availability_status,services_offered,looking_for,collaboration_interests,preferred_project_types")
         .eq("community_discoverable", true).order("display_name", { ascending: true }).range(0, 23);
       if (!active) return;
       if (queryError) setError("We couldn't load the community right now. " + queryError.message);
@@ -80,7 +82,7 @@ export default function CommunityDirectory() {
     setLoadingMore(true);
     const start = profiles.length;
     const { data, error: queryError } = await supabase.from("profiles")
-      .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url,availability_status")
+      .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url,availability_status,services_offered,looking_for,collaboration_interests,preferred_project_types")
       .eq("community_discoverable", true).order("display_name", { ascending: true }).range(start, start + 23);
     if (queryError) setError("We couldn't load more members. " + queryError.message);
     else {
@@ -96,12 +98,40 @@ export default function CommunityDirectory() {
   const myProfile = ownProfile;
 
   const matchFor = (candidate: PublicProfile) => {
-    const ownNiche = (myProfile?.primary_niche ?? "").toLowerCase();
-    const theirNiche = (candidate.primary_niche ?? "").toLowerCase();
-    const ownSkills = (myProfile?.skills ?? "").toLowerCase();
-    const theirSkills = (candidate.skills ?? "").toLowerCase();
-    const ownText = `${ownNiche} ${ownSkills}`;
-    const theirText = `${theirNiche} ${theirSkills}`;
+    const tokenize = (value: string | null | undefined) => new Set(
+      (value ?? "").toLowerCase().replace(/[^a-z0-9+#./-]+/g, " ").split(/\\s+/)
+        .filter(term => term.length > 2 && !["the", "and", "for", "with", "from", "you", "your", "are", "who", "that", "this", "work", "looking", "need", "help", "want"].includes(term))
+    );
+    const overlapCount = (left: Set<string>, right: Set<string>) => {
+      let count = 0;
+      left.forEach(term => { if (right.has(term)) count += 1; });
+      return count;
+    };
+    const ownNiche = (myProfile?.primary_niche ?? "").trim().toLowerCase();
+    const theirNiche = (candidate.primary_niche ?? "").trim().toLowerCase();
+    const sameNiche = Boolean(ownNiche && theirNiche && (ownNiche === theirNiche || ownNiche.includes(theirNiche) || theirNiche.includes(ownNiche)));
+    const ownSkills = tokenize(myProfile?.skills);
+    const theirSkills = tokenize(candidate.skills);
+    const sharedSkills = overlapCount(ownSkills, theirSkills);
+    const ownServices = tokenize(myProfile?.services_offered);
+    const theirServices = tokenize(candidate.services_offered);
+    const ownNeeds = tokenize(myProfile?.looking_for);
+    const theirNeeds = tokenize(candidate.looking_for);
+    const serviceNeedOverlap = overlapCount(ownNeeds, theirServices) + overlapCount(theirNeeds, ownServices);
+    const ownInterests = new Set(myProfile?.collaboration_interests ?? []);
+    const theirInterests = new Set(candidate.collaboration_interests ?? []);
+    const sharedInterests = overlapCount(
+      new Set([...ownInterests].map(value => value.trim().toLowerCase())),
+      new Set([...theirInterests].map(value => value.trim().toLowerCase()))
+    );
+    const ownProjectTypes = new Set(myProfile?.preferred_project_types ?? []);
+    const theirProjectTypes = new Set(candidate.preferred_project_types ?? []);
+    const sharedProjectTypes = overlapCount(
+      new Set([...ownProjectTypes].map(value => value.trim().toLowerCase())),
+      new Set([...theirProjectTypes].map(value => value.trim().toLowerCase()))
+    );
+    const ownText = `${myProfile?.primary_niche ?? ""} ${myProfile?.skills ?? ""} ${myProfile?.services_offered ?? ""}`.toLowerCase();
+    const theirText = `${candidate.primary_niche ?? ""} ${candidate.skills ?? ""} ${candidate.services_offered ?? ""}`.toLowerCase();
     const groups = [
       { terms: ["brand", "graphic design", "logo", "visual", "ui/ux", "product design"], complements: ["web", "developer", "software", "copy", "writing", "marketing", "video"] },
       { terms: ["web", "developer", "software", "frontend", "backend"], complements: ["brand", "graphic", "ui/ux", "copy", "content", "seo", "marketing"] },
@@ -109,22 +139,39 @@ export default function CommunityDirectory() {
       { terms: ["marketing", "social media", "seo"], complements: ["brand", "graphic", "web", "developer", "video", "copy"] },
       { terms: ["video", "motion", "animation"], complements: ["brand", "graphic", "marketing", "social media", "copy"] },
     ];
-    const ownGroup = groups.find(group => group.terms.some(term => ownText.includes(term)));
-    const complementary = Boolean(ownGroup && ownGroup.complements.some(term => theirText.includes(term)));
-    const sameNiche = Boolean(ownNiche && theirNiche && (ownNiche === theirNiche || ownNiche.includes(theirNiche) || theirNiche.includes(ownNiche)));
-    const sharedPlatform = (myProfile?.work_platforms ?? []).some(item => (candidate.work_platforms ?? []).includes(item));
-    const ownSkillTerms = ownSkills.split(/[,·|]/).map(value => value.trim()).filter(value => value.length > 2);
-    const sharedSkills = ownSkillTerms.filter(skill => theirText.includes(skill)).length;
-    const score = (complementary ? 5 : 0) + (sameNiche ? 2 : 0) + (sharedPlatform ? 1 : 0) + Math.min(sharedSkills, 2);
-    const reason = complementary ? "Complementary skills" : sameNiche ? "Similar specialisation" : sharedSkills ? "Shared skills" : sharedPlatform ? "Shared work platforms" : "Potential network connection";
-    return { score, reason };
+    const complementary = groups.some(group =>
+      (group.terms.some(term => ownText.includes(term)) && group.complements.some(term => theirText.includes(term))) ||
+      (group.terms.some(term => theirText.includes(term)) && group.complements.some(term => ownText.includes(term)))
+    );
+    const sharedPlatform = (myProfile?.work_platforms ?? []).some(item => (candidate.work_platforms ?? []).some(other => other.toLowerCase() === item.toLowerCase()));
+    const availabilityBonus = candidate.availability_status === "open" || !candidate.availability_status ? 1 : candidate.availability_status === "unavailable" ? -4 : 0;
+    const reasons: string[] = [];
+    if (complementary) reasons.push("Complementary services");
+    if (serviceNeedOverlap > 0) reasons.push("What you offer matches what they need");
+    if (sharedInterests > 0) reasons.push("Shared collaboration interests");
+    if (sharedProjectTypes > 0) reasons.push("Similar project preferences");
+    if (sharedSkills > 0) reasons.push("Shared skills");
+    if (sameNiche) reasons.push("Similar specialisation");
+    if (sharedPlatform) reasons.push("Shared work platforms");
+    if (candidate.availability_status === "open") reasons.push("Open to work");
+    const score =
+      (complementary ? 5 : 0) +
+      Math.min(sharedSkills, 2) * 2 +
+      Math.min(serviceNeedOverlap, 2) * 3 +
+      Math.min(sharedInterests, 2) * 3 +
+      Math.min(sharedProjectTypes, 2) * 2 +
+      (sameNiche ? 2 : 0) +
+      (sharedPlatform ? 1 : 0) +
+      availabilityBonus;
+    return { score, reason: reasons.slice(0, 2).join(" · ") || "Potential network connection" };
   };
 
   const recommended = useMemo(() => profiles
     .filter(profile => profile.id !== currentUserId)
     .map(profile => ({ profile, ...matchFor(profile) }))
     .sort((a, b) => b.score - a.score || (a.profile.display_name ?? "").localeCompare(b.profile.display_name ?? ""))
-    .slice(0, 3), [profiles, currentUserId, myProfile?.primary_niche, myProfile?.skills, myProfile?.work_platforms]);
+    .filter(item => item.score > 0)
+    .slice(0, 3), [profiles, currentUserId, myProfile?.primary_niche, myProfile?.skills, myProfile?.work_platforms, myProfile?.services_offered, myProfile?.looking_for, myProfile?.collaboration_interests, myProfile?.preferred_project_types, myProfile?.availability_status]);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
