@@ -1906,3 +1906,208 @@ body{background:var(--page);color:var(--ink)}
 .mile-password-valid{color:#087a27}.mile-password-invalid{color:#a27a12}
 .mile-auth-submit:disabled{cursor:not-allowed;opacity:.55;transform:none!important}
 @media(max-width:700px){.mile-password-strength ul{grid-template-columns:1fr}.mile-otp-input{font-size:20px!important}}
+
+
+/* MILE authentication refresh — quiet confidence, clear hierarchy, precise inputs. */
+.mile-auth-page{
+  --auth-navy:#08085f;
+  --auth-lime:#a6ff00;
+  --auth-ink:#17192a;
+  --auth-muted:#697084;
+  --auth-line:#e3e7ef;
+  background:#f6f7fb!important;
+  color:var(--auth-ink)!important;
+}
+.mile-auth-aside{
+  background:
+    radial-gradient(circle at 88% 78%,rgba(166,255,0,.10),transparent 28%),
+    linear-gradient(145deg,#08085f 0%,#10136f 58%,#08084d 100%)!important;
+}
+.mile-auth-story h1{max-width:570px;letter-spacing:-.078em}
+.mile-auth-story h1 em{color:var(--auth-lime)!important}
+.mile-auth-kicker{color:rgba(255,255,255,.72)!important}
+.mile-auth-manifesto>span,.mile-auth-footer i{color:var(--auth-lime)!important;background:var(--auth-lime)!important}
+.mile-auth-decoration{border-color:rgba(255,255,255,.13)!important}
+.mile-auth-decoration:after{border-color:rgba(166,255,0,.22)!important}
+.mile-auth-main{
+  background:
+    radial-gradient(ellipse at 95% 5%,rgba(8,8,95,.045),transparent 32%),
+    #f6f7fb!important;
+}
+.mile-auth-form-wrap{
+  max-width:440px!important;
+  padding:38px 0!important;
+}
+.mile-auth-eyebrow{
+  color:#252a79!important;
+  font-size:9px!important;
+  letter-spacing:.19em!important;
+}
+.mile-auth-form-wrap h2{
+  color:#11132b!important;
+  font-size:clamp(36px,3.4vw,47px)!important;
+  font-weight:700!important;
+  letter-spacing:-.067em!important;
+}
+.mile-auth-subtitle{
+  color:#6e7487!important;
+  font-size:12px!important;
+  line-height:1.85!important;
+}
+.mile-auth-form{gap:10px!important}
+.mile-auth-form>label,.mile-auth-label-row label{
+  color:#292d43!important;
+  font-size:10px!important;
+  font-weight:750!important;
+}
+.mile-auth-label-row a,.mile-auth-switch a{
+  color:#171a70!important;
+}
+.mile-auth-input{
+  height:52px!important;
+  border:1px solid #dfe3ed!important;
+  border-radius:11px!important;
+  background:#fff!important;
+  color:#17192a!important;
+  padding:0 16px!important;
+  font-size:12px!important;
+  box-shadow:0 2px 5px rgba(13,18,60,.018)!important;
+}
+.mile-auth-input::placeholder{color:#a2a8b6!important}
+.mile-auth-input:hover{border-color:#b8bfd2!important}
+.mile-auth-input:focus{
+  border-color:#252a79!important;
+  box-shadow:0 0 0 4px rgba(8,8,95,.085)!important;
+  background:#fff!important;
+}
+.mile-auth-password button{color:#737b91!important}
+.mile-auth-password button:hover{color:#08085f!important}
+.mile-auth-submit{
+  height:54px!important;
+  margin-top:14px!important;
+  border:1px solid #08085f!important;
+  border-radius:11px!important;
+  background:#08085f!important;
+  color:#fff!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  letter-spacing:.01em;
+  box-shadow:0 8px 18px rgba(8,8,95,.12)!important;
+}
+.mile-auth-submit:hover{
+  transform:translateY(-1px)!important;
+  background:#151879!important;
+  border-color:#151879!important;
+}
+.mile-auth-submit:focus-visible,.mile-auth-back:focus-visible,
+.mile-auth-switch a:focus-visible,.mile-auth-resend button:focus-visible{
+  outline:3px solid rgba(166,255,0,.8)!important;
+  outline-offset:3px!important;
+}
+.mile-auth-submit-secondary{
+  background:#fff!important;
+  color:#08085f!important;
+  border:1px solid #dfe3ed!important;
+  box-shadow:none!important;
+}
+.mile-auth-submit-secondary:hover{background:#f0f1fb!important;color:#08085f!important}
+.mile-auth-divider{color:#9298a8!important}
+.mile-auth-divider:before,.mile-auth-divider:after{background:#e1e4ed!important}
+.mile-auth-switch{color:#73798b!important;font-size:10px!important}
+.mile-auth-legal,.mile-auth-terms{color:#8d94a4!important;font-size:9px!important}
+.mile-auth-alert{border-radius:11px!important;padding:13px 15px!important;font-size:10px!important}
+.mile-auth-alert.success{background:#eff8e6!important;color:#315c0b!important}
+.mile-auth-alert.error{background:#fff1ef!important;color:#a53b32!important}
+.mile-auth-back{color:#777e91!important}
+.mile-auth-back:hover{color:#08085f!important}
+.mile-auth-resend button{color:#171a70!important;font-size:10px!important}
+.mile-auth-resend button:hover{color:#4c5200!important}
+.mile-password-strength{
+  border-color:#e1e5ed!important;
+  border-radius:11px!important;
+  background:#f9faff!important;
+  padding:13px!important;
+}
+.mile-password-strength-top strong,.mile-password-strength li.is-ok{color:#246a24!important}
+.mile-password-bars i.is-filled{background:#a6c900!important}
+.mile-auth-signup .mile-auth-form-wrap{max-width:450px!important}
+.mile-auth-signup .mile-auth-subtitle{margin-bottom:23px!important}
+
+/* Eight-position OTP control: one real input, eight clear visual positions. */
+.mile-otp-control{
+  position:relative;
+  width:100%;
+  padding:7px 0;
+  cursor:text;
+  outline:none;
+}
+.mile-otp-slots{
+  display:grid;
+  grid-template-columns:repeat(8,minmax(0,1fr));
+  gap:clamp(5px,1vw,9px);
+  width:100%;
+}
+.mile-otp-slots span{
+  display:grid;
+  place-items:center;
+  min-width:0;
+  height:clamp(43px,5.2vw,54px);
+  border:1px solid #dfe3ed;
+  border-radius:10px;
+  background:#fff;
+  color:#10134f;
+  font-size:clamp(17px,2vw,21px);
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+  box-shadow:0 2px 5px rgba(13,18,60,.025);
+  transition:border-color .16s ease,background .16s ease,box-shadow .16s ease,transform .16s ease;
+}
+.mile-otp-slots span:not(:empty){
+  border-color:#cbd2e5;
+  background:#f8f9ff;
+}
+.mile-otp-slots span.is-current{
+  border:1.5px solid #08085f;
+  background:#f5f6ff;
+  box-shadow:0 0 0 3px rgba(8,8,95,.09);
+  transform:translateY(-1px);
+}
+.mile-otp-control:focus-within .mile-otp-slots span.is-current{
+  border-color:#08085f;
+}
+.mile-otp-native{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  width:100%;
+  height:100%;
+  opacity:0;
+  cursor:text;
+  color:transparent;
+  caret-color:transparent;
+  border:0;
+  outline:0;
+}
+.mile-otp-control:focus-within .mile-otp-slots span{
+  border-color:#bfc6df;
+}
+.mile-otp-control:focus-within .mile-otp-slots span.is-current{
+  border-color:#08085f;
+  box-shadow:0 0 0 3px rgba(8,8,95,.11);
+}
+@media(max-width:700px){
+  .mile-auth-page{background:#f6f7fb!important}
+  .mile-auth-main{background:#f6f7fb!important;padding:68px 22px 36px!important}
+  .mile-auth-form-wrap{max-width:460px!important;padding:22px 0!important}
+  .mile-auth-mobile-logo{margin-bottom:34px!important}
+  .mile-auth-form-wrap h2{font-size:37px!important}
+  .mile-otp-slots{gap:5px}
+  .mile-otp-slots span{height:46px;border-radius:8px;font-size:18px}
+}
+@media(max-width:360px){
+  .mile-otp-slots{gap:3px}
+  .mile-otp-slots span{height:41px;font-size:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  .mile-auth-page *{transition:none!important;animation:none!important}
+}
