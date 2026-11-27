@@ -1,0 +1,9 @@
+import Link from "next/link";
+import { forgotPassword } from "@/app/auth/actions";
+
+type Props = { searchParams: Promise<{ error?: string; sent?: string }> };
+
+export default async function ForgotPasswordPage({ searchParams }: Props) {
+  const params = await searchParams;
+  return <main className="mile-auth-page"><section className="mile-auth-aside"><Link href="/" className="mile-auth-logo"><img src="/mile-logo.png" alt="MILE" /></Link><div className="mile-auth-story"><span className="mile-auth-kicker">GET BACK ON TRACK</span><h1>A fresh start<br /><em>when you need it.</em></h1><p>Reset your password securely and get back to your work.</p></div><span className="mile-auth-footer">EVERY STEP HAS A PURPOSE <i /> MILE COMMUNITY</span></section><section className="mile-auth-main"><Link href="/login" className="mile-auth-back">← Back to sign in</Link><div className="mile-auth-form-wrap"><p className="mile-auth-eyebrow">PASSWORD RECOVERY</p><h2>Forgot your password?</h2><p className="mile-auth-subtitle">Enter your email and we’ll send you a secure reset link.</p>{params.sent && <p role="status" className="mile-auth-alert success">If an account exists for that email, a reset email has been sent.</p>}{params.error && <p role="alert" className="mile-auth-alert error">We couldn’t send the reset email. Check the address and try again.</p>}<form action={forgotPassword} className="mile-auth-form"><label htmlFor="email">Email address</label><input className="mile-auth-input" id="email" name="email" type="email" required autoComplete="email" placeholder="you@example.com"/><button className="mile-auth-submit" type="submit">Send reset email <span>→</span></button></form><p className="mile-auth-switch">Remember your password? <Link href="/login">Sign in</Link></p></div></section></main>;
+}
