@@ -1883,3 +1883,26 @@ body{background:var(--page);color:var(--ink)}
 :root[data-theme="dark"] .workspace-sidebar nav button[class*="bg-[#eaf8ef]"] svg {
   color: #102016 !important;
 }
+
+
+.mile-auth-divider{display:flex;align-items:center;gap:12px;margin:22px 0 8px;color:#a0a8a1;font-size:9px;font-weight:800;letter-spacing:.16em}
+.mile-auth-divider:before,.mile-auth-divider:after{content:"";height:1px;flex:1;background:#e4e8e4}
+.mile-auth-divider span{flex:none}
+.mile-auth-submit-secondary{background:#fff!important;color:#000080!important;border:1px solid #dfe4df!important;margin-top:8px}
+.mile-auth-submit-secondary:hover{background:#f4f6ff!important;color:#000080!important}
+.mile-otp-input{text-align:center;font-size:22px!important;font-weight:800;letter-spacing:.35em}
+.mile-auth-resend{display:flex;justify-content:center;margin-top:18px}
+.mile-auth-resend button{display:inline-flex;align-items:center;gap:7px;color:#00851e;font-size:10px;font-weight:800}
+.mile-auth-resend button:hover{text-decoration:underline}
+.mile-password-strength{margin-top:5px;padding:11px 12px;border:1px solid #e3e8e3;border-radius:8px;background:#f8faf8}
+.mile-password-strength-top{display:flex;justify-content:space-between;gap:12px;color:#69736c;font-size:9px;font-weight:700}
+.mile-password-strength-top strong{color:#00851e}
+.mile-password-bars{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:8px 0}
+.mile-password-bars i{height:3px;border-radius:99px;background:#e2e7e2}
+.mile-password-bars i.is-filled{background:#00A525}
+.mile-password-strength ul{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin:0;padding:0;list-style:none;color:#929992;font-size:8px}
+.mile-password-strength li.is-ok{color:#087a27}
+.mile-password-valid,.mile-password-invalid{margin:0!important;font-size:10px!important;font-weight:700}
+.mile-password-valid{color:#087a27}.mile-password-invalid{color:#a27a12}
+.mile-auth-submit:disabled{cursor:not-allowed;opacity:.55;transform:none!important}
+@media(max-width:700px){.mile-password-strength ul{grid-template-columns:1fr}.mile-otp-input{font-size:20px!important}}
