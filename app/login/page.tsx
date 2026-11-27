@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { use, useState } from "react";
 import { ArrowLeft, ArrowRight, Eye, EyeOff } from "lucide-react";
-import { signIn } from "@/app/auth/actions";
+import { sendLoginOtp, signIn } from "@/app/auth/actions";
 
 type Props = { searchParams: Promise<{ error?: string; message?: string; next?: string }> };
 
@@ -31,21 +31,32 @@ export default function LoginPage({ searchParams }: Props) {
           <span className="mile-auth-mobile-logo"><img src="/mile-logo.png" alt="MILE" /></span>
           <p className="mile-auth-eyebrow">YOUR COMMUNITY IS WAITING</p>
           <h2>Welcome back.</h2>
-          <p className="mile-auth-subtitle">Sign in to continue your journey with MILE.</p>
+          <p className="mile-auth-subtitle">Sign in with your password or use a one-time code sent to your email.</p>
 
-          {params.message === "confirm" && <p role="status" className="mile-auth-alert success">Your account is ready. Confirm your email address, then sign in.</p>}
+          {params.message === "confirm" && <p role="status" className="mile-auth-alert success">Check your email to verify your account before signing in.</p>}
+          {params.message === "password_reset" && <p role="status" className="mile-auth-alert success">Your password was updated. You can sign in again.</p>}
+          {params.error === "otp" && <p role="alert" className="mile-auth-alert error">We couldn’t send the code. Check the email address and try again.</p>}
+          {params.error === "session" && <p role="alert" className="mile-auth-alert error">Your reset session expired. Please request another reset email.</p>}
+          {params.error === "invalid_email" && <p role="alert" className="mile-auth-alert error">Enter a valid email address.</p>}
           {params.error && <p role="alert" className="mile-auth-alert error">{params.error === "credentials" ? "That email and password combination doesn’t match. Please try again." : "We couldn’t sign you in. Please check your details and try again."}</p>}
 
           <form action={signIn} className="mile-auth-form">
             <input type="hidden" name="next" value={params.next || "/dashboard"} />
             <label htmlFor="email">Email address</label>
             <input className="mile-auth-input" id="email" name="email" type="email" required autoComplete="email" placeholder="you@example.com" />
-            <div className="mile-auth-label-row"><label htmlFor="password">Password</label></div>
+            <div className="mile-auth-label-row"><label htmlFor="password">Password</label><Link href="/forgot-password">Forgot password?</Link></div>
             <div className="mile-auth-password">
               <input className="mile-auth-input" id="password" name="password" type={showPassword ? "text" : "password"} required autoComplete="current-password" placeholder="Enter your password" />
               <button type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button>
             </div>
             <button className="mile-auth-submit" type="submit">Sign in <ArrowRight size={17}/></button>
+          </form>
+          <div className="mile-auth-divider"><span>OR</span></div>
+          <form action={sendLoginOtp} className="mile-auth-form mile-auth-otp-form">
+            <input type="hidden" name="next" value={params.next || "/dashboard"} />
+            <label htmlFor="otp-email">Email code</label>
+            <input className="mile-auth-input" id="otp-email" name="email" type="email" required autoComplete="email" placeholder="you@example.com" />
+            <button className="mile-auth-submit mile-auth-submit-secondary" type="submit">Send one-time code <ArrowRight size={17}/></button>
           </form>
           <p className="mile-auth-switch">New to MILE? <Link href="/signup">Create an account</Link></p>
           <p className="mile-auth-legal">By continuing, you agree to keep your account information safe and use the community respectfully.</p>
