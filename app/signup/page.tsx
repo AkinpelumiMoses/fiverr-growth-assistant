@@ -11,7 +11,7 @@ export default function SignupPage({ searchParams }: Props) {
   const params = use(searchParams);
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
-  const checks = { length: password.length >= 10, lower: /[a-z]/.test(password), upper: /[A-Z]/.test(password), number: /\\d/.test(password), special: /[^A-Za-z0-9]/.test(password) };
+  const checks = { length: password.length >= 10, lower: /[a-z]/.test(password), upper: /[A-Z]/.test(password), number: /\d/.test(password), special: /[^A-Za-z0-9]/.test(password) };
   const strength = Object.values(checks).filter(Boolean).length;
 
   return (
