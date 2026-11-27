@@ -20,7 +20,8 @@ export default function VerifyPage({ searchParams }: Props) {
     if (!email || !/^\d{6}$/.test(code)) { setError("Enter the 6-digit code from your email."); return; }
     setLoading(true); setError("");
     const supabase = createClient();
-    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+    const type = params.mode === "signup" ? "signup" : "email";
+    const { error } = await supabase.auth.verifyOtp({ email, token: code, type });
     if (error) { setError("That code is invalid or has expired. Request a new one and try again."); setLoading(false); return; }
     window.location.href = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
   }
