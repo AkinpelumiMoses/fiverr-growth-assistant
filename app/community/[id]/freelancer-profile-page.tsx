@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 type Profile = {
   id:string; display_name:string|null; fiverr_username:string|null; seller_level:string|null; primary_niche:string|null;
   avatar_url:string|null; cover_image_url:string|null; bio:string|null; fiverr_profile_url:string|null; skills:string|null; experience_years:number|null;
-  website_url:string|null; work_platforms:string[]|null; upwork_profile_url:string|null; linkedin_url:string|null; other_work_url:string|null;
+  website_url:string|null; work_platforms:string[]|null; upwork_profile_url:string|null; linkedin_url:string|null; other_work_url:string|null; community_discoverable?:boolean|null;
 };
 
 export default function FreelancerProfilePage() {
@@ -25,10 +25,10 @@ export default function FreelancerProfilePage() {
       const {data:{user}}=await supabase.auth.getUser();
       if(!user){if(active){setError("Please sign in to view freelancer profiles.");setLoading(false);}return;}
       const {data,error:queryError}=await supabase.from("profiles")
-        .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,cover_image_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url")
-        .eq("id",params.id).eq("community_discoverable",true).maybeSingle();
+        .select("id,display_name,fiverr_username,seller_level,primary_niche,avatar_url,cover_image_url,bio,fiverr_profile_url,skills,experience_years,website_url,work_platforms,upwork_profile_url,linkedin_url,other_work_url,community_discoverable")
+        .eq("id",params.id).maybeSingle();
       if(!active)return;
-      if(queryError)setError(queryError.message);else if(!data)setError("This profile is unavailable or is no longer public.");else setProfile(data as Profile);
+      if(queryError)setError(queryError.message);else if(!data)setError("This profile is unavailable.");else if(data.id !== user.id && data.community_discoverable !== true)setError("This profile is not available in the community.");else setProfile(data as Profile);
       setLoading(false);
     })();
     return()=>{active=false;};
