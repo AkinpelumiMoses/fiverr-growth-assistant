@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { signUp } from "@/app/auth/actions";
 
@@ -9,6 +9,14 @@ type Props = { searchParams: Promise<{ error?: string }> };
 
 export default function SignupPage({ searchParams }: Props) {
   const params = use(searchParams);
+  useEffect(() => {
+    if (!params.error) return;
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete("error");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  }, [params.error]);
+
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const checks = { length: password.length >= 10, lower: /[a-z]/.test(password), upper: /[A-Z]/.test(password), number: /\d/.test(password), special: /[^A-Za-z0-9]/.test(password) };
