@@ -10,6 +10,9 @@ type Props = { searchParams: Promise<{ error?: string }> };
 export default function SignupPage({ searchParams }: Props) {
   const params = use(searchParams);
   const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const checks = { length: password.length >= 10, lower: /[a-z]/.test(password), upper: /[A-Z]/.test(password), number: /\\d/.test(password), special: /[^A-Za-z0-9]/.test(password) };
+  const strength = Object.values(checks).filter(Boolean).length;
 
   return (
     <main className="mile-auth-page mile-auth-signup">
@@ -33,7 +36,7 @@ export default function SignupPage({ searchParams }: Props) {
           <h2>Join the network.</h2>
           <p className="mile-auth-subtitle">Create your MILE account and find your place in the community.</p>
 
-          {params.error && <p role="alert" className="mile-auth-alert error">We couldn’t create your account. Check your details and try again. Your password must be at least 8 characters.</p>}
+          {params.error && <p role="alert" className="mile-auth-alert error">We couldn’t create your account. Check your details and try again. Use at least 10 characters with uppercase, lowercase, a number and a special character.</p>}
 
           <form action={signUp} className="mile-auth-form">
             <label htmlFor="fullName">Full name</label>
@@ -42,9 +45,14 @@ export default function SignupPage({ searchParams }: Props) {
             <input className="mile-auth-input" id="email" name="email" type="email" required autoComplete="email" placeholder="you@example.com" />
             <label htmlFor="password">Create password</label>
             <div className="mile-auth-password">
-              <input className="mile-auth-input" id="password" name="password" type={showPassword ? "text" : "password"} required minLength={8} autoComplete="new-password" placeholder="At least 8 characters" />
+              <input className="mile-auth-input" id="password" name="password" type={showPassword ? "text" : "password"} required minLength={10} autoComplete="new-password" placeholder="Create a strong password" value={password} onChange={(e) => setPassword(e.target.value)} />
               <button type="button" onClick={() => setShowPassword(v => !v)} aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button>
             </div>
+            {password && <div className="mile-password-strength" aria-live="polite">
+              <div className="mile-password-strength-top"><span>Password strength</span><strong>{strength >= 5 ? "Strong" : strength >= 3 ? "Getting stronger" : "Too weak"}</strong></div>
+              <div className="mile-password-bars">{[1,2,3,4,5].map((bar) => <i key={bar} className={bar <= strength ? "is-filled" : ""} />)}</div>
+              <ul>{Object.entries({length:"10+ characters",lower:"Lowercase letter",upper:"Uppercase letter",number:"Number",special:"Special character"}).map(([key,label]) => <li key={key} className={checks[key as keyof typeof checks] ? "is-ok" : ""}>{checks[key as keyof typeof checks] ? "✓" : "•"} {label}</li>)}</ul>
+            </div>}
             <button className="mile-auth-submit" type="submit">Create account <ArrowRight size={17}/></button>
             <p className="mile-auth-terms">By creating an account, you agree to use accurate information and treat other members with respect.</p>
           </form>
