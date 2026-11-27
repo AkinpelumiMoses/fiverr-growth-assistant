@@ -26,8 +26,8 @@ export default function CommunityDirectory() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
-  const [niche, setNiche] = useState("All niches");
-  const [platform, setPlatform] = useState("All platforms");
+  const [niche, setNiche] = useState("All");
+  const [platform, setPlatform] = useState("All");
   const [availability, setAvailability] = useState("All");
   const EMPTY_FILTER = "All";
 
@@ -94,7 +94,7 @@ export default function CommunityDirectory() {
     setLoadingMore(false);
   }
 
-  const niches = useMemo(() => ["All", ...Array.from(new Set(profiles.map(p => p.primary_niche?.trim()).filter((v): v is string => Boolean(v))))].sort((a,b) => a === "All niches" ? -1 : a.localeCompare(b)), [profiles]);
+  const niches = useMemo(() => ["All", ...Array.from(new Set(profiles.map(p => p.primary_niche?.trim()).filter((v): v is string => Boolean(v))))].sort((a,b) => a === "All" ? -1 : a.localeCompare(b)), [profiles]);
   const platforms = useMemo(() => ["All", ...Array.from(new Set(profiles.flatMap(p => p.work_platforms ?? []))).sort()], [profiles]);
   const myProfile = ownProfile;
 
