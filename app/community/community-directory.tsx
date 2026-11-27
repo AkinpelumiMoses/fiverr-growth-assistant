@@ -204,6 +204,7 @@ export default function CommunityDirectory() {
       <select aria-label="Filter by platform" value={platform} onChange={e => setPlatform(e.target.value)} className="rounded-xl border border-[#DCE5D9] bg-white px-4 py-3 text-sm outline-none focus:border-[#166534] md:min-w-[180px]">{platforms.map(item => <option key={item} value={item}>{item}</option>)}</select>
       <select aria-label="Filter by availability" value={availability} onChange={e => setAvailability(e.target.value)} className="rounded-xl border border-[#DCE5D9] bg-white px-4 py-3 text-sm outline-none focus:border-[#166534] md:min-w-[190px]"><option value="All">All availability</option><option value="open">Open to work</option><option value="limited">Limited availability</option><option value="unavailable">Not taking work</option></select>
     </div>
+    </div>
     <div className="mb-4 flex items-center justify-between"><p className="text-xs font-semibold text-[#68736A]">{loading ? "Finding freelancers…" : `${filtered.length} freelancer${filtered.length === 1 ? "" : "s"} shown`}</p><span className="inline-flex items-center gap-1.5 text-[10px] text-[#899389]"><Users size={13}/> Opt-in profiles only</span></div>
     {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
     {loading && <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{[1,2,3].map(n=><div key={n} className="h-64 animate-pulse rounded-2xl border border-[#E3E9E1] bg-white"/>)}</div>}
